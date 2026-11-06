@@ -1,5 +1,7 @@
 """Foundation utilities for scientific computing."""
 
+from . import matrix
+
 from .errors import ScientificError, ScientificErrorCode
 from .precision import ComparisonTolerance, is_close
 from .validation import (
@@ -20,6 +22,7 @@ from .vector import (
 )
 
 __all__ = [
+    "matrix",
     "ComparisonTolerance",
     "ScientificError",
     "ScientificErrorCode",
