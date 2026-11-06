@@ -29,10 +29,14 @@ The infeasible solver result intentionally has no chosen solution and therefore 
 - Repetitions: 5 per case in the example.
 - Random seed: not applicable; no randomness is used.
 - Timing: `time.perf_counter()` around each `solver.solve(problem)` call.
-- Aggregation: every sample plus arithmetic mean and minimum. The benchmark helper is unchanged.
+- Aggregation: every sample plus arithmetic mean, median, and minimum. Median is computed from `BenchmarkReport.elapsed_seconds` in the example; the public benchmark helper contract is unchanged.
 - Output: JSON with sorted keys, input/configuration, status, objective, constraint diagnostics, candidate counts, objective-call counts, and timings.
 
 The candidate count is eight per solve because there are three binary variables. Objective evaluation count is separately instrumented in the example and can be lower when constraints reject candidates. Runtime for these tiny problems is only recorded for repeatability; it is not meaningful evidence of a performance advantage.
+
+## Scaling evaluation
+
+In addition to the three correctness scenarios, the script runs a deterministic scaling series with 3, 6, 9, and 12 binary variables. Each size uses generated objective/resource coefficients, one resource-capacity constraint, and the same exhaustive solver. Expected candidate counts are `8`, `64`, `512`, and `4096` per solve (`2^n`). Objective evaluations are counted separately because infeasible candidates are rejected before the objective runs. The series shows search-space growth; it does not compare algorithms or establish a runtime advantage.
 
 ## Run
 

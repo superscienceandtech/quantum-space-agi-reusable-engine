@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from statistics import median
 
 from quantum_space_agi.optimization import (
     Constraint,
@@ -44,6 +45,7 @@ class ExampleCase:
     objective_counter: CountingValue
     constraint_inputs: tuple[dict[str, object], ...]
     infeasible_diagnostic_candidate: dict[str, float] | None = None
+    input_override: dict[str, object] | None = None
 
 
 def _make_case(
@@ -138,6 +140,58 @@ def build_cases() -> tuple[ExampleCase, ...]:
     )
 
 
+def build_scaling_cases(sizes: tuple[int, ...] = (3, 6, 9, 12)) -> tuple[ExampleCase, ...]:
+    """Build feasible binary fixtures with exactly 2**size assignments each."""
+    cases = []
+    for size in sizes:
+        if size < 1:
+            raise ValueError("scaling problem sizes must be positive")
+        names = tuple(f"x{index:02d}" for index in range(size))
+        values = {name: float(1 + (index * 3) % 7) for index, name in enumerate(names)}
+        resource_use = {name: float(1 + (index * 5) % 4) for index, name in enumerate(names)}
+        capacity_limit = float(size * 1.5)
+        objective_counter = CountingValue(values)
+        objective = FunctionalObjective(
+            "maximize_total_value", ObjectiveSense.MAXIMIZE, objective_counter
+        )
+        constraint = FunctionalConstraint(
+            "resource_capacity",
+            lambda x, weights=resource_use: sum(weights[name] * x[name] for name in weights),
+            ConstraintRelation.LE,
+            capacity_limit,
+        )
+        problem = OptimizationProblem(
+            objective=objective,
+            variables={name: (0, 1) for name in names},
+            constraints=(constraint,),
+        )
+        constraint_inputs = ({
+            "name": "resource_capacity",
+            "expression_coefficients": resource_use,
+            "relation": ConstraintRelation.LE.value,
+            "bound": capacity_limit,
+            "tolerance": 0.0,
+        },)
+        input_override = {
+            "variables": {name: [0, 1] for name in names},
+            "objective": {
+                "name": objective.name,
+                "sense": objective.sense.value,
+                "coefficients": values,
+            },
+            "constraints": list(constraint_inputs),
+        }
+        cases.append(ExampleCase(
+            name=f"scaling_n{size}",
+            description=f"Deterministic binary scaling fixture with {size} variables.",
+            problem=problem,
+            objective_counter=objective_counter,
+            constraint_inputs=constraint_inputs,
+            input_override=input_override,
+        ))
+    return tuple(cases)
+
+
 def _checks_for_diagnostic(
     problem: OptimizationProblem, candidate: dict[str, float]
 ) -> tuple[ConstraintCheck, ...]:
@@ -174,7 +228,7 @@ def run_case(case: ExampleCase, repetitions: int = REPETITIONS) -> dict[str, obj
     return {
         "case": case.name,
         "description": case.description,
-        "input": {
+        "input": case.input_override or {
             "variables": {name: list(values) for name, values in case.problem.variables.items()},
             "objective": {
                 "name": case.problem.objective.name,
@@ -195,6 +249,7 @@ def run_case(case: ExampleCase, repetitions: int = REPETITIONS) -> dict[str, obj
             "timing_method": "time.perf_counter around solver.solve(problem)",
             "timing_samples_seconds": benchmark.elapsed_seconds,
             "mean_seconds": benchmark.mean_seconds,
+            "median_seconds": median(benchmark.elapsed_seconds),
             "min_seconds": benchmark.min_seconds,
             "seed": None,
             "seed_policy": "not applicable; solver is deterministic and uses no randomness",
@@ -229,8 +284,15 @@ def run_case(case: ExampleCase, repetitions: int = REPETITIONS) -> dict[str, obj
 
 
 def main() -> None:
-    reports = [run_case(case) for case in build_cases()]
-    print(json.dumps(reports, indent=2, sort_keys=True))
+    output = {
+        "scenarios": [run_case(case) for case in build_cases()],
+        "scaling": [run_case(case) for case in build_scaling_cases()],
+        "scaling_note": (
+            "Candidate counts grow exponentially with binary variable count; "
+            "timings are for reproducibility, not performance claims."
+        ),
+    }
+    print(json.dumps(output, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

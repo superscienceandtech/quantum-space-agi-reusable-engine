@@ -1,6 +1,11 @@
 import unittest
 
-from examples.synthetic_optimization import REPETITIONS, build_cases, run_case
+from examples.synthetic_optimization import (
+    REPETITIONS,
+    build_cases,
+    build_scaling_cases,
+    run_case,
+)
 from quantum_space_agi.optimization import (
     ConstraintRelation,
     EnumerativeSolver,
@@ -28,6 +33,7 @@ class OptimizationTests(unittest.TestCase):
         self.assertEqual(benchmark["repetitions"], REPETITIONS)
         self.assertEqual(len(samples), REPETITIONS)
         self.assertAlmostEqual(benchmark["mean_seconds"], sum(samples) / REPETITIONS)
+        self.assertIn("median_seconds", benchmark)
         self.assertEqual(benchmark["min_seconds"], min(samples))
         self.assertIn("time.perf_counter", benchmark["timing_method"])
         self.assertIsNone(benchmark["seed"])
@@ -41,6 +47,16 @@ class OptimizationTests(unittest.TestCase):
         self.assertEqual(result["solution"], {"alpha": 0.0, "beta": 1.0, "gamma": 1.0})
         self.assertEqual(result["candidates_evaluated_per_solve"], 8)
         self.assertTrue(all(check["feasible"] for check in result["constraint_results"]))
+
+    def test_scaling_series_grows_deterministically(self):
+        cases = build_scaling_cases()
+        sizes = (3, 6, 9, 12)
+        self.assertEqual(tuple(len(case.problem.variables) for case in cases), sizes)
+        reports = [run_case(case, repetitions=1) for case in cases]
+        candidate_counts = [report["result"]["candidates_evaluated_per_solve"] for report in reports]
+        self.assertEqual(candidate_counts, [2**size for size in sizes])
+        self.assertTrue(all(report["result"]["status"] == "optimal" for report in reports))
+        self.assertTrue(all(report["result"]["objective_evaluations_per_solve"] > 0 for report in reports))
 
     def test_infeasible_case_reports_diagnostic_resource_violations(self):
         report = run_case(build_cases()[2])

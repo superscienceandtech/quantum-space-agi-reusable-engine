@@ -24,10 +24,11 @@ python -m pip install -e .
 python examples/synthetic_optimization.py
 ```
 
-The script prints JSON containing each case's input, solver settings, status,
-objective, constraint checks, candidate/objective-evaluation counts, and five
-timing samples with mean and minimum. Timing is recorded for reproducibility;
-these tiny examples do not establish a performance advantage. See
+The script prints JSON for the three correctness scenarios and a separate
+3/6/9/12-variable scaling series. Output includes inputs, solver settings,
+status, objective, constraint checks, candidate/objective-evaluation counts,
+and five timing samples with mean, median, and minimum. Timing is recorded for
+reproducibility; these tiny examples do not establish a performance advantage. See
 [docs/classical-optimization-practice.md](docs/classical-optimization-practice.md)
 for benchmark methodology and expected case outcomes.
 
