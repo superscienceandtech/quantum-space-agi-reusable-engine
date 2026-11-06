@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from itertools import product
 from statistics import median
 
 from quantum_space_agi.optimization import (
@@ -16,8 +17,10 @@ from quantum_space_agi.optimization import (
     ObjectiveSense,
     OptimizationProblem,
     OptimizationResult,
+    OptimizationStatus,
     benchmark_solver,
 )
+from quantum_space_agi.optimization.qubo import LinearConstraintSpec, QUBOModel, build_qubo
 
 REPETITIONS = 5
 VALUES = {"alpha": 6, "beta": 4, "gamma": 3}
@@ -44,6 +47,7 @@ class ExampleCase:
     problem: OptimizationProblem
     objective_counter: CountingValue
     constraint_inputs: tuple[dict[str, object], ...]
+    qubo_constraints: tuple[LinearConstraintSpec, ...] = ()
     infeasible_diagnostic_candidate: dict[str, float] | None = None
     input_override: dict[str, object] | None = None
 
@@ -51,8 +55,8 @@ class ExampleCase:
 def _make_case(
     name: str,
     description: str,
-    budget_limit: float,
-    capacity_limit: float,
+    budget_limit: int,
+    capacity_limit: int,
     *,
     minimum_selected: int | None = None,
     diagnostic_candidate: dict[str, float] | None = None,
@@ -109,18 +113,32 @@ def _make_case(
                 "tolerance": 0.0,
             }
         )
+    qubo_constraints = [
+        LinearConstraintSpec("budget", COSTS, ConstraintRelation.LE, budget_limit),
+        LinearConstraintSpec("capacity", WEIGHTS, ConstraintRelation.LE, capacity_limit),
+    ]
+    if minimum_selected is not None:
+        qubo_constraints.append(
+            LinearConstraintSpec(
+                "minimum_selected",
+                {name: 1 for name in VALUES},
+                ConstraintRelation.GE,
+                minimum_selected,
+            )
+        )
     problem = OptimizationProblem(
         objective=objective,
         variables={name: (0, 1) for name in VALUES},
         constraints=tuple(constraints),
     )
     return ExampleCase(
-        name,
-        description,
-        problem,
-        objective_counter,
-        tuple(constraint_inputs),
-        diagnostic_candidate,
+        name=name,
+        description=description,
+        problem=problem,
+        objective_counter=objective_counter,
+        constraint_inputs=tuple(constraint_inputs),
+        qubo_constraints=tuple(qubo_constraints),
+        infeasible_diagnostic_candidate=diagnostic_candidate,
     )
 
 
@@ -197,6 +215,96 @@ def _checks_for_diagnostic(
 ) -> tuple[ConstraintCheck, ...]:
     validated = problem.validate_solution(candidate)
     return tuple(constraint.check(validated) for constraint in problem.constraints)
+
+
+def _minimum_energy_state(model: QUBOModel) -> tuple[dict[str, int], float, int]:
+    """Find a QUBO minimum by classical exhaustive bitstring enumeration."""
+    best_bits: dict[str, int] | None = None
+    best_energy: float | None = None
+    evaluated = 0
+    for bit_values in product((0, 1), repeat=len(model.variable_order)):
+        bits = dict(zip(model.variable_order, bit_values))
+        energy = model.energy(bits)
+        evaluated += 1
+        if best_energy is None or energy < best_energy:
+            best_bits, best_energy = bits, energy
+    assert best_bits is not None and best_energy is not None
+    return best_bits, best_energy, evaluated
+
+
+def run_qubo_case(case: ExampleCase) -> dict[str, object]:
+    """Encode one case, classically enumerate QUBO states, and compare feasibility."""
+    model = build_qubo(
+        decision_variables=tuple(sorted(case.problem.variables)),
+        objective_coefficients=VALUES,
+        objective_sense=case.problem.objective.sense,
+        constraints=case.qubo_constraints,
+    )
+    bits, energy, qubo_states_evaluated = _minimum_energy_state(model)
+    bitstring = "".join(str(bits[name]) for name in model.variable_order)
+    decoded = dict(model.decode(bitstring))
+    validated = case.problem.validate_solution(decoded)
+    constraint_checks = tuple(constraint.check(validated) for constraint in case.problem.constraints)
+    decoded_feasible = all(check.feasible for check in constraint_checks)
+    decoded_objective = case.problem.objective.evaluate(validated) if decoded_feasible else None
+    exact = EnumerativeSolver().solve(case.problem)
+
+    if exact.status is OptimizationStatus.OPTIMAL:
+        if not decoded_feasible:
+            raise AssertionError(f"{case.name}: QUBO minimum decoded to an infeasible assignment")
+        if decoded != dict(exact.solution or {}):
+            raise AssertionError(f"{case.name}: QUBO and exact solver chose different assignments")
+        if decoded_objective != exact.objective_value:
+            raise AssertionError(f"{case.name}: QUBO and exact objective values differ")
+        solution_match: bool | None = True
+    else:
+        if decoded_feasible:
+            raise AssertionError(f"{case.name}: QUBO decoded as feasible while exact solver reports infeasible")
+        solution_match = None
+
+    return {
+        "case": case.name,
+        "method": "classical exhaustive enumeration of QUBO bitstrings; no quantum sampling",
+        "qubo": {
+            "variable_order": model.variable_order,
+            "bitstring": bitstring,
+            "minimum_energy": energy,
+            "penalty_coefficient": model.penalty_coefficient,
+            "slack_values": dict(model.decode_slacks(bitstring)),
+            "bitstrings_evaluated": qubo_states_evaluated,
+        },
+        "decoded": {
+            "decision_variables": decoded,
+            "feasible": decoded_feasible,
+            "objective_value": decoded_objective,
+            "constraint_results": [
+                {
+                    "name": check.name,
+                    "value": check.value,
+                    "relation": check.relation.value,
+                    "bound": check.bound,
+                    "feasible": check.feasible,
+                    "violation": check.violation,
+                }
+                for check in constraint_checks
+            ],
+        },
+        "exact_enumerative_baseline": {
+            "status": exact.status.value,
+            "solution": dict(exact.solution) if exact.solution is not None else None,
+            "objective_value": exact.objective_value,
+            "candidates_evaluated": exact.evaluated_candidates,
+        },
+        "comparison": {
+            "feasibility_agrees": (exact.status is OptimizationStatus.OPTIMAL) == decoded_feasible,
+            "same_feasible_solution": solution_match,
+            "note": (
+                "No exact feasible solution exists; decoded QUBO state remains infeasible."
+                if exact.status is OptimizationStatus.INFEASIBLE
+                else "Decoded feasible optimum matches exact enumeration."
+            ),
+        },
+    }
 
 
 def run_case(case: ExampleCase, repetitions: int = REPETITIONS) -> dict[str, object]:
@@ -286,6 +394,7 @@ def run_case(case: ExampleCase, repetitions: int = REPETITIONS) -> dict[str, obj
 def main() -> None:
     output = {
         "scenarios": [run_case(case) for case in build_cases()],
+        "qubo_experiments": [run_qubo_case(case) for case in build_cases()],
         "scaling": [run_case(case) for case in build_scaling_cases()],
         "scaling_note": (
             "Candidate counts grow exponentially with binary variable count; "

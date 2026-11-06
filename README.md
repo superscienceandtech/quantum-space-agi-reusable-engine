@@ -11,8 +11,9 @@ it is not a complete mission-design solution or an official NASA specification.
 - A deterministic exhaustive classical baseline for small problems.
 - A repeatable wall-clock benchmark helper and synthetic example.
 
-QUBO/QAOA and challenge-specific mission logic are deferred until the classical
-baseline is reviewed and the team interfaces are agreed.
+The QUBO encoding and local QAOA simulator are optional experimental examples,
+not production solver capabilities. Challenge-specific mission logic remains
+outside this reusable-engine baseline.
 
 ## Classical optimization practice
 
@@ -40,3 +41,11 @@ python -m unittest discover -s tests -v
 
 The local conventions, assumptions, and integration decisions to align with
 Yousuf and Sonjoy are documented in [docs/algorithm-conventions.md](docs/algorithm-conventions.md).
+
+The Nov 9–10 QUBO encoding assumptions and classical comparison procedure are
+documented in [docs/qubo-experiment.md](docs/qubo-experiment.md). A separate
+Nov 11–12 local Qiskit simulator experiment is described in
+[docs/qiskit-experiment.md](docs/qiskit-experiment.md); it uses an optional
+dependency, makes no hardware or quantum-advantage claim, and leaves the
+classical baseline intact. The consolidated Nov 13 results and limits are in
+[docs/final-benchmark.md](docs/final-benchmark.md).
