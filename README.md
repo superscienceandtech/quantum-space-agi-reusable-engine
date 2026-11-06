@@ -14,17 +14,22 @@ it is not a complete mission-design solution or an official NASA specification.
 QUBO/QAOA and challenge-specific mission logic are deferred until the classical
 baseline is reviewed and the team interfaces are agreed.
 
-## Run the synthetic example
+## Classical optimization practice
 
-Install the package in editable mode, then run:
+Install the package in editable mode, then run the deterministic feasible,
+resource-constrained, and infeasible examples:
 
 ```powershell
 python -m pip install -e .
 python examples/synthetic_optimization.py
 ```
 
-Expected result: a feasible optimum with objective value `14.0` after `16`
-candidates are enumerated. Runtime varies by machine.
+The script prints JSON containing each case's input, solver settings, status,
+objective, constraint checks, candidate/objective-evaluation counts, and five
+timing samples with mean and minimum. Timing is recorded for reproducibility;
+these tiny examples do not establish a performance advantage. See
+[docs/classical-optimization-practice.md](docs/classical-optimization-practice.md)
+for benchmark methodology and expected case outcomes.
 
 ## Run verification
 
