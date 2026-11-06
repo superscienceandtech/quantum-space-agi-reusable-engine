@@ -1,6 +1,6 @@
 """Foundation utilities for scientific computing."""
 
-from . import matrix
+from . import matrix, units
 
 from .errors import ScientificError, ScientificErrorCode
 from .precision import ComparisonTolerance, is_close
@@ -23,6 +23,7 @@ from .vector import (
 
 __all__ = [
     "matrix",
+    "units",
     "ComparisonTolerance",
     "ScientificError",
     "ScientificErrorCode",
