@@ -10,7 +10,7 @@ import csv
 import io
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -89,7 +89,9 @@ def load_dataset(
     except OSError as exc:
         raise FileAccessError(f"Cannot read '{path}': {exc}") from exc
     except (UnicodeError, LookupError) as exc:
-        raise DataFormatError(f"Cannot decode '{path}' using encoding '{encoding}': {exc}") from exc
+        raise DataFormatError(
+            f"Cannot decode '{path}' using encoding '{encoding}': {exc}"
+        ) from exc
 
     if not contents.strip():
         raise EmptyDatasetError(f"'{path}' is empty and contains no records.")
@@ -111,24 +113,29 @@ def load_dataset(
         resolved_path, metadata_path / "sources", dataset_id
     )
     associated_id = dataset_id or source_id
-    provenance_record, provenance_reference, provenance_warnings = _associate_provenance(
-        resolved_path,
-        metadata_path / "provenance",
-        associated_id,
+    provenance_record, provenance_reference, provenance_warnings = (
+        _associate_provenance(
+            resolved_path,
+            metadata_path / "provenance",
+            associated_id,
+        )
     )
     warnings.extend(provenance_warnings)
     if associated_id is None and provenance_record is not None:
         associated_id = provenance_record["dataset_id"]
 
     source_version = source_record.get("dataset_version") if source_record else None
-    provenance_version = provenance_record.get("dataset_version") if provenance_record else None
+    provenance_version = (
+        provenance_record.get("dataset_version") if provenance_record else None
+    )
     if source_version and provenance_version and source_version != provenance_version:
         raise MetadataAssociationError(
-            f"Source metadata version '{source_version}' does not match provenance version "
+            f"Source metadata version '{source_version}' does not match "
+            f"provenance version "
             f"'{provenance_version}' for dataset_id '{associated_id}'."
         )
 
-    loaded_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    loaded_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
     status = "loaded_with_metadata_warnings" if warnings else "loaded"
     version = source_version or provenance_version
     return DatasetLoadResult(
@@ -161,7 +168,9 @@ def _parse_csv(contents: str, path: Path) -> list[dict[str, Any]]:
         if headers is None:
             raise EmptyDatasetError(f"'{path}' contains no CSV records.")
         if not headers or any(header == "" for header in headers):
-            raise DataFormatError(f"'{path}' is missing one or more CSV column headers.")
+            raise DataFormatError(
+                f"'{path}' is missing one or more CSV column headers."
+            )
         if len(set(headers)) != len(headers):
             raise DataFormatError(f"'{path}' contains duplicate CSV column headers.")
 
@@ -183,7 +192,8 @@ def _parse_json(contents: str, path: Path) -> list[dict[str, Any]]:
         value = json.loads(contents)
     except json.JSONDecodeError as exc:
         raise DataFormatError(
-            f"Malformed JSON in '{path}' at line {exc.lineno}, column {exc.colno}: {exc.msg}."
+            f"Malformed JSON in '{path}' at line {exc.lineno}, "
+            f"column {exc.colno}: {exc.msg}."
         ) from exc
 
     if isinstance(value, list):
@@ -196,16 +206,22 @@ def _parse_json(contents: str, path: Path) -> list[dict[str, Any]]:
             "or an object with only a 'records' array."
         )
 
-    if not isinstance(records, list) or any(not isinstance(record, dict) for record in records):
+    if not isinstance(records, list) or any(
+        not isinstance(record, dict) for record in records
+    ):
         raise DataFormatError(f"'{path}' must contain JSON objects for every record.")
     return records
 
 
-def _read_metadata(directory: Path) -> tuple[list[tuple[Path, dict[str, Any]]], list[str]]:
+def _read_metadata(
+    directory: Path,
+) -> tuple[list[tuple[Path, dict[str, Any]]], list[str]]:
     if not directory.exists():
         return [], [f"Metadata directory is missing: '{directory}'."]
     if not directory.is_dir():
-        raise MetadataAssociationError(f"Metadata path is not a directory: '{directory}'.")
+        raise MetadataAssociationError(
+            f"Metadata path is not a directory: '{directory}'."
+        )
 
     records = []
     for file_path in sorted(directory.glob("*.json")):
@@ -230,7 +246,9 @@ def _referenced_files(record: dict[str, Any]) -> list[str]:
     if isinstance(refs, str):
         refs = [refs]
     if not isinstance(refs, list):
-        raise MetadataAssociationError("Metadata 'files' must be a list of paths or file objects.")
+        raise MetadataAssociationError(
+            "Metadata 'files' must be a list of paths or file objects."
+        )
     normalized = []
     for item in refs:
         if isinstance(item, str):
@@ -241,7 +259,8 @@ def _referenced_files(record: dict[str, Any]) -> list[str]:
                 normalized.append(name)
             else:
                 raise MetadataAssociationError(
-                    "Each metadata file object must include a string 'path' or 'filename'."
+                    "Each metadata file object must include a string "
+                    "'path' or 'filename'."
                 )
         else:
             raise MetadataAssociationError(
@@ -249,18 +268,26 @@ def _referenced_files(record: dict[str, Any]) -> list[str]:
             )
     if "source_file" in record:
         if not isinstance(record["source_file"], str):
-            raise MetadataAssociationError("Metadata 'source_file' must be a string path.")
+            raise MetadataAssociationError(
+                "Metadata 'source_file' must be a string path."
+            )
         normalized.append(record["source_file"])
     return normalized
 
 
-def _references_input(record: dict[str, Any], source_file: Path, metadata_dir: Path) -> bool:
+def _references_input(
+    record: dict[str, Any], source_file: Path, metadata_dir: Path
+) -> bool:
     # ``directory`` is sources/ or provenance/; three parents up is the
     # repository root in the standard ``data/metadata/<kind>`` layout.
     root = metadata_dir.parent.parent.parent.resolve()
     for reference in _referenced_files(record):
         candidate = Path(reference)
-        resolved = candidate.resolve() if candidate.is_absolute() else (root / candidate).resolve()
+        resolved = (
+            candidate.resolve()
+            if candidate.is_absolute()
+            else (root / candidate).resolve()
+        )
         if resolved == source_file or (
             not candidate.parent.parts and candidate.name == source_file.name
         ):
@@ -284,7 +311,8 @@ def _associate_source(
             )
         if requested_id is not None:
             if record_id == requested_id and (
-                not _referenced_files(record) or _references_input(record, source_file, directory)
+                not _referenced_files(record)
+                or _references_input(record, source_file, directory)
             ):
                 matches.append((file_path, record))
         elif _references_input(record, source_file, directory):
@@ -322,11 +350,14 @@ def _associate_provenance(
         for file_path, record in records
         if dataset_id is not None and record.get("dataset_id") == dataset_id
     ]
-    if path_matches and dataset_id is not None and any(
-        record.get("dataset_id") != dataset_id for _, record in path_matches
+    if (
+        path_matches
+        and dataset_id is not None
+        and any(record.get("dataset_id") != dataset_id for _, record in path_matches)
     ):
         raise MetadataAssociationError(
-            f"Provenance for '{source_file.name}' has a dataset_id inconsistent with '{dataset_id}'."
+            f"Provenance for '{source_file.name}' has a dataset_id "
+            f"inconsistent with '{dataset_id}'."
         )
     matches = id_matches or path_matches
     if len(matches) > 1:
@@ -334,12 +365,17 @@ def _associate_provenance(
             f"More than one provenance record matches dataset_id '{dataset_id}'."
         )
     if not matches:
-        return None, None, [f"No provenance metadata matches dataset_id '{dataset_id}'."]
+        return (
+            None,
+            None,
+            [f"No provenance metadata matches dataset_id '{dataset_id}'."],
+        )
     file_path, record = matches[0]
     record_id = record.get("dataset_id")
     if dataset_id is not None and record_id != dataset_id:
         raise MetadataAssociationError(
-            f"Provenance dataset_id '{record_id}' does not match source dataset_id '{dataset_id}'."
+            f"Provenance dataset_id '{record_id}' does not match "
+            f"source dataset_id '{dataset_id}'."
         )
     if not isinstance(record_id, str) or not record_id:
         raise MetadataAssociationError(

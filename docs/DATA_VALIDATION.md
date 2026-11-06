@@ -6,25 +6,25 @@ The ARC-03 validator checks loaded records against an explicit, lightweight sche
 
 1. `load_dataset()` parses CSV or JSON into `DatasetLoadResult` without coercion.
 2. A caller supplies a schema (or a reviewed schema file loaded as JSON).
-3. `validate_dataset()` checks dataset identity, record structure, fields, values, constraints, and optional duplicates.
+3. The local `validate_records()` function checks dataset identity, record structure, fields, values, constraints, and optional duplicates.
 4. The caller uses the `ValidationReport`; invalid records remain present in the original load result and source file.
 
 ```python
 import json
 from pathlib import Path
 
-from quantum_space_agi.data import load_dataset, validate_dataset
+from quantum_space_agi.data import load_dataset, validate_records
 
 loaded = load_dataset("data/samples/sample_dataset.csv")
 schema = json.loads(Path("schemas/sample_dataset.schema.json").read_text())
-report = validate_dataset(loaded, schema)
+report = validate_records(loaded, schema)
 
 if not report.is_valid:
     for issue in report.errors:
         print(issue.record_index, issue.field_name, issue.category, issue.message)
 ```
 
-`validate_dataset()` accepts a `DatasetLoadResult`, a mapping with `records` and optional `dataset_id`, or a sequence of record mappings. A schema definition error raises `SchemaDefinitionError`; data problems are returned in the report instead of raised.
+`validate_records()` accepts a `DatasetLoadResult`, a mapping with `records` and optional `dataset_id`, or a sequence of record mappings. A schema definition error raises `SchemaDefinitionError`; data problems are returned in the report instead of raised. After the remote ARC-03 foundation is integrated, the package-level `validate_dataset()` is reserved for the `Dataset`/`DataSchema` API; the local validator remains importable as `validate_records` or from `quantum_space_agi.data.validator`.
 
 ## Schema format
 

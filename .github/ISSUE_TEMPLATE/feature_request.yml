@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose a general-purpose improvement or capability.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or need
+      description: What user need or limitation would this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe the desired behavior without prescribing unnecessary implementation details.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include relevant alternatives or explain why none are known.
+    validations:
+      required: false
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This is a general-purpose reusable-engine capability.
+          required: true
+        - label: This request may be challenge-specific and needs scope review.
+          required: false

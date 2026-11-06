@@ -24,7 +24,9 @@ class DataLoaderTests(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
-    def add_metadata(self, dataset_id="fixture-1", *, source_file=None, provenance_id=None):
+    def add_metadata(
+        self, dataset_id="fixture-1", *, source_file=None, provenance_id=None
+    ):
         source = {
             "dataset_id": dataset_id,
             "dataset_version": "1.0.0",
@@ -37,7 +39,9 @@ class DataLoaderTests(unittest.TestCase):
             "artifact_id": "artifact-1",
             "files": [{"path": str(source_file or self.data_file)}],
         }
-        (self.metadata_dir / "provenance" / "provenance.json").write_text(json.dumps(provenance))
+        (self.metadata_dir / "provenance" / "provenance.json").write_text(
+            json.dumps(provenance)
+        )
 
     def test_loads_csv_records_as_strings(self):
         self.data_file.write_text("name,value\nalpha,2.5\n", encoding="utf-8")
@@ -90,7 +94,9 @@ class DataLoaderTests(unittest.TestCase):
     def test_loads_json_records_envelope(self):
         path = self.root / "envelope.json"
         path.write_text('{"records": [{"x": 1}]}', encoding="utf-8")
-        self.assertEqual(load_dataset(path, metadata_dir=self.metadata_dir).records, [{"x": 1}])
+        self.assertEqual(
+            load_dataset(path, metadata_dir=self.metadata_dir).records, [{"x": 1}]
+        )
 
     def test_empty_json_raises_empty_dataset_error(self):
         path = self.root / "empty.json"
