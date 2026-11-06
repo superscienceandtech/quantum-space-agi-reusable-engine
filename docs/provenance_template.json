@@ -1,0 +1,18 @@
+{
+  "artifact_id": "example-artifact",
+  "artifact_role": "raw",
+  "dataset_id": "example-dataset",
+  "created_at": "2000-01-01T00:00:00Z",
+  "input_artifacts": [],
+  "source_file": {
+    "filename": "example.csv",
+    "sha256": "REPLACE_WITH_COMPUTED_SHA256"
+  },
+  "schema_version": "1.0.0",
+  "transformations": [],
+  "producer": {
+    "software": "Quantum Space AGI Reusable Engine",
+    "code_revision": "REPLACE_WITH_REVISION_OR_UNSET"
+  },
+  "notes": "SYNTHETIC TEMPLATE — record actual inputs and processing; do not claim unperformed validation."
+}

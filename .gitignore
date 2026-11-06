@@ -1,0 +1,18 @@
+# Local datasets can contain large or restricted files. Keep synthetic samples tracked.
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Temporary processing outputs and common local caches.
+data/tmp/
+data/**/__pycache__/
+__pycache__/
+*.py[cod]
+*.cache
+
+# Machine-local data configuration overrides. Keep config/data_config.json tracked.
+config/data_config.local.json
+.env
+.env.*
+!.env.example

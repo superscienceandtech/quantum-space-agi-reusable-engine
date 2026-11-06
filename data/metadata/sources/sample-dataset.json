@@ -1,0 +1,29 @@
+{
+  "dataset_id": "synthetic-generic-example-v1",
+  "title": "Synthetic generic data loading example",
+  "description": "One generic placeholder record serialized as CSV and JSON for future parser development.",
+  "source_type": "synthetic",
+  "data_status": "synthetic",
+  "source": {
+    "organization": "Project-generated example",
+    "url_or_identifier": "No external source",
+    "citation": "No external attribution; generated solely as a synthetic fixture."
+  },
+  "access": {
+    "collection_timestamp": "Not applicable; synthetic example",
+    "retrieved_at": "Not applicable; no external retrieval",
+    "license_or_terms": "No external source terms; confirm repository licensing before redistribution."
+  },
+  "formats": ["csv", "json"],
+  "files": [
+    "data/samples/sample_dataset.csv",
+    "data/samples/sample_dataset.json"
+  ],
+  "schema_version": "1.0.0",
+  "dataset_version": "1.0.0",
+  "declared_units": {
+    "value": "unitless"
+  },
+  "contact_or_owner": "Super Science & Tech — ARC-03 (confirm owner)",
+  "notes": "Synthetic only. Not NASA data, mission measurements, or scientifically validated."
+}
