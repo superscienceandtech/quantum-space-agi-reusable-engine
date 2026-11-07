@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07111f">
+    <title>Three.js Space Scene Practice</title>
+    <link rel="stylesheet" href="./styles.css">
+    <!-- Three.js and its controls are loaded from one pinned CDN version. -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import('./main.js').catch((error) => {
+        console.error('Unable to load the Three.js module.', error);
+        const status = document.querySelector('#scene-status');
+        if (status) {
+          status.textContent = 'The 3D scene could not load. Check your internet connection, then reload.';
+          status.dataset.state = 'error';
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-header">
+        <p class="eyebrow">Independent learning project · Days 7–8</p>
+        <h1>Build a small 3D space scene</h1>
+        <p class="intro">Explore a planet, orbital path, and lightweight spacecraft model made from basic Three.js shapes.</p>
+      </header>
+
+      <section class="scene-card" aria-labelledby="scene-heading">
+        <div class="scene-toolbar">
+          <div>
+            <h2 id="scene-heading">Planet and spacecraft</h2>
+            <p class="scene-hint">Drag in the scene to orbit · Scroll or pinch to zoom · Use the buttons to control playback and view</p>
+          </div>
+          <div class="controls" role="group" aria-label="3D scene controls">
+            <button class="button button-secondary" id="animation-button" type="button" aria-label="Start scene animation">Start animation</button>
+            <button class="button button-primary" id="reset-button" type="button" aria-label="Reset camera to the starting view">Reset view</button>
+          </div>
+        </div>
+        <div class="scene-frame" id="scene-frame">
+          <p class="scene-status" id="scene-status" role="status" aria-live="polite">Loading the 3D scene…</p>
+          <div class="scene-canvas" id="scene-canvas" role="region" aria-label="Interactive 3D practice scene" aria-describedby="scene-description"></div>
+        </div>
+        <p class="visually-hidden" id="scene-description">A blue illustrative planet sits at the center of a star field. A thin orbit surrounds it, and a small silver spacecraft with blue solar panels moves along the orbit. Drag to orbit the camera and scroll or pinch to zoom. The scene is decorative practice content, not scientific data.</p>
+        <p class="disclaimer"><strong>Practice scene:</strong> All objects and proportions are illustrative. This is not NASA data, a real mission, or a scientifically scaled simulation.</p>
+      </section>
+
+      <section class="learning-notes" aria-labelledby="notes-heading">
+        <h2 id="notes-heading">What to notice</h2>
+        <ul>
+          <li>The scene, camera, and renderer work together to draw the 3D view.</li>
+          <li>The planet, spacecraft, and orbit use simple built-in geometries.</li>
+          <li>Animation starts automatically unless your device requests reduced motion; use the playback button to start or stop it.</li>
+        </ul>
+      </section>
+      <noscript>This practice scene needs JavaScript enabled in your browser.</noscript>
+    </main>
+  </body>
+</html>
