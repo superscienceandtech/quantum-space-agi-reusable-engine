@@ -37,6 +37,10 @@ The QUBO example also reports a seeded classical simulated-annealing heuristic
 against exact QUBO enumeration. It is a classical heuristic comparison, not a
 quantum-hardware run or a quantum-advantage claim.
 
+Algorithm research has a seeded CPU dSB baseline and a project-specific
+feasibility-guided dSB pilot; see [docs/algorithm-research.md](docs/algorithm-research.md).
+They are experimental candidates, not production capabilities or proven novel algorithms.
+
 ## Run verification
 
 ```powershell

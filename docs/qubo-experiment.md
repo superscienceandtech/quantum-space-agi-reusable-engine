@@ -60,6 +60,11 @@ This is an ordinary classical heuristic baseline. It is not simulated quantum
 annealing, a quantum-inspired algorithm, or evidence of quantum advantage. The
 small fixed-seed study is for method comparison and reproducibility only.
 
+A separate research pilot implements a CPU discrete simulated-bifurcation
+baseline and a feasibility-guided dSB candidate. Its scope, equations,
+comparison procedure, and limitations are documented in
+[docs/algorithm-research.md](algorithm-research.md).
+
 ## Run
 
 From the repository root:
