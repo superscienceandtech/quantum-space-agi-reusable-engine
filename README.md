@@ -28,10 +28,13 @@ advantage is implied by the project's name or goals.
 
 The ARC-03 data package provides source and provenance models, JSON/CSV and
 local-file ingestion, declarative schema validation, basic quality analysis,
-safe JSON/CSV export, and a provider-neutral adapter contract. It does not
-include NASA-specific API clients, network retrieval, automatic type coercion,
-or scientific validation rules. Callers remain responsible for supplying
-accurate source metadata and domain-appropriate schemas.
+safe JSON/CSV export, and a provider-neutral adapter contract. A focused,
+read-only NASA Exoplanet Archive TAP adapter retrieves bounded JSON responses
+into a provenance-linked `Dataset`; it does not retain raw response files.
+There is no general NASA API client, automatic type coercion, or scientific
+validation. Callers remain responsible for accurate source metadata and
+domain-appropriate schemas. See
+[`docs/EXOPLANET_ARCHIVE_ADAPTER.md`](docs/EXOPLANET_ARCHIVE_ADAPTER.md).
 
 `Dataset` copies and exposes its top-level record and metadata mappings as
 read-only, but nested dictionaries and lists are not deep-copied or frozen.
@@ -44,9 +47,9 @@ preserve provenance or dataset metadata; use JSON export when that traceability
 is needed. An explicit schema/header option may be considered in a future
 version, but is not currently provided.
 
-Quantum computing, AI/ML, visualization, and external API integrations remain
-future capabilities. They are not core dependencies and should only be
-introduced with a concrete use case and tests.
+Quantum computing, task-specific AI/ML, visualization, and other external API
+integrations remain future capabilities. They are not core dependencies and
+should only be introduced with a concrete use case and tests.
 
 ## Project status
 
