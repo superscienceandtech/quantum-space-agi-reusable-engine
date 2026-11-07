@@ -230,8 +230,20 @@
     resources.replaceChildren(...data.resources.map(resourceCard));
     const lineRendered = window.arc09Charts.renderLine(document.getElementById('line-chart'), data.trend);
     const barsRendered = window.arc09Charts.renderBars(document.getElementById('bar-chart'), data.comparison);
+    const scatterRendered = window.arc09Charts.renderScatter(document.getElementById('scatter-chart'), data.scatter);
+    const graphRendered = window.arc09Charts.renderRelationshipGraph(document.getElementById('relationship-graph'), data.relationshipGraph);
     fillTable('line-table', lineRendered ? data.trend : [], (row) => [`Step ${row.step}`, row.value]);
     fillTable('bar-table', barsRendered ? data.comparison : [], (row) => [row.category, row.seriesA, row.seriesB]);
+    fillTable('scatter-table', scatterRendered ? data.scatter : [], (point) => [point.x, point.y]);
+    const graphRows = graphRendered ? [
+      ...data.relationshipGraph.nodes.map((item) => ['Node', item.label, 'Illustrative concept only']),
+      ...data.relationshipGraph.edges.map((edge) => {
+        const from = data.relationshipGraph.nodes.find((item) => item.id === edge.from);
+        const to = data.relationshipGraph.nodes.find((item) => item.id === edge.to);
+        return ['Connection', `${from.label} to ${to.label}`, edge.label];
+      })
+    ] : [];
+    fillTable('graph-table', graphRows, (row) => row);
     renderActivity('all');
     previewState('loading');
 

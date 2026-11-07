@@ -1,7 +1,9 @@
 # ARC-09 Prototype Handoff
 
-**Project:** Quantum Space AGI - Space Mission Design Game  
-**Prototype:** `C:\Nasa AGI\arc09-ui-prototype`  
+**Project:** Quantum Space AGI - Space Mission Design Game
+
+**Prototype:** `C:\Nasa AGI\quantum-space-agi-reusable-engine\arc09-ui-prototype`
+
 **Status:** Isolated design prototype; not production code and not team-approved.
 
 ## 1. Purpose and scope
@@ -11,7 +13,7 @@ This plain HTML, CSS, and JavaScript prototype demonstrates proposed ARC-09 dash
 ## 2. Implemented features
 
 - Application header, sidebar navigation, page heading, and main content region.
-- Dashboard demonstration with synthetic overview metrics, resource summary, recent activity, and SVG line and grouped-bar charts.
+- Dashboard demonstration with synthetic overview metrics, resource summary, recent activity, SVG line/grouped-bar/scatter charts, and a conceptual relationship graph.
 - Navigation destinations for the dashboard and proposed placeholder views. Placeholder destinations identify views without implementing mission workflows.
 - Reusable styling and JavaScript patterns for buttons, cards, status badges, metric displays, form-field examples, and loading, empty, and error examples.
 - Responsive navigation drawer and layout rules for narrower viewports.
@@ -24,11 +26,11 @@ The stylesheet applies the proposed palette: primary `#1D4ED8`, secondary `#0F76
 
 CSS responsive breakpoints are 1100px, 760px, and 540px. These are prototype implementation choices, not approved production breakpoints. The CSS includes visible focus styling and reduced-motion handling. Actual rendered behavior at these sizes has not been verified in a browser.
 
-## 4. Chart architecture and data limitations
+## 4. Day 5 and Day 6 visualization architecture
 
-`charts.js` generates the line and grouped-bar charts as inline SVG. `data.js` keeps the demonstration datasets separate from rendering. Chart output includes a title and description, labels/tooltips, and a tabular data alternative. Source validation handles missing, empty, or invalid chart inputs; plotted values use a fixed display range for this sample. That range is a chart presentation rule, not a scientific threshold.
+`charts.js` generates four inline SVG visualizations: line, grouped bar, scatter, and a conceptual relationship graph. `data.js` separates synthetic demonstration data from rendering. Each visualization includes an SVG title/description, keyboard-focusable interactive marks or nodes/connections, pointer/focus tooltips, and an HTML table/text alternative. Input checks distinguish missing, empty, and invalid values; chart values are finite and constrained to the declared sample display range. These are practice-chart presentation rules, not scientific thresholds.
 
-All displayed values are synthetic sample data. They are not NASA data, mission telemetry, or simulation results. The sample has no authoritative scientific units or provenance beyond being synthetic; no scientific interpretation should be inferred. No API schema or scientific model is implemented.
+The line and grouped-bar examples use unitless synthetic values. The scatter uses unitless X/Y pairs and explicitly avoids causal claims. The graph shows Mission, Spacecraft, Payload, Resources, and Simulation concepts connected by generic illustrative associations. It is not a confirmed product data model. All sample values and relationships are synthetic or conceptual; they are not NASA data, mission telemetry, or simulation results. No API schema or scientific model is implemented.
 
 ## 5. Accessibility implementation
 
@@ -38,11 +40,11 @@ These are source-level implementation details only. Keyboard behavior, accessibi
 
 ## 6. Files and architecture
 
-- `index.html` - semantic shell, dashboard, placeholder destinations, chart containers, and demo controls.
+- `index.html` - semantic shell, dashboard, placeholder destinations, four visualization containers, data alternatives, and demo controls.
 - `styles.css` - design tokens, component styles, responsive layouts, focus states, and reduced-motion rules.
 - `app.js` - navigation drawer, page/placeholder navigation, and demonstration interactions/states.
-- `charts.js` - SVG chart rendering, validation, and accessible chart/table output.
-- `data.js` - synthetic demonstration data.
+- `charts.js` - SVG chart/graph rendering, input validation, and accessible descriptions/tooltips.
+- `data.js` - synthetic chart values and conceptual graph example.
 - `README.md` - local project notes and recorded verification instructions/limitations.
 - `STATIC_AUDIT.md` - source audit and remediation record.
 - `PROTOTYPE_HANDOFF.md` - this handoff.
@@ -52,11 +54,15 @@ No third-party charting library or package manager is used by this standalone pr
 
 ## 7. Verification status
 
-**Implemented:** The source files contain the features described above.  
-**Source-checked:** Prior static review and the latest accessibility/CSS refinement included source inspection of navigation targets, ID/ARIA references, chart data handling, drawer focus logic, token references, typography values, and responsive rules. These checks do not execute the application. See `STATIC_AUDIT.md` for the earlier audit and remediation record.  
-**Browser-tested:** No successful browser rendering of this prototype is recorded. Prior Chrome and Edge startup attempts failed before the page rendered; screenshots were not produced.  
-**Automated/runtime-tested:** No automated test suite is present in the prototype folder, and no JavaScript runtime test was performed for this handoff. Browser console checks were not performed.  
-**Screen-reader-tested:** Not performed.
+- **Implemented:** The source files contain the features described above.
+- **Source-checked:** Prior static review and the latest accessibility/CSS refinement included source inspection of navigation targets, ID/ARIA references, chart data handling, drawer focus logic, token references, typography values, and responsive rules. The Day 5/6 follow-up also checked chart/graph data paths, labels, alternatives, and source wiring. These checks do not execute the application. See `STATIC_AUDIT.md` for the audit and follow-up record.
+- **Browser-tested:** No successful browser rendering of this prototype is recorded. Prior Chrome and Edge startup attempts failed before the page rendered; screenshots were not produced.
+- **Automated/runtime-tested:** No automated test suite is present in the prototype folder, and no JavaScript runtime test was performed for this handoff. Browser console checks were not performed.
+- **Screen-reader-tested:** Not performed.
+
+**Day 5 source status:** Line and grouped-bar charts were already present. A scatter plot was added with axis labels, keyboard/pointer tooltips, synthetic unitless pairs, a no-causation notice, and a table alternative.
+
+**Day 6 source status:** A simple interactive conceptual relationship graph was added with labeled nodes and connections, keyboard/pointer tooltips, and a table text alternative. It illustrates generic associations only and does not assert a product schema.
 
 ## 8. Known limitations and future verification
 

@@ -691,6 +691,10 @@ button,a,select {
   margin-top: 8px;
 }
 
+.graph-host {
+  height: 330px;
+}
+
 .chart-host svg {
   display: block;
   width: 100%;
@@ -763,6 +767,46 @@ button,a,select {
 
 .bar-series-b {
   fill: var(--secondary);
+}
+
+.scatter-dot {
+  fill: var(--secondary);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.graph-edge {
+  stroke: var(--border);
+  stroke-width: 2;
+}
+
+.graph-edge-mark:focus-visible .graph-edge {
+  stroke: var(--text);
+  stroke-width: 4;
+}
+
+.graph-edge-label {
+  fill: var(--muted);
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  font: 600 11px Inter,ui-sans-serif,system-ui,sans-serif;
+}
+
+.graph-node {
+  fill: var(--subtle);
+  stroke: var(--primary);
+  stroke-width: 1.5;
+}
+
+.graph-node-1 {
+  stroke: var(--secondary);
+}
+
+.graph-node-label {
+  fill: var(--text);
+  font: 650 14px Inter,ui-sans-serif,system-ui,sans-serif;
 }
 
 .chart-mark {
@@ -1250,6 +1294,9 @@ td {
   }
   .chart-host {
     height: 220px;
+  }
+  .graph-host {
+    height: 290px;
   }
   .chart-tick {
     font-size: 13px;
