@@ -1,27 +1,45 @@
-# Python
+# Local datasets can be large or restricted; keep directory markers tracked.
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/tmp/
+config/data_config.local.json
+
+# Python caches and bytecode.
 __pycache__/
 *.py[cod]
 *$py.class
+data/**/__pycache__/
+*.cache
 
-# Testing
+# Testing and type checking.
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
-
-# Type checking and linting
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
 
-# Virtual environments
+# Virtual environments.
 .venv/
 venv/
+env/
 ENV/
 
-# Environment variables
+# Build artifacts.
+build/
+dist/
+*.egg-info/
+
+# Environment files and secrets.
 .env
 .env.*
+!.env.example
 
-# IDE and OS
+# IDE and operating system files.
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db

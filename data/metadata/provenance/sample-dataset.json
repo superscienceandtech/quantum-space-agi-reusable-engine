@@ -1,0 +1,36 @@
+{
+  "artifact_id": "synthetic-generic-example-v1",
+  "artifact_role": "sample",
+  "dataset_id": "synthetic-generic-example-v1",
+  "dataset_version": "1.0.0",
+  "created_at": "2026-11-06T00:00:00Z",
+  "input_artifacts": [],
+  "files": [
+    {
+      "filename": "sample_dataset.csv",
+      "path": "data/samples/sample_dataset.csv",
+      "format": "csv",
+      "sha256": "b713c2264ac4d364433f2b82787097de00030cc7ef34b12eff3dc4fcf179c84d"
+    },
+    {
+      "filename": "sample_dataset.json",
+      "path": "data/samples/sample_dataset.json",
+      "format": "json",
+      "sha256": "7c879e931b5c549cf9edb4bf29766897792629d755873b1b6454ab1bcfe73340"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "transformations": [
+    {
+      "name": "author synthetic fixture",
+      "description": "Created one generic placeholder record and serialized equivalent fields to CSV and JSON.",
+      "performed_by": "ARC-03 data setup",
+      "automated": false
+    }
+  ],
+  "producer": {
+    "software": "Quantum Space AGI Reusable Engine repository fixture",
+    "code_revision": "not applicable; manually authored sample"
+  },
+  "notes": "Synthetic fixture with no external input, source URL, or scientific claim. Checksums are SHA-256 of the listed files."
+}
