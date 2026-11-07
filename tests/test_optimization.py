@@ -1,6 +1,12 @@
 import unittest
+from itertools import product
 
-from examples.qubo_heuristics import simulated_annealing_qubo
+from examples.qubo_heuristics import (
+    discrete_simulated_bifurcation_qubo,
+    feasibility_guided_dsb,
+    qubo_to_ising,
+    simulated_annealing_qubo,
+)
 from examples.synthetic_optimization import (
     REPETITIONS,
     build_cases,
@@ -24,6 +30,73 @@ from quantum_space_agi.optimization.qubo import LinearConstraintSpec, build_qubo
 
 
 class OptimizationTests(unittest.TestCase):
+    def test_qubo_to_ising_preserves_every_small_fixture_energy(self):
+        case = build_cases()[0]
+        model = build_qubo(
+            tuple(sorted(case.problem.variables)),
+            {"alpha": 6, "beta": 4, "gamma": 3},
+            case.problem.objective.sense,
+            case.qubo_constraints,
+        )
+        constant, fields, couplings = qubo_to_ising(model)
+        for bits in product((0, 1), repeat=len(model.variable_order)):
+            state = dict(zip(model.variable_order, bits))
+            spins = tuple(1 - 2 * bit for bit in bits)
+            ising_energy = constant + sum(fields[i] * spins[i] for i in range(len(spins)))
+            ising_energy += sum(
+                couplings[i][j] * spins[i] * spins[j]
+                for i in range(len(spins)) for j in range(i + 1, len(spins))
+            )
+            self.assertAlmostEqual(model.energy(state), ising_energy)
+
+    def test_discrete_simulated_bifurcation_is_seeded(self):
+        case = build_cases()[0]
+        model = build_qubo(
+            tuple(sorted(case.problem.variables)),
+            {"alpha": 6, "beta": 4, "gamma": 3},
+            case.problem.objective.sense,
+            case.qubo_constraints,
+        )
+        first = discrete_simulated_bifurcation_qubo(model, seed=29, agents=4, steps=32)
+        second = discrete_simulated_bifurcation_qubo(model, seed=29, agents=4, steps=32)
+        self.assertEqual(dict(first.state), dict(second.state))
+        self.assertEqual(first.energy, second.energy)
+        self.assertEqual(first.updates_evaluated, 4 * 32)
+        self.assertEqual(first.energy, model.energy(first.state))
+
+    def test_feasibility_guided_dsb_repairs_feasible_fixture(self):
+        case = build_cases()[0]
+        model = build_qubo(
+            tuple(sorted(case.problem.variables)),
+            {"alpha": 6, "beta": 4, "gamma": 3},
+            case.problem.objective.sense,
+            case.qubo_constraints,
+        )
+        result = feasibility_guided_dsb(
+            model, case.problem, case.qubo_constraints,
+            seed=13, agents=4, steps=32, max_flip_size=2,
+        )
+        self.assertTrue(result.feasible)
+        self.assertEqual(result.objective_value, 10.0)
+        self.assertEqual(result.energy, model.energy(result.state))
+        self.assertGreaterEqual(result.repair_candidates_evaluated, result.repair_moves)
+
+    def test_feasibility_guided_dsb_does_not_falsify_infeasibility(self):
+        case = build_cases()[2]
+        model = build_qubo(
+            tuple(sorted(case.problem.variables)),
+            {"alpha": 6, "beta": 4, "gamma": 3},
+            case.problem.objective.sense,
+            case.qubo_constraints,
+        )
+        result = feasibility_guided_dsb(
+            model, case.problem, case.qubo_constraints,
+            seed=13, agents=4, steps=32, max_flip_size=2,
+        )
+        self.assertFalse(result.feasible)
+        self.assertIsNone(result.objective_value)
+        self.assertGreater(max(result.violations.values()), 0.0)
+
     def test_simulated_annealing_is_seeded_and_reports_work(self):
         case = build_cases()[0]
         model = build_qubo(
