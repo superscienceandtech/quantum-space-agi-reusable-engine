@@ -253,3 +253,52 @@ The following shared decisions require technical-lead or domain-owner approval:
 - package-location and public import names for reusable Python modules;
 - integration ownership for notebook conversion versus package extraction;
 - mission resource constraints and non-two-body model requirements.
+
+## Package Integration Interface
+
+The importable API is provided under
+`quantum_space_agi.simulation` and is an implementation-facing mirror of the
+validated notebook contracts:
+
+```python
+from quantum_space_agi.simulation import (
+    OrbitalState,
+    SimulationConfig,
+    run_simulation,
+)
+```
+
+The workflow contract is:
+
+```python
+config = SimulationConfig(
+    initial_position_m=(7_000_000.0, 0.0, 0.0),
+    initial_velocity_mps=(0.0, 7_500.0, 0.0),
+    simulation_duration_s=600.0,
+    time_step_s=10.0,
+    collision_radius_m=6_378_137.0,
+)
+result = run_simulation(config)
+```
+
+The result is deterministic for identical inputs and immutable configuration.
+It contains:
+
+- `times_s`: Float64 sample times in seconds.
+- `states`: Float64 shape `(N, 6)` states ordered as
+  `[x, y, z, vx, vy, vz]` in metres and metres per second.
+- `collision_*`: initial or sampled collision information; `None` means no
+  detected collision before trajectory termination.
+- `diagnostics`: trajectory-level invariants and drift arrays.
+- `model`: explicit frame, integrator, model, and unit metadata.
+
+`run_simulation` terminates normally at the configured duration or at the first
+collision sample. It raises `ValueError` for invalid scalar, state, derivative,
+or numerical output conditions. Numerical failure, collision detection, and
+normal propagation completion are distinct outcomes and must not be inferred
+from one another.
+
+The package implementation does not add drag, J2, thrust, third-body gravity,
+adaptive stepping, attitude dynamics, or collision response. Any future model
+extension requires a separate model identifier, equation documentation, and
+scientific tests.
