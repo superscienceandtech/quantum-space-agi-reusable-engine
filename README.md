@@ -33,6 +33,10 @@ reproducibility; these tiny examples do not establish a performance advantage. S
 [docs/classical-optimization-practice.md](docs/classical-optimization-practice.md)
 for benchmark methodology and expected case outcomes.
 
+The QUBO example also reports a seeded classical simulated-annealing heuristic
+against exact QUBO enumeration. It is a classical heuristic comparison, not a
+quantum-hardware run or a quantum-advantage claim.
+
 ## Run verification
 
 ```powershell

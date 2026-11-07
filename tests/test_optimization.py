@@ -1,10 +1,12 @@
 import unittest
 
+from examples.qubo_heuristics import simulated_annealing_qubo
 from examples.synthetic_optimization import (
     REPETITIONS,
     build_cases,
     build_scaling_cases,
     run_case,
+    run_annealing_case,
     run_qubo_case,
 )
 from examples.qiskit_qaoa_experiment import run_qaoa_case
@@ -22,6 +24,43 @@ from quantum_space_agi.optimization.qubo import LinearConstraintSpec, build_qubo
 
 
 class OptimizationTests(unittest.TestCase):
+    def test_simulated_annealing_is_seeded_and_reports_work(self):
+        case = build_cases()[0]
+        model = build_qubo(
+            tuple(sorted(case.problem.variables)),
+            {"alpha": 6, "beta": 4, "gamma": 3},
+            case.problem.objective.sense,
+            case.qubo_constraints,
+        )
+        first = simulated_annealing_qubo(model, seed=41, sweeps=8, restarts=2)
+        second = simulated_annealing_qubo(model, seed=41, sweeps=8, restarts=2)
+        self.assertEqual(dict(first.state), dict(second.state))
+        self.assertEqual(first.energy, second.energy)
+        self.assertEqual(first.proposals_evaluated, 2 * 8 * len(model.variable_order))
+        self.assertLessEqual(first.accepted_moves, first.proposals_evaluated)
+        self.assertEqual(first.energy, model.energy(first.state))
+
+    def test_annealing_report_compares_with_exact_baselines(self):
+        report = run_annealing_case(build_cases()[0], seeds=(3, 7, 11))
+        self.assertEqual(report["reference"]["original_solver_status"], "optimal")
+        self.assertEqual(report["summary"]["run_count"], 3)
+        self.assertEqual(report["configuration"]["proposals_per_run"], 4 * 64 * 8)
+        self.assertGreaterEqual(report["summary"]["optimal_energy_rate"], 0.0)
+        self.assertLessEqual(report["summary"]["optimal_energy_rate"], 1.0)
+        self.assertGreaterEqual(report["summary"]["exact_enumeration_mean_seconds"], 0.0)
+        self.assertTrue(all("exact_enumeration_runtime_seconds" in run for run in report["runs"]))
+
+    def test_simulated_annealing_rejects_invalid_schedule(self):
+        case = build_cases()[0]
+        model = build_qubo(
+            tuple(sorted(case.problem.variables)),
+            {"alpha": 6, "beta": 4, "gamma": 3},
+            case.problem.objective.sense,
+            case.qubo_constraints,
+        )
+        with self.assertRaisesRegex(ValueError, "must not exceed"):
+            simulated_annealing_qubo(model, seed=1, initial_temperature=1, final_temperature=2)
+
     def test_qiskit_qaoa_simulation_is_seeded_and_preserves_infeasibility(self):
         try:
             import qiskit  # noqa: F401

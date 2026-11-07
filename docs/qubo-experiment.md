@@ -45,6 +45,21 @@ For each of the existing `feasible`, `resource_constrained`, and `infeasible` in
 
 The number of QUBO bitstrings includes slack bits and can exceed the original decision-candidate count. The example enumerates all QUBO bitstrings deterministically and is intended only for these small cases.
 
+## Heuristic evaluation
+
+The JSON example also runs a classical single-bit Metropolis simulated-annealing
+heuristic over each encoded QUBO. It uses 20 fixed seeds, four restarts per seed,
+64 sweeps per restart, and a geometric temperature schedule from 10.0 to 0.05.
+For each seed it records the best visited QUBO energy, whether the original
+decision constraints are satisfied, proposal/acceptance counts, and paired runtime
+measurements for the heuristic and exact enumeration.
+The aggregate success rate is compared with the exact minimum QUBO energy; the
+decoded best state is independently checked against the original model.
+
+This is an ordinary classical heuristic baseline. It is not simulated quantum
+annealing, a quantum-inspired algorithm, or evidence of quantum advantage. The
+small fixed-seed study is for method comparison and reproducibility only.
+
 ## Run
 
 From the repository root:

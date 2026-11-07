@@ -5,7 +5,8 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from itertools import product
-from statistics import median
+from statistics import mean, median
+from time import perf_counter
 
 from quantum_space_agi.optimization import (
     Constraint,
@@ -21,6 +22,10 @@ from quantum_space_agi.optimization import (
     benchmark_solver,
 )
 from quantum_space_agi.optimization.qubo import LinearConstraintSpec, QUBOModel, build_qubo
+try:
+    from examples.qubo_heuristics import simulated_annealing_qubo
+except ImportError:
+    from qubo_heuristics import simulated_annealing_qubo
 
 REPETITIONS = 5
 VALUES = {"alpha": 6, "beta": 4, "gamma": 3}
@@ -307,6 +312,105 @@ def run_qubo_case(case: ExampleCase) -> dict[str, object]:
     }
 
 
+def run_annealing_case(case: ExampleCase, seeds: tuple[int, ...] = tuple(range(20))) -> dict[str, object]:
+    """Compare seeded classical QUBO annealing runs with exact references."""
+    if not seeds or len(set(seeds)) != len(seeds):
+        raise ValueError("seeds must be a non-empty tuple of unique integers")
+    model = build_qubo(
+        decision_variables=tuple(sorted(case.problem.variables)),
+        objective_coefficients=VALUES,
+        objective_sense=case.problem.objective.sense,
+        constraints=case.qubo_constraints,
+    )
+    exact_state, exact_energy, exact_states = _minimum_energy_state(model)
+    exact_bitstring = "".join(str(exact_state[name]) for name in model.variable_order)
+    exact_problem_result = EnumerativeSolver().solve(case.problem)
+    records: list[dict[str, object]] = []
+    results = []
+    runtimes: list[float] = []
+    exact_runtimes: list[float] = []
+
+    for seed in seeds:
+        exact_started = perf_counter()
+        repeated_state, repeated_energy, repeated_count = _minimum_energy_state(model)
+        exact_runtimes.append(perf_counter() - exact_started)
+        if repeated_energy != exact_energy or repeated_count != exact_states:
+            raise RuntimeError("exact QUBO reference changed across repetitions")
+        started = perf_counter()
+        result = simulated_annealing_qubo(model, seed=seed)
+        runtimes.append(perf_counter() - started)
+        results.append(result)
+        decoded = dict(model.decode(result.state))
+        validated = case.problem.validate_solution(decoded)
+        checks = tuple(constraint.check(validated) for constraint in case.problem.constraints)
+        feasible = all(check.feasible for check in checks)
+        records.append({
+            "seed": seed,
+            "energy": result.energy,
+            "matches_exact_qubo_energy": abs(result.energy - exact_energy) <= 1e-12,
+            "feasible": feasible,
+            "proposals_evaluated": result.proposals_evaluated,
+            "accepted_moves": result.accepted_moves,
+            "runtime_seconds": runtimes[-1],
+            "exact_enumeration_runtime_seconds": exact_runtimes[-1],
+        })
+
+    best_index = min(range(len(records)), key=lambda index: records[index]["energy"])
+    best_run = results[best_index]
+    best_decision = dict(model.decode(best_run.state))
+    best_validated = case.problem.validate_solution(best_decision)
+    best_checks = tuple(constraint.check(best_validated) for constraint in case.problem.constraints)
+    best_feasible = all(check.feasible for check in best_checks)
+    best_objective = case.problem.objective.evaluate(best_validated) if best_feasible else None
+    optimal_runs = sum(bool(record["matches_exact_qubo_energy"]) for record in records)
+    feasible_runs = sum(bool(record["feasible"]) for record in records)
+
+    return {
+        "case": case.name,
+        "method": "classical simulated annealing with single-bit Metropolis updates",
+        "configuration": {
+            "seeds": seeds,
+            "restarts_per_seed": 4,
+            "sweeps_per_restart": 64,
+            "initial_temperature": 10.0,
+            "final_temperature": 0.05,
+            "proposals_per_run": 4 * 64 * len(model.variable_order),
+        },
+        "reference": {
+            "exact_qubo_energy": exact_energy,
+            "exact_qubo_bitstring": exact_bitstring,
+            "qubo_bitstrings_evaluated": exact_states,
+            "original_solver_status": exact_problem_result.status.value,
+            "original_objective_value": exact_problem_result.objective_value,
+        },
+        "summary": {
+            "optimal_energy_runs": optimal_runs,
+            "run_count": len(records),
+            "optimal_energy_rate": optimal_runs / len(records),
+            "feasible_runs": feasible_runs,
+            "feasibility_rate": feasible_runs / len(records),
+            "mean_runtime_seconds": mean(runtimes),
+            "median_runtime_seconds": median(runtimes),
+            "minimum_runtime_seconds": min(runtimes),
+            "exact_enumeration_mean_seconds": mean(exact_runtimes),
+            "exact_enumeration_median_seconds": median(exact_runtimes),
+            "exact_enumeration_minimum_seconds": min(exact_runtimes),
+        },
+        "best_visited_state": {
+            "decision_variables": best_decision,
+            "energy": best_run.energy,
+            "feasible": best_feasible,
+            "objective_value": best_objective,
+            "constraint_violations": {check.name: check.violation for check in best_checks},
+        },
+        "runs": records,
+        "interpretation": (
+            "Small synthetic heuristic study only; no optimality, hardware, "
+            "quantum-inspired, or quantum-advantage claim."
+        ),
+    }
+
+
 def run_case(case: ExampleCase, repetitions: int = REPETITIONS) -> dict[str, object]:
     """Solve, repeat the benchmark, and serialize deterministic result details."""
     solver = EnumerativeSolver()
@@ -395,6 +499,7 @@ def main() -> None:
     output = {
         "scenarios": [run_case(case) for case in build_cases()],
         "qubo_experiments": [run_qubo_case(case) for case in build_cases()],
+        "qubo_annealing_evaluation": [run_annealing_case(case) for case in build_cases()],
         "scaling": [run_case(case) for case in build_scaling_cases()],
         "scaling_note": (
             "Candidate counts grow exponentially with binary variable count; "
