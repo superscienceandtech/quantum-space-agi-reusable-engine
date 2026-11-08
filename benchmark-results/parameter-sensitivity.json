@@ -1,0 +1,2030 @@
+{
+  "environment": {
+    "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python_version": "3.14.4"
+  },
+  "limitations": [
+    "Only three synthetic instances per family/size setting.",
+    "Parameter candidates are a small predeclared grid, not an exhaustive search.",
+    "A single held-out instance per family/size gives exploratory evidence only.",
+    "This study does not establish general superiority or quantum advantage."
+  ],
+  "protocol": {
+    "families": [
+      "maxcut_sparse",
+      "maxcut_dense",
+      "knapsack"
+    ],
+    "holdout_instances_per_setting": 1,
+    "holdout_is_not_used_for_selection": true,
+    "holdout_seeds": [
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129
+    ],
+    "independent_instances_per_setting": 3,
+    "requested_energy_evaluation_budget": 1024,
+    "selection_rule": "lowest mean relative objective gap on training instances; median runtime breaks ties",
+    "sizes": [
+      8,
+      12,
+      16
+    ],
+    "training_instances_per_setting": 2,
+    "tuning_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  },
+  "results": [
+    {
+      "decision_variable_count": 8,
+      "family": "maxcut_sparse",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.015690231866998753,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.015359399501903681,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20371909,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.015671366766036955,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.015324610998504795,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "selected_configuration": "pump_1_5",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.01505395764943387,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.01433920300405589,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.014746082599594956,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.013873352498194436,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.014077097500558012,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.014123152497631963,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20371907,
+            20371908
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 996,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.008133458099958564,
+            "median_energy_evaluations": 996.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.007964501503010979,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20371909,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 996,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.008133458099958564,
+            "median_energy_evaluations": 996.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.007964501503010979,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "selected_configuration": "baseline",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 996,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.007193946249753935,
+                "median_energy_evaluations": 996.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.007168300999182975,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 996,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.008802796549571213,
+                "median_energy_evaluations": 996.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.00838035099877743,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 996,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.007531706350346212,
+                "median_energy_evaluations": 996.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.007616851497004973,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20371907,
+            20371908
+          ]
+        }
+      },
+      "training_instances": 2
+    },
+    {
+      "decision_variable_count": 12,
+      "family": "maxcut_sparse",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.03333333333333333,
+            "mean_relative_optimality_gap": 0.0003875968992248062,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.024283457166651107,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.02334870699996827,
+            "optimal_runs": 29,
+            "optimality_rate": 0.9666666666666667,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20372309,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.03333333333333333,
+            "mean_relative_optimality_gap": 0.0003875968992248062,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.024283457166651107,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.02334870699996827,
+            "optimal_runs": 29,
+            "optimality_rate": 0.9666666666666667,
+            "runs": 30
+          },
+          "selected_configuration": "baseline",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.023634081950513065,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.02197550650089397,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.024123092099034692,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.023659057002078043,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.023425156950906967,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.02224170650151791,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20372307,
+            20372308
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1012,
+            "mean_optimality_gap": 0.36666666666666664,
+            "mean_relative_optimality_gap": 0.004263565891472868,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.01181512016725416,
+            "median_energy_evaluations": 1012.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.011464603001513751,
+            "optimal_runs": 21,
+            "optimality_rate": 0.7,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20372309,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1012,
+            "mean_optimality_gap": 0.16666666666666666,
+            "mean_relative_optimality_gap": 0.001937984496124031,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.011580006766598672,
+            "median_energy_evaluations": 1012.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.011607203497987939,
+            "optimal_runs": 25,
+            "optimality_rate": 0.8333333333333334,
+            "runs": 30
+          },
+          "selected_configuration": "hotter_start",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.011307193349784939,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.01111285300066811,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.011231614548523793,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.011335722498188261,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.010689508150608162,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.009619553002266912,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20372307,
+            20372308
+          ]
+        }
+      },
+      "training_instances": 2
+    },
+    {
+      "decision_variable_count": 16,
+      "family": "maxcut_sparse",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.3333333333333333,
+            "mean_relative_optimality_gap": 0.0023148148148148147,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.03550343176611932,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.03509692149964394,
+            "optimal_runs": 25,
+            "optimality_rate": 0.8333333333333334,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20372709,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.3333333333333333,
+            "mean_relative_optimality_gap": 0.0023148148148148147,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.03550343176611932,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.03509692149964394,
+            "optimal_runs": 25,
+            "optimality_rate": 0.8333333333333334,
+            "runs": 30
+          },
+          "selected_configuration": "baseline",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.05,
+                "mean_relative_optimality_gap": 0.00033112582781456954,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.03282022210078139,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.032250149499304825,
+                "optimal_runs": 19,
+                "optimality_rate": 0.95,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.05,
+                "mean_relative_optimality_gap": 0.00033112582781456954,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.0326706682000804,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.03251470199757023,
+                "optimal_runs": 19,
+                "optimality_rate": 0.95,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.4,
+                "mean_relative_optimality_gap": 0.002761681383370125,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.03268272929963132,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.03187645800062455,
+                "optimal_runs": 18,
+                "optimality_rate": 0.9,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20372707,
+            20372708
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 964,
+            "mean_optimality_gap": 0.9,
+            "mean_relative_optimality_gap": 0.0062499999999999995,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.014789756399841281,
+            "median_energy_evaluations": 964.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.014131994499621214,
+            "optimal_runs": 19,
+            "optimality_rate": 0.6333333333333333,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20372709,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 964,
+            "mean_optimality_gap": 0.6666666666666666,
+            "mean_relative_optimality_gap": 0.004629629629629629,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.020398138965780768,
+            "median_energy_evaluations": 964.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.016430683001090074,
+            "optimal_runs": 23,
+            "optimality_rate": 0.7666666666666667,
+            "runs": 30
+          },
+          "selected_configuration": "cooler_start",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 964,
+                "mean_optimality_gap": 1.05,
+                "mean_relative_optimality_gap": 0.0070663171449595295,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.015156963450499461,
+                "median_energy_evaluations": 964.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.01407486900279764,
+                "optimal_runs": 15,
+                "optimality_rate": 0.75,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 964,
+                "mean_optimality_gap": 0.45,
+                "mean_relative_optimality_gap": 0.0030928072111846947,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.014349599300840055,
+                "median_energy_evaluations": 964.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.01387905400042655,
+                "optimal_runs": 17,
+                "optimality_rate": 0.85,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 964,
+                "mean_optimality_gap": 1.3,
+                "mean_relative_optimality_gap": 0.009027777777777777,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.013851203499871189,
+                "median_energy_evaluations": 964.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.013651975998072885,
+                "optimal_runs": 16,
+                "optimality_rate": 0.8,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20372707,
+            20372708
+          ]
+        }
+      },
+      "training_instances": 2
+    },
+    {
+      "decision_variable_count": 8,
+      "family": "maxcut_dense",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.020442852265841794,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.020027539001603145,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20481909,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.02109753903229527,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.020347252997453324,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "selected_configuration": "pump_1_5",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.05,
+                "mean_relative_optimality_gap": 0.0006578947368421052,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.019838208449436935,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.019551149998733308,
+                "optimal_runs": 19,
+                "optimality_rate": 0.95,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.019935401251132134,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.019140616001095623,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.05,
+                "mean_relative_optimality_gap": 0.0006578947368421052,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.01965950865051127,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.01935203350149095,
+                "optimal_runs": 19,
+                "optimality_rate": 0.95,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20481907,
+            20481908
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 996,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.010484228000374666,
+            "median_energy_evaluations": 996.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.009865356998489005,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20481909,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 996,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.010084241867055728,
+            "median_energy_evaluations": 996.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.01000566900256672,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "selected_configuration": "hotter_start",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 996,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.00955940725034452,
+                "median_energy_evaluations": 996.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.009605986000678968,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 996,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.00967318159964634,
+                "median_energy_evaluations": 996.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.009571533501002705,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 996,
+                "mean_optimality_gap": 0.0,
+                "mean_relative_optimality_gap": 0.0,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.00963557829891215,
+                "median_energy_evaluations": 996.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.009260657498089131,
+                "optimal_runs": 20,
+                "optimality_rate": 1,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20481907,
+            20481908
+          ]
+        }
+      },
+      "training_instances": 2
+    },
+    {
+      "decision_variable_count": 12,
+      "family": "maxcut_dense",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.03933900256549047,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.03639809649757808,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20482309,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.050197878899052736,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.04461668549629394,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "selected_configuration": "pump_1_5",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.2,
+                "mean_relative_optimality_gap": 0.0011695906432748538,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.038973001900376406,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.03685318450152408,
+                "optimal_runs": 19,
+                "optimality_rate": 0.95,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.1,
+                "mean_relative_optimality_gap": 0.0005847953216374269,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.035728025299613365,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.034797362499375595,
+                "optimal_runs": 19,
+                "optimality_rate": 0.95,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.2,
+                "mean_relative_optimality_gap": 0.0011695906432748538,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.04603444310014311,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.04061319899847149,
+                "optimal_runs": 19,
+                "optimality_rate": 0.95,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20482307,
+            20482308
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1012,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.02039411026610954,
+            "median_energy_evaluations": 1012.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.01916535399868735,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20482309,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1012,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.02039411026610954,
+            "median_energy_evaluations": 1012.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.01916535399868735,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "selected_configuration": "baseline",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 0.2,
+                "mean_relative_optimality_gap": 0.001119554679926197,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.018253062949588637,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.018398140000499552,
+                "optimal_runs": 17,
+                "optimality_rate": 0.85,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 0.3,
+                "mean_relative_optimality_gap": 0.0017543859649122805,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.018330079150473466,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.016939817498496268,
+                "optimal_runs": 18,
+                "optimality_rate": 0.9,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 1.0,
+                "mean_relative_optimality_gap": 0.005747881289676955,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.02020573625122779,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.018246277501020813,
+                "optimal_runs": 13,
+                "optimality_rate": 0.65,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20482307,
+            20482308
+          ]
+        }
+      },
+      "training_instances": 2
+    },
+    {
+      "decision_variable_count": 16,
+      "family": "maxcut_dense",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.03333333333333333,
+            "mean_relative_optimality_gap": 0.00010224948875255624,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.08084038236750833,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.06889190950096236,
+            "optimal_runs": 29,
+            "optimality_rate": 0.9666666666666667,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20482709,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 0.0,
+            "mean_relative_optimality_gap": 0.0,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.07238385616607654,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.06457359149862896,
+            "optimal_runs": 30,
+            "optimality_rate": 1,
+            "runs": 30
+          },
+          "selected_configuration": "pump_1_5",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 1.4,
+                "mean_relative_optimality_gap": 0.004465860287557833,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.0634464796003158,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.060278373002802255,
+                "optimal_runs": 14,
+                "optimality_rate": 0.7,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 1.15,
+                "mean_relative_optimality_gap": 0.0036696819436087885,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.07450018839954282,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.0727546154994343,
+                "optimal_runs": 14,
+                "optimality_rate": 0.7,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 1.4,
+                "mean_relative_optimality_gap": 0.004465860287557833,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.04804606724901532,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.04711263900026097,
+                "optimal_runs": 14,
+                "optimality_rate": 0.7,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20482707,
+            20482708
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 964,
+            "mean_optimality_gap": 0.1,
+            "mean_relative_optimality_gap": 0.00030674846625766873,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.05256895970063245,
+            "median_energy_evaluations": 964.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.04276718499750132,
+            "optimal_runs": 27,
+            "optimality_rate": 0.9,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20482709,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 964,
+            "mean_optimality_gap": 0.03333333333333333,
+            "mean_relative_optimality_gap": 0.00010224948875255624,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.04156563090000418,
+            "median_energy_evaluations": 964.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.041186002497852314,
+            "optimal_runs": 29,
+            "optimality_rate": 0.9666666666666667,
+            "runs": 30
+          },
+          "selected_configuration": "hotter_start",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 964,
+                "mean_optimality_gap": 0.85,
+                "mean_relative_optimality_gap": 0.002707006369426752,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.025780218750878704,
+                "median_energy_evaluations": 964.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.02400135949937976,
+                "optimal_runs": 17,
+                "optimality_rate": 0.85,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 964,
+                "mean_optimality_gap": 1.05,
+                "mean_relative_optimality_gap": 0.003347579825307579,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.024779684950044612,
+                "median_energy_evaluations": 964.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.023937504502100637,
+                "optimal_runs": 14,
+                "optimality_rate": 0.7,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 964,
+                "mean_optimality_gap": 0.65,
+                "mean_relative_optimality_gap": 0.0020736944749891076,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.03221577435106156,
+                "median_energy_evaluations": 964.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.0274919535004301,
+                "optimal_runs": 16,
+                "optimality_rate": 0.8,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20482707,
+            20482708
+          ]
+        }
+      },
+      "training_instances": 2
+    },
+    {
+      "decision_variable_count": 8,
+      "family": "knapsack",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 34.9,
+            "mean_relative_optimality_gap": 0.33883495145631065,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.060995599333546126,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 32.0,
+            "median_runtime_seconds": 0.05949817199871177,
+            "optimal_runs": 2,
+            "optimality_rate": 0.06666666666666667,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20591909,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 36.2,
+            "mean_relative_optimality_gap": 0.35145631067961164,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.06932928653356309,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 32.0,
+            "median_runtime_seconds": 0.060219783503271174,
+            "optimal_runs": 1,
+            "optimality_rate": 0.03333333333333333,
+            "runs": 30
+          },
+          "selected_configuration": "pump_1_5",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 41.3,
+                "mean_relative_optimality_gap": 0.3058040785416779,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.045025673000418466,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 28.0,
+                "median_runtime_seconds": 0.04437733300073887,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 37.85,
+                "mean_relative_optimality_gap": 0.27986422891761775,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.05078929719929874,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 28.0,
+                "median_runtime_seconds": 0.05044755150083802,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 46.2,
+                "mean_relative_optimality_gap": 0.341753664737383,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.05739647749978758,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 31.0,
+                "median_runtime_seconds": 0.05270644299889682,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20591907,
+            20591908
+          ]
+        },
+        "fg_dsb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 1.8666666666666667,
+            "mean_relative_optimality_gap": 0.018122977346278317,
+            "mean_repair_candidates_evaluated": 87.6,
+            "mean_runtime_seconds": 0.04662304239949056,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.04429230599998846,
+            "optimal_runs": 23,
+            "optimality_rate": 0.7666666666666667,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20591909,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 1.8666666666666667,
+            "mean_relative_optimality_gap": 0.018122977346278317,
+            "mean_repair_candidates_evaluated": 87.6,
+            "mean_runtime_seconds": 0.04662304239949056,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.04429230599998846,
+            "optimal_runs": 23,
+            "optimality_rate": 0.7666666666666667,
+            "runs": 30
+          },
+          "selected_configuration": "baseline",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 0.35,
+                "mean_relative_optimality_gap": 0.002631578947368421,
+                "mean_repair_candidates_evaluated": 93.6,
+                "mean_runtime_seconds": 0.04576445115017123,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.04460160200324026,
+                "optimal_runs": 19,
+                "optimality_rate": 0.95,
+                "runs": 20
+              }
+            },
+            "one_flip": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 13.0,
+                "mean_relative_optimality_gap": 0.09716016660355925,
+                "mean_repair_candidates_evaluated": 16,
+                "mean_runtime_seconds": 0.04833420009999827,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 12.0,
+                "median_runtime_seconds": 0.04822066050110152,
+                "optimal_runs": 9,
+                "optimality_rate": 0.45,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20591907,
+            20591908
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 0.9666666666666667,
+            "feasible_runs": 29,
+            "mean_energy_evaluations": 1012,
+            "mean_optimality_gap": 41.55172413793103,
+            "mean_relative_optimality_gap": 0.4034147974556411,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.02779807906699716,
+            "median_energy_evaluations": 1012.0,
+            "median_optimality_gap": 42.0,
+            "median_runtime_seconds": 0.02581697549976525,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20591909,
+          "holdout_selected": {
+            "feasibility_rate": 0.9666666666666667,
+            "feasible_runs": 29,
+            "mean_energy_evaluations": 1012,
+            "mean_optimality_gap": 41.55172413793103,
+            "mean_relative_optimality_gap": 0.4034147974556411,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.03165255049971165,
+            "median_energy_evaluations": 1012.0,
+            "median_optimality_gap": 42.0,
+            "median_runtime_seconds": 0.028674066001258325,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "selected_configuration": "cooler_start",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 60.3,
+                "mean_relative_optimality_gap": 0.4444095851138638,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.0246255102003488,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 57.0,
+                "median_runtime_seconds": 0.023569736502395244,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 59.2,
+                "mean_relative_optimality_gap": 0.4361389084221345,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.02905553369928384,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 56.5,
+                "median_runtime_seconds": 0.0276430794983753,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 61.0,
+                "mean_relative_optimality_gap": 0.4494455563368854,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.05446115419945272,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 58.5,
+                "median_runtime_seconds": 0.05224275249929633,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20591907,
+            20591908
+          ]
+        }
+      },
+      "training_instances": 2
+    },
+    {
+      "decision_variable_count": 12,
+      "family": "knapsack",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 65.13333333333334,
+            "mean_relative_optimality_gap": 0.34462081128747796,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.08651883093383124,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 63.0,
+            "median_runtime_seconds": 0.07882219650491606,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20592309,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 57.5,
+            "mean_relative_optimality_gap": 0.30423280423280424,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.0834288519336648,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 52.5,
+            "median_runtime_seconds": 0.07650251449740608,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "selected_configuration": "pump_1_5",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 71.8,
+                "mean_relative_optimality_gap": 0.3563718553459119,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.0951397832006478,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 71.0,
+                "median_runtime_seconds": 0.09198706499955733,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 66.2,
+                "mean_relative_optimality_gap": 0.3330385220125786,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.0765375713006506,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 57.5,
+                "median_runtime_seconds": 0.07464149199950043,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 72.8,
+                "mean_relative_optimality_gap": 0.36053852201257863,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.08727945059872581,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 71.0,
+                "median_runtime_seconds": 0.08444862499891315,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20592307,
+            20592308
+          ]
+        },
+        "fg_dsb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 2.1333333333333333,
+            "mean_relative_optimality_gap": 0.01128747795414462,
+            "mean_repair_candidates_evaluated": 293.8,
+            "mean_runtime_seconds": 0.0821564397328378,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.08184737699775724,
+            "optimal_runs": 26,
+            "optimality_rate": 0.8666666666666667,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20592309,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 2.1333333333333333,
+            "mean_relative_optimality_gap": 0.01128747795414462,
+            "mean_repair_candidates_evaluated": 293.8,
+            "mean_runtime_seconds": 0.0821564397328378,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 0.0,
+            "median_runtime_seconds": 0.08184737699775724,
+            "optimal_runs": 26,
+            "optimality_rate": 0.8666666666666667,
+            "runs": 30
+          },
+          "selected_configuration": "baseline",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 7.75,
+                "mean_relative_optimality_gap": 0.03632468553459119,
+                "mean_repair_candidates_evaluated": 276.9,
+                "mean_runtime_seconds": 0.07597971415088978,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 0.0,
+                "median_runtime_seconds": 0.0733203109994065,
+                "optimal_runs": 12,
+                "optimality_rate": 0.6,
+                "runs": 20
+              }
+            },
+            "one_flip": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 43.25,
+                "mean_relative_optimality_gap": 0.21321540880503145,
+                "mean_repair_candidates_evaluated": 24,
+                "mean_runtime_seconds": 0.08395460914944124,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 40.0,
+                "median_runtime_seconds": 0.07516281549760606,
+                "optimal_runs": 2,
+                "optimality_rate": 0.1,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20592307,
+            20592308
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 992,
+            "mean_optimality_gap": 89.26666666666667,
+            "mean_relative_optimality_gap": 0.47231040564373894,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.04245276236809635,
+            "median_energy_evaluations": 992.0,
+            "median_optimality_gap": 89.5,
+            "median_runtime_seconds": 0.039809631001844537,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20592309,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 992,
+            "mean_optimality_gap": 89.26666666666667,
+            "mean_relative_optimality_gap": 0.47231040564373894,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.059679283866231954,
+            "median_energy_evaluations": 992.0,
+            "median_optimality_gap": 89.5,
+            "median_runtime_seconds": 0.04630512500079931,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "selected_configuration": "cooler_start",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 71.3,
+                "mean_relative_optimality_gap": 0.34717767295597485,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.04227728274854599,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 63.5,
+                "median_runtime_seconds": 0.03775270900223404,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 71.3,
+                "mean_relative_optimality_gap": 0.34717767295597485,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.03984438895095081,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 63.5,
+                "median_runtime_seconds": 0.037165209996601334,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1012,
+                "mean_optimality_gap": 71.3,
+                "mean_relative_optimality_gap": 0.34717767295597485,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.04005668185018294,
+                "median_energy_evaluations": 1012.0,
+                "median_optimality_gap": 63.5,
+                "median_runtime_seconds": 0.03915557650179835,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20592307,
+            20592308
+          ]
+        }
+      },
+      "training_instances": 2
+    },
+    {
+      "decision_variable_count": 16,
+      "family": "knapsack",
+      "holdout_instances": 1,
+      "methods": {
+        "discrete_sb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 74.13333333333334,
+            "mean_relative_optimality_gap": 0.2574074074074074,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.09427308016650689,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 68.0,
+            "median_runtime_seconds": 0.09370764149934985,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20592709,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 75.93333333333334,
+            "mean_relative_optimality_gap": 0.2636574074074074,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.09413938799965156,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 73.0,
+            "median_runtime_seconds": 0.09277396250035963,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "selected_configuration": "pump_1_5",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 0.95,
+                "feasible_runs": 19,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 68.57894736842105,
+                "mean_relative_optimality_gap": 0.277182141466358,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.09473393959960959,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 62.0,
+                "median_runtime_seconds": 0.09413556000072276,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "pump_1_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 66.85,
+                "mean_relative_optimality_gap": 0.27038864948369784,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.09816467170130636,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 62.5,
+                "median_runtime_seconds": 0.09480904350130004,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "pump_2_5": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 73.15,
+                "mean_relative_optimality_gap": 0.29589316204569477,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.09905578399993828,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 62.5,
+                "median_runtime_seconds": 0.09811115999764297,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20592707,
+            20592708
+          ]
+        },
+        "fg_dsb": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 5.433333333333334,
+            "mean_relative_optimality_gap": 0.018865740740740742,
+            "mean_repair_candidates_evaluated": 566.6666666666666,
+            "mean_runtime_seconds": 0.10215976256658905,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 4.0,
+            "median_runtime_seconds": 0.10230548450272181,
+            "optimal_runs": 5,
+            "optimality_rate": 0.16666666666666666,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20592709,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1024,
+            "mean_optimality_gap": 5.433333333333334,
+            "mean_relative_optimality_gap": 0.018865740740740742,
+            "mean_repair_candidates_evaluated": 566.6666666666666,
+            "mean_runtime_seconds": 0.10215976256658905,
+            "median_energy_evaluations": 1024.0,
+            "median_optimality_gap": 4.0,
+            "median_runtime_seconds": 0.10230548450272181,
+            "optimal_runs": 5,
+            "optimality_rate": 0.16666666666666666,
+            "runs": 30
+          },
+          "selected_configuration": "baseline",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 5.45,
+                "mean_relative_optimality_gap": 0.022020489470688673,
+                "mean_repair_candidates_evaluated": 537.2,
+                "mean_runtime_seconds": 0.10304659719913616,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 3.0,
+                "median_runtime_seconds": 0.10298424249776872,
+                "optimal_runs": 1,
+                "optimality_rate": 0.05,
+                "runs": 20
+              }
+            },
+            "one_flip": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1024,
+                "mean_optimality_gap": 36.4,
+                "mean_relative_optimality_gap": 0.14723961297666477,
+                "mean_repair_candidates_evaluated": 36.8,
+                "mean_runtime_seconds": 0.09925619960049517,
+                "median_energy_evaluations": 1024.0,
+                "median_optimality_gap": 34.0,
+                "median_runtime_seconds": 0.09596183150279103,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20592707,
+            20592708
+          ]
+        },
+        "simulated_annealing": {
+          "baseline_configuration": "baseline",
+          "holdout_baseline": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1016,
+            "mean_optimality_gap": 122.73333333333333,
+            "mean_relative_optimality_gap": 0.42615740740740743,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.04489911563311277,
+            "median_energy_evaluations": 1016.0,
+            "median_optimality_gap": 113.5,
+            "median_runtime_seconds": 0.04426783249800792,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "holdout_instance_seed": 20592709,
+          "holdout_selected": {
+            "feasibility_rate": 1,
+            "feasible_runs": 30,
+            "mean_energy_evaluations": 1016,
+            "mean_optimality_gap": 119.06666666666666,
+            "mean_relative_optimality_gap": 0.4134259259259259,
+            "mean_repair_candidates_evaluated": 0,
+            "mean_runtime_seconds": 0.04681720719891018,
+            "median_energy_evaluations": 1016.0,
+            "median_optimality_gap": 106.0,
+            "median_runtime_seconds": 0.04630930450002779,
+            "optimal_runs": 0,
+            "optimality_rate": 0,
+            "runs": 30
+          },
+          "selected_configuration": "hotter_start",
+          "training_configuration_summaries": {
+            "baseline": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1016,
+                "mean_optimality_gap": 90.8,
+                "mean_relative_optimality_gap": 0.36627042849012115,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.04586514700131374,
+                "median_energy_evaluations": 1016.0,
+                "median_optimality_gap": 90.0,
+                "median_runtime_seconds": 0.045245395001984434,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "cooler_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1016,
+                "mean_optimality_gap": 90.1,
+                "mean_relative_optimality_gap": 0.363540125213432,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.05098551665068953,
+                "median_energy_evaluations": 1016.0,
+                "median_optimality_gap": 90.0,
+                "median_runtime_seconds": 0.04969316850110772,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            },
+            "hotter_start": {
+              "summary": {
+                "feasibility_rate": 1,
+                "feasible_runs": 20,
+                "mean_energy_evaluations": 1016,
+                "mean_optimality_gap": 89.5,
+                "mean_relative_optimality_gap": 0.36097894137734776,
+                "mean_repair_candidates_evaluated": 0,
+                "mean_runtime_seconds": 0.049051424400386165,
+                "median_energy_evaluations": 1016.0,
+                "median_optimality_gap": 87.5,
+                "median_runtime_seconds": 0.047633745500206714,
+                "optimal_runs": 0,
+                "optimality_rate": 0,
+                "runs": 20
+              }
+            }
+          },
+          "training_instance_seeds": [
+            20592707,
+            20592708
+          ]
+        }
+      },
+      "training_instances": 2
+    }
+  ],
+  "study": "held-out parameter sensitivity"
+}

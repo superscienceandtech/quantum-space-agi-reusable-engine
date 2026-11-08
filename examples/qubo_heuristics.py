@@ -186,6 +186,10 @@ def discrete_simulated_bifurcation_qubo(
     )
     fields = tuple(value / scale for value in raw_fields)
     couplings = tuple(tuple(value / scale for value in row) for row in raw_couplings)
+    neighbors = tuple(
+        tuple((j, couplings[i][j]) for j in range(len(raw_fields)) if couplings[i][j] != 0.0)
+        for i in range(len(raw_fields))
+    )
     names = model.variable_order
     rng = Random(seed)
     best_state: dict[str, int] | None = None
@@ -202,9 +206,7 @@ def discrete_simulated_bifurcation_qubo(
             next_position = [0.0] * len(names)
             for i in range(len(names)):
                 force = -fields[i] - sum(
-                    couplings[i][j] * spins[j]
-                    for j in range(len(names))
-                    if j != i
+                    coefficient * spins[j] for j, coefficient in neighbors[i]
                 )
                 next_momentum[i] = momentum[i] + (
                     (pump - a0) * position[i] + c0 * force

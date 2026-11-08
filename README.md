@@ -41,6 +41,15 @@ Algorithm research has a seeded CPU dSB baseline and a project-specific
 feasibility-guided dSB pilot; see [docs/algorithm-research.md](docs/algorithm-research.md).
 They are experimental candidates, not production capabilities or proven novel algorithms.
 
+## Algorithm generalization benchmark
+
+A generated benchmark compares exact small-instance references, simulated
+annealing, discrete simulated bifurcation, and feasibility-guided dSB across
+sparse/dense Max-Cut and knapsack families. See
+[docs/generalization-benchmark.md](docs/generalization-benchmark.md) for the
+matched-budget protocol, public Kipu and Stanford Gset G1/G2 Max-Cut comparisons,
+held-out parameter sensitivity, reproduction commands, and interpretation
+limits.
 ## Run verification
 
 ```powershell

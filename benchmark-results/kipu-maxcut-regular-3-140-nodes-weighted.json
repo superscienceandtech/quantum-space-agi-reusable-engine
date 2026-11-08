@@ -1,0 +1,631 @@
+{
+  "generated_benchmark": null,
+  "public_maxcut_benchmark": {
+    "instance": {
+      "edge_count": 210,
+      "name": "qsagi-kipu-maxcut-140.json",
+      "qubo_variable_count": 140,
+      "source_path": "/tmp/qsagi-kipu-maxcut-140.json",
+      "vertex_count": 140
+    },
+    "methods": {
+      "discrete_sb": {
+        "runs": [
+          {
+            "below_published_reference": false,
+            "energy": -99.70429999999999,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.266000000000005,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.29586666200339096,
+            "seed": 0
+          },
+          {
+            "below_published_reference": false,
+            "energy": -101.0971,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 4.873199999999997,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.2664711030010949,
+            "seed": 1
+          },
+          {
+            "below_published_reference": false,
+            "energy": -100.1203,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 5.849999999999994,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.26068855600169627,
+            "seed": 2
+          },
+          {
+            "below_published_reference": false,
+            "energy": -101.4327,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 4.537599999999998,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.23460343899932923,
+            "seed": 3
+          },
+          {
+            "below_published_reference": false,
+            "energy": -100.7983,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 5.171999999999997,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.23361159700289136,
+            "seed": 4
+          },
+          {
+            "below_published_reference": false,
+            "energy": -99.4731,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.497199999999992,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.2576551259990083,
+            "seed": 5
+          },
+          {
+            "below_published_reference": false,
+            "energy": -97.35329999999999,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 8.617000000000004,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.2539749689967721,
+            "seed": 6
+          },
+          {
+            "below_published_reference": false,
+            "energy": -100.3369,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 5.633399999999995,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.2342670250000083,
+            "seed": 7
+          },
+          {
+            "below_published_reference": false,
+            "energy": -100.1385,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 5.831800000000001,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.25987172099848976,
+            "seed": 8
+          },
+          {
+            "below_published_reference": false,
+            "energy": -99.2117,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.758600000000001,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.3544187660008902,
+            "seed": 9
+          },
+          {
+            "below_published_reference": false,
+            "energy": -98.9897,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.9805999999999955,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.2993870119971689,
+            "seed": 10
+          },
+          {
+            "below_published_reference": false,
+            "energy": -100.2281,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 5.742199999999997,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.24645499100006418,
+            "seed": 11
+          },
+          {
+            "below_published_reference": false,
+            "energy": -99.6013,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.369,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.284221461006382,
+            "seed": 12
+          },
+          {
+            "below_published_reference": false,
+            "energy": -101.5193,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 4.450999999999993,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.3301309410016984,
+            "seed": 13
+          },
+          {
+            "below_published_reference": false,
+            "energy": -101.76769999999999,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 4.202600000000004,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.3310945829944103,
+            "seed": 14
+          },
+          {
+            "below_published_reference": false,
+            "energy": -101.1271,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 4.843199999999996,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.24803480000264244,
+            "seed": 15
+          },
+          {
+            "below_published_reference": false,
+            "energy": -99.9679,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.002399999999994,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.37727177499618847,
+            "seed": 16
+          },
+          {
+            "below_published_reference": false,
+            "energy": -99.7487,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.221599999999995,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.265941372999805,
+            "seed": 17
+          },
+          {
+            "below_published_reference": false,
+            "energy": -99.5067,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.4636,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.36667961799685145,
+            "seed": 18
+          },
+          {
+            "below_published_reference": false,
+            "energy": -100.1991,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 5.771199999999993,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.588854301997344,
+            "seed": 19
+          },
+          {
+            "below_published_reference": false,
+            "energy": -102.2693,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 3.7009999999999934,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.2940976870013401,
+            "seed": 20
+          },
+          {
+            "below_published_reference": false,
+            "energy": -99.2845,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.6858,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.3824391980015207,
+            "seed": 21
+          },
+          {
+            "below_published_reference": false,
+            "energy": -100.9245,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 5.0458,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.3917825000025914,
+            "seed": 22
+          },
+          {
+            "below_published_reference": false,
+            "energy": -101.4827,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 4.4876000000000005,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.35667638699669624,
+            "seed": 23
+          },
+          {
+            "below_published_reference": false,
+            "energy": -101.0857,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 4.884599999999992,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.37535719299921766,
+            "seed": 24
+          },
+          {
+            "below_published_reference": false,
+            "energy": -99.8527,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 6.117599999999996,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.46752356799697736,
+            "seed": 25
+          },
+          {
+            "below_published_reference": false,
+            "energy": -98.8669,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 7.1033999999999935,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.31514629499724833,
+            "seed": 26
+          },
+          {
+            "below_published_reference": false,
+            "energy": -101.0397,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 4.930599999999998,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.20263034100207733,
+            "seed": 27
+          },
+          {
+            "below_published_reference": false,
+            "energy": -100.88069999999999,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 5.089600000000004,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.20101877200067975,
+            "seed": 28
+          },
+          {
+            "below_published_reference": false,
+            "energy": -98.5503,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 7.420000000000002,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.21339510600228095,
+            "seed": 29
+          }
+        ],
+        "summary": {
+          "below_reference_runs": 0,
+          "best_energy": -102.2693,
+          "mean_energy": -100.21862666666667,
+          "mean_energy_evaluations": 1024,
+          "mean_gap_to_reference": 5.751673333333331,
+          "mean_runtime_seconds": 0.30631889556655856,
+          "median_gap_to_reference": 5.801499999999997,
+          "median_runtime_seconds": 0.28915957400386105,
+          "reference_match_rate": 0,
+          "runs": 30
+        }
+      },
+      "simulated_annealing": {
+        "runs": [
+          {
+            "below_published_reference": false,
+            "energy": -87.68589999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 18.284400000000005,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.15719912700296845,
+            "seed": 0
+          },
+          {
+            "below_published_reference": false,
+            "energy": -91.9421,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 14.028199999999998,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.0837459839967778,
+            "seed": 1
+          },
+          {
+            "below_published_reference": false,
+            "energy": -91.4913,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 14.479,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.07649377299821936,
+            "seed": 2
+          },
+          {
+            "below_published_reference": false,
+            "energy": -90.8121,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 15.158199999999994,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.07677328600402689,
+            "seed": 3
+          },
+          {
+            "below_published_reference": false,
+            "energy": -90.7423,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 15.227999999999994,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.0863194929988822,
+            "seed": 4
+          },
+          {
+            "below_published_reference": false,
+            "energy": -91.4721,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 14.498199999999997,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.08383918800245738,
+            "seed": 5
+          },
+          {
+            "below_published_reference": false,
+            "energy": -92.0047,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 13.965599999999995,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.08192630600387929,
+            "seed": 6
+          },
+          {
+            "below_published_reference": false,
+            "energy": -92.90209999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 13.068200000000004,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.08396879300562432,
+            "seed": 7
+          },
+          {
+            "below_published_reference": false,
+            "energy": -93.8445,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 12.125799999999998,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.08269553900026949,
+            "seed": 8
+          },
+          {
+            "below_published_reference": false,
+            "energy": -87.7815,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 18.1888,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.11933830700581893,
+            "seed": 9
+          },
+          {
+            "below_published_reference": false,
+            "energy": -88.3219,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 17.648399999999995,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.09202923800330609,
+            "seed": 10
+          },
+          {
+            "below_published_reference": false,
+            "energy": -86.8153,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 19.155,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.08888950399705209,
+            "seed": 11
+          },
+          {
+            "below_published_reference": false,
+            "energy": -93.7293,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 12.241,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.09418466300121509,
+            "seed": 12
+          },
+          {
+            "below_published_reference": false,
+            "energy": -90.7625,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 15.207799999999992,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.11838860700663645,
+            "seed": 13
+          },
+          {
+            "below_published_reference": false,
+            "energy": -90.5971,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 15.373199999999997,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.131598877000215,
+            "seed": 14
+          },
+          {
+            "below_published_reference": false,
+            "energy": -89.01429999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 16.956000000000003,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.08684684599575121,
+            "seed": 15
+          },
+          {
+            "below_published_reference": false,
+            "energy": -91.91029999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 14.060000000000002,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.08836671199969715,
+            "seed": 16
+          },
+          {
+            "below_published_reference": false,
+            "energy": -92.9511,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 13.019199999999998,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.10491022600035649,
+            "seed": 17
+          },
+          {
+            "below_published_reference": false,
+            "energy": -90.8411,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 15.129199999999997,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.12259448799886741,
+            "seed": 18
+          },
+          {
+            "below_published_reference": false,
+            "energy": -92.34089999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 13.629400000000004,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.10239131699927384,
+            "seed": 19
+          },
+          {
+            "below_published_reference": false,
+            "energy": -90.59309999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 15.377200000000002,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.11852771299891174,
+            "seed": 20
+          },
+          {
+            "below_published_reference": false,
+            "energy": -91.4395,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 14.5308,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.11023115499847336,
+            "seed": 21
+          },
+          {
+            "below_published_reference": false,
+            "energy": -92.25269999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 13.717600000000004,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.12158344499766827,
+            "seed": 22
+          },
+          {
+            "below_published_reference": false,
+            "energy": -91.67229999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 14.298000000000002,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.0983944440013147,
+            "seed": 23
+          },
+          {
+            "below_published_reference": false,
+            "energy": -92.7517,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 13.218599999999995,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.128314434994536,
+            "seed": 24
+          },
+          {
+            "below_published_reference": false,
+            "energy": -90.4225,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 15.547799999999995,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.113373590997071,
+            "seed": 25
+          },
+          {
+            "below_published_reference": false,
+            "energy": -90.42649999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 15.543800000000005,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.1124621519993525,
+            "seed": 26
+          },
+          {
+            "below_published_reference": false,
+            "energy": -92.1287,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 13.8416,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.0754033530029119,
+            "seed": 27
+          },
+          {
+            "below_published_reference": false,
+            "energy": -91.7477,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 14.2226,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.06128834399714833,
+            "seed": 28
+          },
+          {
+            "below_published_reference": false,
+            "energy": -92.74669999999999,
+            "energy_evaluations": 842,
+            "gap_to_published_reference": 13.223600000000005,
+            "matches_published_reference": false,
+            "runtime_seconds": 0.06274990700330818,
+            "seed": 29
+          }
+        ],
+        "summary": {
+          "below_reference_runs": 0,
+          "best_energy": -93.8445,
+          "mean_energy": -91.13812666666666,
+          "mean_energy_evaluations": 842,
+          "mean_gap_to_reference": 14.832173333333333,
+          "mean_runtime_seconds": 0.09882762710039969,
+          "median_gap_to_reference": 14.488599999999998,
+          "median_runtime_seconds": 0.09310695050226059,
+          "reference_match_rate": 0,
+          "runs": 30
+        }
+      }
+    },
+    "protocol": {
+      "d_sb_updates_per_run": 1024,
+      "dsb_agents": 8,
+      "dsb_steps": 128,
+      "paired_solver_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "requested_energy_evaluation_budget": 1024,
+      "sa_energy_evaluations_per_run": 842,
+      "sa_restarts": 2,
+      "sa_sweeps_per_restart": 3
+    },
+    "reference": {
+      "interpretation": "Upstream publishes this as a ground-state energy; this run does not independently certify optimality.",
+      "published_energy": -105.9703
+    }
+  }
+}
