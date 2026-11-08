@@ -48,13 +48,14 @@ The diagram shows the current module boundaries. Learned preprocessing and task-
 | --- | --- | --- |
 | Raw data storage | Keep received files byte-for-byte for audit and reprocessing. | Future `data/raw/`; read-only after ingestion. Exclude large/private data from Git as appropriate. |
 | Processed data storage | Hold explicitly transformed outputs without replacing raw files. | Future `data/processed/`; associate each output with provenance. |
-| Sample data | Small, clearly synthetic fixtures for examples and future development. | Future `data/samples/`; label synthetic/example values in filenames and metadata. |
+| Sample data | Small, clearly synthetic fixtures for examples and future development. | Existing `data/samples/sample_dataset.csv` and `data/samples/sample_dataset.json` are synthetic/example fixtures, not NASA archive data or approved ML training data. |
 | Data schemas | Define fields, types, nullability, and simple constraints. | Explicit lightweight JSON-compatible schema at `schemas/`; version/migration policy remains future work. |
 | Source metadata | Describe where/how a dataset was obtained and its license/access details. | Use `source_metadata_template.json`. Never put credentials in metadata. |
 | Provenance metadata | Record file identity, transformations, timestamps, and parent inputs. | Use `provenance_template.json`; link processed outputs to source checksums. |
 | Data configuration | Hold non-secret dataset paths/options and supported-format defaults. | `config/data_config.json`; environment-specific secrets belong in secret management. |
 | Loader interface | Read CSV/JSON into a consistent record-list result while retaining source details. | Implemented in `src/quantum_space_agi/data/loader.py`; format-specific parsers are behind `load_dataset`. |
-| Validation interface | Check structure, declared types, missing values, basic constraints, and optional duplicates. | Implemented separately in `src/quantum_space_agi/data/validator.py`; returns structured issues without changing records. Scientific and unit validation remain future work. |
+| Structured schema validation | Check schema-declared required fields, nullability, and exact Python types without coercion or scientific validation. | `validate_dataset(dataset, schema)` in `src/quantum_space_agi/data/schemas.py`; `from quantum_space_agi.data import validate_dataset` refers to this structured `Dataset`/`DataSchema` API. |
+| Legacy record validation | Validate a legacy `DatasetLoadResult`, mapping, or record sequence against its configurable contract. | `validate_dataset()` in `src/quantum_space_agi/data/validator.py`; exported from the package as `validate_records`. |
 | ML preprocessing | Apply explicit deterministic scalar conversions and record transformations in provenance. | Implemented in `src/quantum_space_agi/ml/preprocessing.py`; learned preprocessing remains blocked pending an approved use case. |
 | NASA source integration | Retrieve one bounded JSON result from the Exoplanet Archive `ps` table and return a provenance-linked `Dataset`. | Implemented as a source-specific adapter at `src/quantum_space_agi/data/adapters/exoplanet_archive.py`; it does not retain response bytes or establish scientific/ML validity. |
 | ML integration | Consume task-approved data and return model/evaluation artifacts linked to inputs. | Future module boundary; must not own or mutate raw data. |
@@ -80,7 +81,7 @@ The paths above describe the repository layout. Generic loading, explicit-schema
 1. Identify the source file and capture source metadata before parsing.
 2. Parse CSV/JSON without changing original bytes; the ARC-03 loader rejects malformed input with a useful error.
 3. Apply a declared schema version. Preserve source field names or document mappings.
-4. Apply an explicit schema for structural and basic data-quality checks. Report missing values, configured duplicates, type mismatches, and declared range violations without modifying source data. Unit and scientific rules must be domain-specific and explicit.
+4. Current structured schema validation checks declared required fields, nullability, and exact types; `analyze_quality()` reports missing values for observed fields, exact duplicate rows, and finite numeric summaries. The legacy validator has a separate configurable contract. A unified workflow for declared keys, ranges, and other domain-specific rules is a future desired contract, not a capability of the structured schema API. Unit and scientific rules must be explicit and domain-specific.
 5. Write accepted/processed output separately and capture every transformation in provenance.
 6. Make downstream consumers state which schema and processed-data version they accept.
 
@@ -88,7 +89,7 @@ Nulls must remain distinguishable from zero, empty string, and sentinel values. 
 
 ## NASA data compatibility
 
-The Exoplanet Archive adapter records its source, endpoint, exact generated query, response format, retrieval time, checksum, ordering, identity fields, and citation guidance. Archive version, DOI, column descriptions, and units remain explicitly unknown unless verified. This adapter is a technical ingestion demonstration only; it does not imply NASA endorsement, scientific validation, or ML suitability. Review product documentation and terms before selecting data for research or training.
+The Exoplanet Archive adapter records its source, endpoint, exact generated query, response format, retrieval time, checksum, ordering, identity fields, and citation guidance. The adapter-returned `Dataset` leaves archive version, DOI, column descriptions, and units explicitly unknown; information independently verified through authoritative documentation may be recorded separately. This adapter is a technical ingestion demonstration only; it does not imply NASA endorsement, scientific validation, or ML suitability. Review product documentation and terms before selecting data for research or training.
 
 ## Open decisions for implementation
 
