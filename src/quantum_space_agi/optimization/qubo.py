@@ -6,10 +6,10 @@ or provide a quantum solver; examples use classical bitstring enumeration.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from math import isfinite
 from types import MappingProxyType
-from typing import Mapping
 
 from .models import ConstraintRelation, ObjectiveSense
 
@@ -27,15 +27,15 @@ class LinearConstraintSpec:
         if not self.name.strip():
             raise ValueError("constraint name must not be empty")
         if isinstance(self.bound, bool) or not isinstance(self.bound, int):
-            raise ValueError("QUBO constraint bounds must be integers")
+            raise TypeError("QUBO constraint bounds must be integers")
         if not isinstance(self.relation, ConstraintRelation):
-            raise ValueError("relation must be a ConstraintRelation")
+            raise TypeError("relation must be a ConstraintRelation")
         copied: dict[str, int] = {}
         for name, value in self.coefficients.items():
             if not name.strip():
                 raise ValueError("constraint variable names must not be empty")
             if isinstance(value, bool) or not isinstance(value, int):
-                raise ValueError("QUBO constraint coefficients must be integers")
+                raise TypeError("QUBO constraint coefficients must be integers")
             copied[name] = value
         object.__setattr__(self, "coefficients", MappingProxyType(copied))
 
@@ -73,19 +73,28 @@ class QUBOModel:
         object.__setattr__(
             self,
             "slack_variables",
-            MappingProxyType({name: tuple(items) for name, items in self.slack_variables.items()}),
+            MappingProxyType(
+                {name: tuple(items) for name, items in self.slack_variables.items()}
+            ),
         )
 
     def _normalize_bits(self, state: str | Mapping[str, int]) -> Mapping[str, int]:
         if isinstance(state, str):
-            if len(state) != len(self.variable_order) or any(bit not in "01" for bit in state):
-                raise ValueError("bitstring must contain one 0/1 character per QUBO variable")
+            if len(state) != len(self.variable_order) or any(
+                bit not in "01" for bit in state
+            ):
+                raise ValueError(
+                    "bitstring must contain one 0/1 character per QUBO variable"
+                )
             bits = dict(zip(self.variable_order, (int(bit) for bit in state)))
         else:
             bits = dict(state)
             if set(bits) != set(self.variable_order):
                 raise ValueError("bit mapping must contain exactly the QUBO variables")
-            if any(not isinstance(bit, (int, bool)) or bit not in (0, 1) for bit in bits.values()):
+            if any(
+                not isinstance(bit, (int, bool)) or bit not in (0, 1)
+                for bit in bits.values()
+            ):
                 raise ValueError("QUBO bits must be integers 0 or 1")
         return MappingProxyType(bits)
 
@@ -107,7 +116,9 @@ class QUBOModel:
         bits = self._normalize_bits(state)
         return MappingProxyType(
             {
-                constraint: sum((1 << index) * bits[name] for index, name in enumerate(names))
+                constraint: sum(
+                    (1 << index) * bits[name] for index, name in enumerate(names)
+                )
                 for constraint, names in self.slack_variables.items()
             }
         )
@@ -129,34 +140,55 @@ def build_qubo(
     improvement across the full objective range.
     """
     decision_variables = tuple(decision_variables)
-    if not decision_variables or len(set(decision_variables)) != len(decision_variables):
+    if not decision_variables or len(set(decision_variables)) != len(
+        decision_variables
+    ):
         raise ValueError("decision_variables must be non-empty and unique")
     variable_set = set(decision_variables)
     if any(not name.strip() for name in decision_variables):
         raise ValueError("decision variable names must not be empty")
     if set(objective_coefficients) != variable_set:
-        raise ValueError("objective coefficients must define every decision variable exactly once")
+        raise ValueError(
+            "objective coefficients must define every decision variable exactly once"
+        )
     if not isinstance(objective_sense, ObjectiveSense):
-        raise ValueError("objective_sense must be an ObjectiveSense")
-    if any(isinstance(c, bool) or not isinstance(c, int) for c in objective_coefficients.values()):
+        raise TypeError("objective_sense must be an ObjectiveSense")
+    if any(
+        isinstance(c, bool) or not isinstance(c, int)
+        for c in objective_coefficients.values()
+    ):
         raise ValueError("QUBO objective coefficients must be integers")
     if len({constraint.name for constraint in constraints}) != len(constraints):
         raise ValueError("constraint names must be unique in a QUBO encoding")
     for constraint in constraints:
         if not set(constraint.coefficients).issubset(variable_set):
-            raise ValueError(f"constraint {constraint.name!r} references an unknown decision variable")
+            raise ValueError(
+                f"constraint {constraint.name!r} references an unknown decision variable"
+            )
 
     objective_range = sum(abs(value) for value in objective_coefficients.values())
-    penalty = objective_range + 1 if penalty_coefficient is None else penalty_coefficient
-    if isinstance(penalty, bool) or not isinstance(penalty, int) or penalty <= objective_range:
-        raise ValueError(f"penalty_coefficient must be an integer greater than {objective_range}")
+    penalty = (
+        objective_range + 1 if penalty_coefficient is None else penalty_coefficient
+    )
+    if (
+        isinstance(penalty, bool)
+        or not isinstance(penalty, int)
+        or penalty <= objective_range
+    ):
+        raise ValueError(
+            f"penalty_coefficient must be an integer greater than {objective_range}"
+        )
 
     variable_order = list(decision_variables)
     slack_variables: dict[str, tuple[str, ...]] = {}
     slack_signs: dict[str, int] = {}
     for constraint in constraints:
-        lower = sum(min(0, coefficient) for coefficient in constraint.coefficients.values())
-        upper = sum(max(0, coefficient) for coefficient in constraint.coefficients.values())
+        lower = sum(
+            min(0, coefficient) for coefficient in constraint.coefficients.values()
+        )
+        upper = sum(
+            max(0, coefficient) for coefficient in constraint.coefficients.values()
+        )
         if constraint.relation is ConstraintRelation.LE:
             max_slack, slack_sign = constraint.bound - lower, 1
         elif constraint.relation is ConstraintRelation.GE:
@@ -202,7 +234,9 @@ def build_qubo(
             # For bits, b_i^2 == b_i; cross terms in a square carry factor 2.
             add_term(left, left, penalty * (2 * constant * left_value + left_value**2))
             for right in names[index + 1 :]:
-                add_term(left, right, penalty * 2 * left_value * residual_coefficients[right])
+                add_term(
+                    left, right, penalty * 2 * left_value * residual_coefficients[right]
+                )
 
     return QUBOModel(
         variable_order=tuple(variable_order),

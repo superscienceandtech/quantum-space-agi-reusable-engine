@@ -11,10 +11,11 @@ import argparse
 import json
 import platform
 from pathlib import Path
-from statistics import mean, median
+from statistics import mean
 from time import perf_counter
 
 from quantum_space_agi.optimization import EnumerativeSolver, OptimizationStatus
+
 try:
     from examples.generalization_benchmark import (
         DEFAULT_EVALUATION_BUDGET,
@@ -85,7 +86,10 @@ def _evaluate_configuration(instance, method, config, seeds, budget):
                 final_temperature=config["final_temperature"],
             )
             state, energy = result.state, result.energy
-            evaluations, repair_evaluations = result.proposals_evaluated + sa_restarts, 0
+            evaluations, repair_evaluations = (
+                result.proposals_evaluated + sa_restarts,
+                0,
+            )
         elif method == "discrete_sb":
             result = discrete_simulated_bifurcation_qubo(
                 instance.qubo,
@@ -145,6 +149,7 @@ def _select_configuration(training_results):
             float("inf") if gap is None else float(gap),
             float(summary["median_runtime_seconds"]),
         )
+
     return min(training_results.items(), key=score)
 
 
@@ -272,12 +277,16 @@ def main():
     parser.add_argument("--sizes", default="8,12,16")
     parser.add_argument("--tuning-seeds", type=int, default=10)
     parser.add_argument("--holdout-seeds", type=int, default=30)
-    parser.add_argument("--evaluation-budget", type=int, default=DEFAULT_EVALUATION_BUDGET)
+    parser.add_argument(
+        "--evaluation-budget", type=int, default=DEFAULT_EVALUATION_BUDGET
+    )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     families = tuple(part.strip() for part in args.families.split(",") if part.strip())
     try:
-        sizes = tuple(int(part.strip()) for part in args.sizes.split(",") if part.strip())
+        sizes = tuple(
+            int(part.strip()) for part in args.sizes.split(",") if part.strip()
+        )
     except ValueError as error:
         parser.error(f"invalid sizes: {error}")
     report = run_study(

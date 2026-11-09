@@ -1,6 +1,7 @@
 import unittest
 from itertools import product
 
+from examples.qiskit_qaoa_experiment import run_qaoa_case
 from examples.qubo_heuristics import (
     discrete_simulated_bifurcation_qubo,
     feasibility_guided_dsb,
@@ -11,11 +12,10 @@ from examples.synthetic_optimization import (
     REPETITIONS,
     build_cases,
     build_scaling_cases,
-    run_case,
     run_annealing_case,
+    run_case,
     run_qubo_case,
 )
-from examples.qiskit_qaoa_experiment import run_qaoa_case
 from quantum_space_agi.optimization import (
     ConstraintRelation,
     EnumerativeSolver,
@@ -23,7 +23,6 @@ from quantum_space_agi.optimization import (
     FunctionalObjective,
     ObjectiveSense,
     OptimizationProblem,
-    OptimizationStatus,
     benchmark_solver,
 )
 from quantum_space_agi.optimization.qubo import LinearConstraintSpec, build_qubo
@@ -42,10 +41,13 @@ class OptimizationTests(unittest.TestCase):
         for bits in product((0, 1), repeat=len(model.variable_order)):
             state = dict(zip(model.variable_order, bits))
             spins = tuple(1 - 2 * bit for bit in bits)
-            ising_energy = constant + sum(fields[i] * spins[i] for i in range(len(spins)))
+            ising_energy = constant + sum(
+                fields[i] * spins[i] for i in range(len(spins))
+            )
             ising_energy += sum(
                 couplings[i][j] * spins[i] * spins[j]
-                for i in range(len(spins)) for j in range(i + 1, len(spins))
+                for i in range(len(spins))
+                for j in range(i + 1, len(spins))
             )
             self.assertAlmostEqual(model.energy(state), ising_energy)
 
@@ -73,8 +75,13 @@ class OptimizationTests(unittest.TestCase):
             case.qubo_constraints,
         )
         result = feasibility_guided_dsb(
-            model, case.problem, case.qubo_constraints,
-            seed=13, agents=4, steps=32, max_flip_size=2,
+            model,
+            case.problem,
+            case.qubo_constraints,
+            seed=13,
+            agents=4,
+            steps=32,
+            max_flip_size=2,
         )
         self.assertTrue(result.feasible)
         self.assertEqual(result.objective_value, 10.0)
@@ -90,8 +97,13 @@ class OptimizationTests(unittest.TestCase):
             case.qubo_constraints,
         )
         result = feasibility_guided_dsb(
-            model, case.problem, case.qubo_constraints,
-            seed=13, agents=4, steps=32, max_flip_size=2,
+            model,
+            case.problem,
+            case.qubo_constraints,
+            seed=13,
+            agents=4,
+            steps=32,
+            max_flip_size=2,
         )
         self.assertFalse(result.feasible)
         self.assertIsNone(result.objective_value)
@@ -120,8 +132,12 @@ class OptimizationTests(unittest.TestCase):
         self.assertEqual(report["configuration"]["proposals_per_run"], 4 * 64 * 8)
         self.assertGreaterEqual(report["summary"]["optimal_energy_rate"], 0.0)
         self.assertLessEqual(report["summary"]["optimal_energy_rate"], 1.0)
-        self.assertGreaterEqual(report["summary"]["exact_enumeration_mean_seconds"], 0.0)
-        self.assertTrue(all("exact_enumeration_runtime_seconds" in run for run in report["runs"]))
+        self.assertGreaterEqual(
+            report["summary"]["exact_enumeration_mean_seconds"], 0.0
+        )
+        self.assertTrue(
+            all("exact_enumeration_runtime_seconds" in run for run in report["runs"])
+        )
 
     def test_simulated_annealing_rejects_invalid_schedule(self):
         case = build_cases()[0]
@@ -132,7 +148,9 @@ class OptimizationTests(unittest.TestCase):
             case.qubo_constraints,
         )
         with self.assertRaisesRegex(ValueError, "must not exceed"):
-            simulated_annealing_qubo(model, seed=1, initial_temperature=1, final_temperature=2)
+            simulated_annealing_qubo(
+                model, seed=1, initial_temperature=1, final_temperature=2
+            )
 
     def test_qiskit_qaoa_simulation_is_seeded_and_preserves_infeasibility(self):
         try:
@@ -171,7 +189,9 @@ class OptimizationTests(unittest.TestCase):
         self.assertEqual(result["solution"], {"alpha": 1.0, "beta": 1.0, "gamma": 0.0})
         self.assertEqual(result["candidates_evaluated_per_solve"], 8)
         self.assertEqual(result["objective_evaluations_per_solve"], 7)
-        self.assertTrue(all(check["feasible"] for check in result["constraint_results"]))
+        self.assertTrue(
+            all(check["feasible"] for check in result["constraint_results"])
+        )
         benchmark = report["benchmark"]
         samples = benchmark["timing_samples_seconds"]
         self.assertEqual(benchmark["repetitions"], REPETITIONS)
@@ -190,17 +210,28 @@ class OptimizationTests(unittest.TestCase):
         self.assertEqual(result["objective_value"], 7.0)
         self.assertEqual(result["solution"], {"alpha": 0.0, "beta": 1.0, "gamma": 1.0})
         self.assertEqual(result["candidates_evaluated_per_solve"], 8)
-        self.assertTrue(all(check["feasible"] for check in result["constraint_results"]))
+        self.assertTrue(
+            all(check["feasible"] for check in result["constraint_results"])
+        )
 
     def test_scaling_series_grows_deterministically(self):
         cases = build_scaling_cases()
         sizes = (3, 6, 9, 12)
         self.assertEqual(tuple(len(case.problem.variables) for case in cases), sizes)
         reports = [run_case(case, repetitions=1) for case in cases]
-        candidate_counts = [report["result"]["candidates_evaluated_per_solve"] for report in reports]
+        candidate_counts = [
+            report["result"]["candidates_evaluated_per_solve"] for report in reports
+        ]
         self.assertEqual(candidate_counts, [2**size for size in sizes])
-        self.assertTrue(all(report["result"]["status"] == "optimal" for report in reports))
-        self.assertTrue(all(report["result"]["objective_evaluations_per_solve"] > 0 for report in reports))
+        self.assertTrue(
+            all(report["result"]["status"] == "optimal" for report in reports)
+        )
+        self.assertTrue(
+            all(
+                report["result"]["objective_evaluations_per_solve"] > 0
+                for report in reports
+            )
+        )
 
     def test_infeasible_case_reports_diagnostic_resource_violations(self):
         report = run_case(build_cases()[2])
@@ -210,12 +241,20 @@ class OptimizationTests(unittest.TestCase):
         self.assertIsNone(result["solution"])
         self.assertEqual(result["candidates_evaluated_per_solve"], 8)
         self.assertEqual(result["objective_evaluations_per_solve"], 0)
-        self.assertEqual(result["constraint_diagnostic_source"], "explicit_diagnostic_witness")
-        violations = {check["name"]: check["violation"] for check in result["constraint_results"]}
-        self.assertEqual(violations, {"budget": 3.0, "capacity": 1.0, "minimum_selected": 0.0})
+        self.assertEqual(
+            result["constraint_diagnostic_source"], "explicit_diagnostic_witness"
+        )
+        violations = {
+            check["name"]: check["violation"] for check in result["constraint_results"]
+        }
+        self.assertEqual(
+            violations, {"budget": 3.0, "capacity": 1.0, "minimum_selected": 0.0}
+        )
 
     def test_constraint_tolerance_is_applied(self):
-        constraint = FunctionalConstraint("limit", lambda x: x["x"], ConstraintRelation.LE, 1, tolerance=0.1)
+        constraint = FunctionalConstraint(
+            "limit", lambda x: x["x"], ConstraintRelation.LE, 1, tolerance=0.1
+        )
         check = constraint.check({"x": 1.05})
         self.assertTrue(check.feasible)
         self.assertEqual(check.violation, 0.0)
@@ -223,7 +262,8 @@ class OptimizationTests(unittest.TestCase):
     def test_invalid_empty_domain_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "must not be empty"):
             OptimizationProblem(
-                FunctionalObjective("min", ObjectiveSense.MINIMIZE, lambda x: 0), {"x": ()}
+                FunctionalObjective("min", ObjectiveSense.MINIMIZE, lambda x: 0),
+                {"x": ()},
             )
 
     def test_candidate_requires_exact_allowed_variables(self):
@@ -234,7 +274,9 @@ class OptimizationTests(unittest.TestCase):
             problem.validate_solution({"alpha": 2, "beta": 0, "gamma": 0})
 
     def test_benchmark_repeats_and_reports_solver_results(self):
-        report = benchmark_solver(EnumerativeSolver(), build_cases()[0].problem, repetitions=2)
+        report = benchmark_solver(
+            EnumerativeSolver(), build_cases()[0].problem, repetitions=2
+        )
         self.assertEqual(report.repetitions, 2)
         self.assertEqual(len(report.elapsed_seconds), 2)
         self.assertTrue(all(result.objective_value == 10 for result in report.results))
@@ -242,7 +284,9 @@ class OptimizationTests(unittest.TestCase):
 
     def test_zero_benchmark_repetitions_are_rejected(self):
         with self.assertRaisesRegex(ValueError, "at least 1"):
-            benchmark_solver(EnumerativeSolver(), build_cases()[0].problem, repetitions=0)
+            benchmark_solver(
+                EnumerativeSolver(), build_cases()[0].problem, repetitions=0
+            )
 
     def test_qubo_feasible_minimum_matches_exact_classical_baseline(self):
         report = run_qubo_case(build_cases()[0])
@@ -259,7 +303,9 @@ class OptimizationTests(unittest.TestCase):
         self.assertEqual(report["decoded"]["objective_value"], 7.0)
         self.assertEqual(report["exact_enumerative_baseline"]["objective_value"], 7.0)
         self.assertTrue(report["comparison"]["feasibility_agrees"])
-        self.assertTrue(all(c["violation"] == 0 for c in report["decoded"]["constraint_results"]))
+        self.assertTrue(
+            all(c["violation"] == 0 for c in report["decoded"]["constraint_results"])
+        )
 
     def test_qubo_does_not_turn_infeasible_input_into_feasible_result(self):
         report = run_qubo_case(build_cases()[2])
@@ -292,10 +338,24 @@ class OptimizationTests(unittest.TestCase):
             ObjectiveSense.MAXIMIZE,
             (LinearConstraintSpec("lower_bound", {"x": 1}, ConstraintRelation.GE, 0),),
         )
-        self.assertEqual(qubo.slack_variables["lower_bound"], ("__slack__lower_bound__0",))
+        self.assertEqual(
+            qubo.slack_variables["lower_bound"], ("__slack__lower_bound__0",)
+        )
         self.assertEqual(qubo.decode_slacks("10"), {"lower_bound": 0})
         self.assertEqual(qubo.decode_slacks("11"), {"lower_bound": 1})
         self.assertEqual(qubo.energy("11"), -1.0)
+
+    def test_qubo_type_validation_raises_type_error(self):
+        with self.assertRaisesRegex(TypeError, "bounds must be integers"):
+            LinearConstraintSpec("budget", {"x": 1}, ConstraintRelation.LE, 1.0)
+        with self.assertRaisesRegex(TypeError, "relation must be a ConstraintRelation"):
+            LinearConstraintSpec("budget", {"x": 1}, "<=", 1)
+        with self.assertRaisesRegex(TypeError, "coefficients must be integers"):
+            LinearConstraintSpec("budget", {"x": 1.0}, ConstraintRelation.LE, 1)
+        with self.assertRaisesRegex(
+            TypeError, "objective_sense must be an ObjectiveSense"
+        ):
+            build_qubo(("x",), {"x": 1}, "maximize", ())
 
 
 if __name__ == "__main__":

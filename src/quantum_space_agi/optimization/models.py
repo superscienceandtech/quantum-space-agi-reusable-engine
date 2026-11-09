@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
 from math import isfinite
 from types import MappingProxyType
-from typing import Mapping, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .interfaces import Constraint, ConstraintCheck, Objective
@@ -30,9 +31,9 @@ class OptimizationStatus(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class OptimizationProblem:
-    objective: "Objective"
+    objective: Objective
     variables: Mapping[str, tuple[float, ...]]
-    constraints: tuple["Constraint", ...] = ()
+    constraints: tuple[Constraint, ...] = ()
     comparison_tolerance: float = 1e-12
 
     def __post_init__(self) -> None:
@@ -46,12 +47,18 @@ class OptimizationProblem:
             if not domain:
                 raise ValueError(f"domain for variable {name!r} must not be empty")
             if any(not isfinite(value) for value in domain):
-                raise ValueError(f"domain for variable {name!r} contains a non-finite value")
+                raise ValueError(
+                    f"domain for variable {name!r} contains a non-finite value"
+                )
             if len(set(domain)) != len(domain):
-                raise ValueError(f"domain for variable {name!r} contains duplicate values")
+                raise ValueError(
+                    f"domain for variable {name!r} contains duplicate values"
+                )
             copied[name] = domain
         if not copied:
-            raise ValueError("an optimization problem must define at least one variable")
+            raise ValueError(
+                "an optimization problem must define at least one variable"
+            )
         object.__setattr__(self, "variables", MappingProxyType(copied))
         object.__setattr__(self, "constraints", tuple(self.constraints))
 
@@ -73,7 +80,9 @@ class OptimizationProblem:
             if not isfinite(value):
                 raise ValueError(f"value for variable {name!r} must be finite")
             if value not in self.variables[name]:
-                raise ValueError(f"value {value!r} is outside the domain for variable {name!r}")
+                raise ValueError(
+                    f"value {value!r} is outside the domain for variable {name!r}"
+                )
         return MappingProxyType(normalized)
 
 
@@ -82,7 +91,7 @@ class OptimizationResult:
     status: OptimizationStatus
     solution: Mapping[str, float] | None
     objective_value: float | None
-    constraint_checks: tuple["ConstraintCheck", ...]
+    constraint_checks: tuple[ConstraintCheck, ...]
     evaluated_candidates: int
     solver_name: str
 

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from math import isfinite
-from typing import Callable, Mapping, Protocol
+from typing import Protocol
 
 from .models import ConstraintRelation, ObjectiveSense
 
@@ -25,7 +26,7 @@ class Constraint(Protocol):
 
     name: str
 
-    def check(self, solution: Solution) -> "ConstraintCheck": ...
+    def check(self, solution: Solution) -> ConstraintCheck: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,5 +84,12 @@ class FunctionalConstraint:
         else:
             raw_violation = abs(value - self.bound)
         violation = max(0.0, raw_violation - self.tolerance)
-        return ConstraintCheck(self.name, value, self.relation, self.bound, self.tolerance,
-                               violation == 0.0, violation)
+        return ConstraintCheck(
+            self.name,
+            value,
+            self.relation,
+            self.bound,
+            self.tolerance,
+            violation == 0.0,
+            violation,
+        )

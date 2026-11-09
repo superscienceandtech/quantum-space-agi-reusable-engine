@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from math import exp, isfinite
 from random import Random
 from types import MappingProxyType
-from typing import Mapping
 
 from quantum_space_agi.optimization.qubo import QUBOModel
 
@@ -37,7 +37,7 @@ def simulated_annealing_qubo(
     quantum-inspired algorithm, and it provides no optimality guarantee.
     """
     if isinstance(seed, bool) or not isinstance(seed, int):
-        raise ValueError("seed must be an integer")
+        raise TypeError("seed must be an integer")
     if isinstance(sweeps, bool) or not isinstance(sweeps, int) or sweeps < 1:
         raise ValueError("sweeps must be a positive integer")
     if isinstance(restarts, bool) or not isinstance(restarts, int) or restarts < 1:
@@ -66,9 +66,10 @@ def simulated_annealing_qubo(
 
         for step in range(total_proposals):
             fraction = step / max(1, total_proposals - 1)
-            temperature = initial_temperature * (
-                final_temperature / initial_temperature
-            ) ** fraction
+            temperature = (
+                initial_temperature
+                * (final_temperature / initial_temperature) ** fraction
+            )
             candidate = current.copy()
             candidate[rng.randrange(number_of_bits)] ^= 1
             candidate_energy = model.energy(dict(zip(names, candidate)))
@@ -90,7 +91,11 @@ def simulated_annealing_qubo(
         seed=seed,
     )
 
-from quantum_space_agi.optimization.models import ConstraintRelation, OptimizationProblem
+
+from quantum_space_agi.optimization.models import (
+    ConstraintRelation,
+    OptimizationProblem,
+)
 from quantum_space_agi.optimization.qubo import LinearConstraintSpec
 
 
@@ -122,7 +127,9 @@ class FeasibilityGuidedResult:
     seed: int
 
 
-def qubo_to_ising(model: QUBOModel) -> tuple[float, tuple[float, ...], tuple[tuple[float, ...], ...]]:
+def qubo_to_ising(
+    model: QUBOModel,
+) -> tuple[float, tuple[float, ...], tuple[tuple[float, ...], ...]]:
     """Return constant, fields, and symmetric pair couplings for spins in {-1,+1}.
 
     Uses b_i = (1 - s_i) / 2 and the convention
@@ -166,7 +173,7 @@ def discrete_simulated_bifurcation_qubo(
     evaluated sequentially in this portable reference implementation.
     """
     if isinstance(seed, bool) or not isinstance(seed, int):
-        raise ValueError("seed must be an integer")
+        raise TypeError("seed must be an integer")
     if isinstance(agents, bool) or not isinstance(agents, int) or agents < 1:
         raise ValueError("agents must be a positive integer")
     if isinstance(steps, bool) or not isinstance(steps, int) or steps < 1:
@@ -181,13 +188,21 @@ def discrete_simulated_bifurcation_qubo(
     _, raw_fields, raw_couplings = qubo_to_ising(model)
     scale = max(
         [abs(value) for value in raw_fields]
-        + [abs(raw_couplings[i][j]) for i in range(len(raw_fields)) for j in range(i + 1, len(raw_fields))]
+        + [
+            abs(raw_couplings[i][j])
+            for i in range(len(raw_fields))
+            for j in range(i + 1, len(raw_fields))
+        ]
         + [1.0]
     )
     fields = tuple(value / scale for value in raw_fields)
     couplings = tuple(tuple(value / scale for value in row) for row in raw_couplings)
     neighbors = tuple(
-        tuple((j, couplings[i][j]) for j in range(len(raw_fields)) if couplings[i][j] != 0.0)
+        tuple(
+            (j, couplings[i][j])
+            for j in range(len(raw_fields))
+            if couplings[i][j] != 0.0
+        )
         for i in range(len(raw_fields))
     )
     names = model.variable_order
@@ -208,9 +223,9 @@ def discrete_simulated_bifurcation_qubo(
                 force = -fields[i] - sum(
                     coefficient * spins[j] for j, coefficient in neighbors[i]
                 )
-                next_momentum[i] = momentum[i] + (
-                    (pump - a0) * position[i] + c0 * force
-                ) * time_step
+                next_momentum[i] = (
+                    momentum[i] + ((pump - a0) * position[i] + c0 * force) * time_step
+                )
                 next_position[i] = position[i] + a0 * next_momentum[i] * time_step
                 if abs(next_position[i]) > 1.0:
                     next_position[i] = 1.0 if next_position[i] > 0 else -1.0
@@ -239,8 +254,8 @@ def discrete_simulated_bifurcation_qubo(
 
 def feasibility_guided_dsb(
     model: QUBOModel,
-    problem: "OptimizationProblem",
-    constraints: tuple["LinearConstraintSpec", ...],
+    problem: OptimizationProblem,
+    constraints: tuple[LinearConstraintSpec, ...],
     *,
     seed: int,
     agents: int = 8,
@@ -261,10 +276,18 @@ def feasibility_guided_dsb(
 
     decision_names = tuple(sorted(problem.variables))
     if any(tuple(problem.variables[name]) != (0.0, 1.0) for name in decision_names):
-        raise ValueError("feasibility_guided_dsb currently requires binary (0, 1) domains")
+        raise ValueError(
+            "feasibility_guided_dsb currently requires binary (0, 1) domains"
+        )
     if not constraints:
-        raise ValueError("linear constraint specifications are required for slack encoding")
-    if isinstance(max_flip_size, bool) or not isinstance(max_flip_size, int) or max_flip_size < 1:
+        raise ValueError(
+            "linear constraint specifications are required for slack encoding"
+        )
+    if (
+        isinstance(max_flip_size, bool)
+        or not isinstance(max_flip_size, int)
+        or max_flip_size < 1
+    ):
         raise ValueError("max_flip_size must be a positive integer")
     max_flip_size = min(max_flip_size, len(decision_names))
 
@@ -275,7 +298,9 @@ def feasibility_guided_dsb(
 
     def assess(candidate_bits: Mapping[str, int]):
         validated = problem.validate_solution(candidate_bits)
-        checks = tuple(constraint.check(validated) for constraint in problem.constraints)
+        checks = tuple(
+            constraint.check(validated) for constraint in problem.constraints
+        )
         objective = problem.objective.evaluate(validated)
         violated = sum(not check.feasible for check in checks)
         normalized = sum(
@@ -283,21 +308,28 @@ def feasibility_guided_dsb(
             for check in checks
         )
         objective_rank = (
-            -objective if problem.objective.sense is ObjectiveSense.MAXIMIZE else objective
+            -objective
+            if problem.objective.sense is ObjectiveSense.MAXIMIZE
+            else objective
         )
         return (violated, normalized, objective_rank), checks, objective
 
     def encode_slacks(candidate_bits: Mapping[str, int]) -> dict[str, int]:
         encoded = {name: int(candidate_bits[name]) for name in decision_names}
         for spec in constraints:
-            lhs = sum(spec.coefficients.get(name, 0) * encoded[name] for name in decision_names)
+            lhs = sum(
+                spec.coefficients.get(name, 0) * encoded[name]
+                for name in decision_names
+            )
             if spec.relation is ConstraintRelation.LE:
                 slack = max(0, spec.bound - lhs)
             elif spec.relation is ConstraintRelation.GE:
                 slack = max(0, lhs - spec.bound)
             else:
                 slack = 0
-            for index, slack_name in enumerate(model.slack_variables.get(spec.name, ())):
+            for index, slack_name in enumerate(
+                model.slack_variables.get(spec.name, ())
+            ):
                 encoded[slack_name] = (slack >> index) & 1
         if set(encoded) != set(model.variable_order):
             raise ValueError("constraint specs do not match the QUBO slack variables")
@@ -324,7 +356,11 @@ def feasibility_guided_dsb(
         if best_bits is None:
             break
         current = best_bits
-        current_key, current_checks, current_objective = best_key, best_checks, best_objective
+        current_key, current_checks, current_objective = (
+            best_key,
+            best_checks,
+            best_objective,
+        )
         repair_moves += 1
 
     final_state = encode_slacks(current)
@@ -336,7 +372,9 @@ def feasibility_guided_dsb(
         energy=model.energy(final_state),
         feasible=feasible,
         objective_value=current_objective if feasible else None,
-        violations=MappingProxyType({check.name: check.violation for check in current_checks}),
+        violations=MappingProxyType(
+            {check.name: check.violation for check in current_checks}
+        ),
         repair_moves=repair_moves,
         repair_candidates_evaluated=candidates_evaluated,
         seed=seed,

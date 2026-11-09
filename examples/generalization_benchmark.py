@@ -13,6 +13,7 @@ import argparse
 import ast
 import json
 import platform
+from collections.abc import Mapping
 from dataclasses import dataclass
 from itertools import combinations
 from math import isclose, isfinite
@@ -21,7 +22,6 @@ from random import Random
 from statistics import mean, median
 from time import perf_counter
 from types import MappingProxyType
-from typing import Mapping
 
 from quantum_space_agi.optimization import (
     ConstraintRelation,
@@ -37,6 +37,7 @@ from quantum_space_agi.optimization.qubo import (
     QUBOModel,
     build_qubo,
 )
+
 try:
     from examples.qubo_heuristics import (
         discrete_simulated_bifurcation_qubo,
@@ -87,7 +88,10 @@ class PublicMaxCutInstance:
     qubo: QUBOModel
     published_reference_energy: float | None
 
-def _add_term(terms: dict[tuple[str, str], float], left: str, right: str, value: float) -> None:
+
+def _add_term(
+    terms: dict[tuple[str, str], float], left: str, right: str, value: float
+) -> None:
     pair = (left, right) if left <= right else (right, left)
     terms[pair] = terms.get(pair, 0.0) + value
 
@@ -102,8 +106,7 @@ def _build_maxcut_instance(
     rng = Random(instance_seed)
     selected_edges = rng.sample(possible_edges, edge_count)
     edges = tuple(
-        (left, right, rng.randint(1, 10))
-        for left, right in sorted(selected_edges)
+        (left, right, rng.randint(1, 10)) for left, right in sorted(selected_edges)
     )
 
     terms: dict[tuple[str, str], float] = {}
@@ -116,11 +119,17 @@ def _build_maxcut_instance(
 
     def cut_weight(solution, edge_list=edges) -> float:
         return float(
-            sum(weight for left, right, weight in edge_list if solution[left] != solution[right])
+            sum(
+                weight
+                for left, right, weight in edge_list
+                if solution[left] != solution[right]
+            )
         )
 
     problem = OptimizationProblem(
-        objective=FunctionalObjective("max_cut_weight", ObjectiveSense.MAXIMIZE, cut_weight),
+        objective=FunctionalObjective(
+            "max_cut_weight", ObjectiveSense.MAXIMIZE, cut_weight
+        ),
         variables={name: (0, 1) for name in names},
     )
     qubo = QUBOModel(
@@ -139,15 +148,17 @@ def _build_maxcut_instance(
         problem=problem,
         qubo=qubo,
         linear_constraints=(),
-        metadata=MappingProxyType({
-            "edge_count": len(edges),
-            "possible_edge_count": len(possible_edges),
-            "target_density": density,
-            "edges": [
-                {"left": left, "right": right, "weight": weight}
-                for left, right, weight in edges
-            ],
-        }),
+        metadata=MappingProxyType(
+            {
+                "edge_count": len(edges),
+                "possible_edge_count": len(possible_edges),
+                "target_density": density,
+                "edges": [
+                    {"left": left, "right": right, "weight": weight}
+                    for left, right, weight in edges
+                ],
+            }
+        ),
     )
 
 
@@ -165,7 +176,9 @@ def _build_knapsack_instance(size: int, instance_seed: int) -> BenchmarkInstance
     )
     resource_constraint = FunctionalConstraint(
         "weight_capacity",
-        lambda solution, data=weights: sum(data[name] * solution[name] for name in data),
+        lambda solution, data=weights: sum(
+            data[name] * solution[name] for name in data
+        ),
         ConstraintRelation.LE,
         capacity,
     )
@@ -191,21 +204,25 @@ def _build_knapsack_instance(size: int, instance_seed: int) -> BenchmarkInstance
         problem=problem,
         qubo=qubo,
         linear_constraints=(spec,),
-        metadata=MappingProxyType({
-            "values": values,
-            "weights": weights,
-            "capacity": capacity,
-            "qubo_variable_count_including_slack": len(qubo.variable_order),
-        }),
+        metadata=MappingProxyType(
+            {
+                "values": values,
+                "weights": weights,
+                "capacity": capacity,
+                "qubo_variable_count_including_slack": len(qubo.variable_order),
+            }
+        ),
     )
 
 
 def build_instance(family: str, size: int, instance_seed: int) -> BenchmarkInstance:
     """Build one fixed-seed sparse/dense Max-Cut or 0/1-knapsack instance."""
     if isinstance(size, bool) or not isinstance(size, int) or size < 4 or size > 20:
-        raise ValueError("size must be an integer from 4 through 20; exact-reference cost grows exponentially")
+        raise ValueError(
+            "size must be an integer from 4 through 20; exact-reference cost grows exponentially"
+        )
     if isinstance(instance_seed, bool) or not isinstance(instance_seed, int):
-        raise ValueError("instance_seed must be an integer")
+        raise TypeError("instance_seed must be an integer")
     if family in ("maxcut_sparse", "maxcut_dense"):
         return _build_maxcut_instance(family, size, instance_seed)
     if family == "knapsack":
@@ -225,7 +242,11 @@ def build_instances(
         raise ValueError("families must be non-empty and unique")
     if not sizes or len(set(sizes)) != len(sizes):
         raise ValueError("sizes must be non-empty and unique")
-    if isinstance(instances_per_setting, bool) or not isinstance(instances_per_setting, int) or instances_per_setting < 1:
+    if (
+        isinstance(instances_per_setting, bool)
+        or not isinstance(instances_per_setting, int)
+        or instances_per_setting < 1
+    ):
         raise ValueError("instances_per_setting must be a positive integer")
     instances = []
     for family in families:
@@ -240,7 +261,9 @@ def build_instances(
     return tuple(instances)
 
 
-def load_public_kipu_maxcut(path: Path, *, published_reference_energy: float | None = None) -> PublicMaxCutInstance:
+def load_public_kipu_maxcut(
+    path: Path, *, published_reference_energy: float | None = None
+) -> PublicMaxCutInstance:
     """Load the Kipu public Max-Cut Ising JSON format without adding a dependency.
 
     The source Hamiltonian is constant + sum(h_i*s_i) + sum(J_ij*s_i*s_j).
@@ -250,7 +273,9 @@ def load_public_kipu_maxcut(path: Path, *, published_reference_energy: float | N
     raw = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or not raw:
         raise ValueError("public Max-Cut JSON must be a non-empty object")
-    if published_reference_energy is not None and not isfinite(published_reference_energy):
+    if published_reference_energy is not None and not isfinite(
+        published_reference_energy
+    ):
         raise ValueError("published_reference_energy must be finite")
 
     constant = 0.0
@@ -276,16 +301,24 @@ def load_public_kipu_maxcut(path: Path, *, published_reference_energy: float | N
         elif len(indices) == 2:
             left, right = indices
             if (
-                isinstance(left, bool) or not isinstance(left, int) or left < 0
-                or isinstance(right, bool) or not isinstance(right, int) or right < 0
+                isinstance(left, bool)
+                or not isinstance(left, int)
+                or left < 0
+                or isinstance(right, bool)
+                or not isinstance(right, int)
+                or right < 0
                 or left == right
             ):
-                raise ValueError("Max-Cut edge endpoints must be distinct non-negative integers")
+                raise ValueError(
+                    "Max-Cut edge endpoints must be distinct non-negative integers"
+                )
             vertices.update((left, right))
             pair = (left, right) if left < right else (right, left)
             couplings[pair] = couplings.get(pair, 0.0) + value
         else:
-            raise ValueError("only constant, linear, and quadratic Ising terms are supported")
+            raise ValueError(
+                "only constant, linear, and quadratic Ising terms are supported"
+            )
 
     if not vertices:
         raise ValueError("public Max-Cut JSON contains no vertices")
@@ -310,7 +343,11 @@ def load_public_kipu_maxcut(path: Path, *, published_reference_energy: float | N
     model = QUBOModel(
         variable_order=names,
         decision_variables=names,
-        terms={pair: coefficient for pair, coefficient in terms.items() if coefficient != 0.0},
+        terms={
+            pair: coefficient
+            for pair, coefficient in terms.items()
+            if coefficient != 0.0
+        },
         offset=offset,
         penalty_coefficient=0,
         slack_variables={},
@@ -333,11 +370,15 @@ def load_public_gset_maxcut(path: Path, *, best_known_cut: int) -> PublicMaxCutI
     target, not an optimality certificate.
     """
     if isinstance(best_known_cut, bool) or not isinstance(best_known_cut, int):
-        raise ValueError("best_known_cut must be an integer")
+        raise TypeError("best_known_cut must be an integer")
     if best_known_cut < 0:
         raise ValueError("best_known_cut must be non-negative")
 
-    rows = [line.split() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = [
+        line.split()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
     if not rows or len(rows[0]) != 2:
         raise ValueError("Gset file must start with '<vertex_count> <edge_count>'")
     try:
@@ -354,12 +395,19 @@ def load_public_gset_maxcut(path: Path, *, best_known_cut: int) -> PublicMaxCutI
     seen_edges: set[tuple[int, int]] = set()
     for line_number, row in enumerate(rows[1:], start=2):
         if len(row) != 3:
-            raise ValueError(f"Gset edge row {line_number} must contain two vertices and a weight")
+            raise ValueError(
+                f"Gset edge row {line_number} must contain two vertices and a weight"
+            )
         try:
             left, right, weight = (int(value) for value in row)
         except ValueError as error:
-            raise ValueError(f"Gset edge row {line_number} must contain integers") from error
-        if not (1 <= left <= vertex_count and 1 <= right <= vertex_count) or left == right:
+            raise ValueError(
+                f"Gset edge row {line_number} must contain integers"
+            ) from error
+        if (
+            not (1 <= left <= vertex_count and 1 <= right <= vertex_count)
+            or left == right
+        ):
             raise ValueError(f"Gset edge row {line_number} has an invalid endpoint")
         edge = (min(left, right), max(left, right))
         if edge in seen_edges:
@@ -376,7 +424,11 @@ def load_public_gset_maxcut(path: Path, *, best_known_cut: int) -> PublicMaxCutI
     qubo = QUBOModel(
         variable_order=names,
         decision_variables=names,
-        terms={pair: coefficient for pair, coefficient in terms.items() if coefficient != 0.0},
+        terms={
+            pair: coefficient
+            for pair, coefficient in terms.items()
+            if coefficient != 0.0
+        },
         offset=0.0,
         penalty_coefficient=0,
         slack_variables={},
@@ -397,7 +449,11 @@ def evaluate_gset_cut(path: Path, bitstring: str) -> int:
     This direct objective calculation is independent of the QUBO energy
     conversion and is suitable for checking externally published solutions.
     """
-    rows = [line.split() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = [
+        line.split()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
     if not rows or len(rows[0]) != 2:
         raise ValueError("Gset file must start with '<vertex_count> <edge_count>'")
     try:
@@ -412,16 +468,24 @@ def evaluate_gset_cut(path: Path, bitstring: str) -> int:
     total = 0
     for line_number, row in enumerate(rows[1:], start=2):
         if len(row) != 3:
-            raise ValueError(f"Gset edge row {line_number} must contain two vertices and a weight")
+            raise ValueError(
+                f"Gset edge row {line_number} must contain two vertices and a weight"
+            )
         try:
             left, right, weight = (int(value) for value in row)
         except ValueError as error:
-            raise ValueError(f"Gset edge row {line_number} must contain integers") from error
-        if not (1 <= left <= vertex_count and 1 <= right <= vertex_count) or left == right:
+            raise ValueError(
+                f"Gset edge row {line_number} must contain integers"
+            ) from error
+        if (
+            not (1 <= left <= vertex_count and 1 <= right <= vertex_count)
+            or left == right
+        ):
             raise ValueError(f"Gset edge row {line_number} has an invalid endpoint")
         if bitstring[left - 1] != bitstring[right - 1]:
             total += weight
     return total
+
 
 def _quality_record(
     instance: BenchmarkInstance,
@@ -484,8 +548,12 @@ def _summarize(records: list[dict[str, object]]) -> dict[str, object]:
         "runs": len(records),
         "feasible_runs": sum(bool(record["feasible"]) for record in records),
         "feasibility_rate": mean(bool(record["feasible"]) for record in records),
-        "optimal_runs": sum(bool(record["matches_exact_optimum"]) for record in records),
-        "optimality_rate": mean(bool(record["matches_exact_optimum"]) for record in records),
+        "optimal_runs": sum(
+            bool(record["matches_exact_optimum"]) for record in records
+        ),
+        "optimality_rate": mean(
+            bool(record["matches_exact_optimum"]) for record in records
+        ),
         "mean_optimality_gap": mean(gaps) if gaps else None,
         "median_optimality_gap": median(gaps) if gaps else None,
         "mean_relative_optimality_gap": mean(relative_gaps) if relative_gaps else None,
@@ -509,7 +577,7 @@ def run_instance(
     if not seeds or len(set(seeds)) != len(seeds):
         raise ValueError("seeds must be non-empty and unique")
     if isinstance(evaluation_budget, bool) or not isinstance(evaluation_budget, int):
-        raise ValueError("evaluation_budget must be an integer")
+        raise TypeError("evaluation_budget must be an integer")
     if evaluation_budget < 64:
         raise ValueError("evaluation_budget must be at least 64")
 
@@ -521,9 +589,7 @@ def run_instance(
 
     bit_count = len(instance.qubo.variable_order)
     sa_restarts = min(4, max(1, evaluation_budget // (2 * bit_count)))
-    sa_sweeps = max(
-        1, (evaluation_budget - sa_restarts) // (sa_restarts * bit_count)
-    )
+    sa_sweeps = max(1, (evaluation_budget - sa_restarts) // (sa_restarts * bit_count))
     dsb_agents = min(8, max(1, evaluation_budget // 2))
     dsb_steps = max(1, evaluation_budget // dsb_agents)
 
@@ -545,9 +611,12 @@ def run_instance(
         sa_runtime = perf_counter() - started
         records["simulated_annealing"].append(
             _quality_record(
-                instance, sa.state, sa.energy,
+                instance,
+                sa.state,
+                sa.energy,
                 optimal_value=exact.objective_value,
-                seed=seed, runtime_seconds=sa_runtime,
+                seed=seed,
+                runtime_seconds=sa_runtime,
                 energy_evaluations=sa.proposals_evaluated + sa_restarts,
             )
         )
@@ -559,9 +628,12 @@ def run_instance(
         dsb_runtime = perf_counter() - started
         records["discrete_sb"].append(
             _quality_record(
-                instance, dsb.state, dsb.energy,
+                instance,
+                dsb.state,
+                dsb.energy,
                 optimal_value=exact.objective_value,
-                seed=seed, runtime_seconds=dsb_runtime,
+                seed=seed,
+                runtime_seconds=dsb_runtime,
                 energy_evaluations=dsb.updates_evaluated,
             )
         )
@@ -580,9 +652,12 @@ def run_instance(
             fg_runtime = perf_counter() - started
             records["fg_dsb"].append(
                 _quality_record(
-                    instance, fg.state, fg.energy,
+                    instance,
+                    fg.state,
+                    fg.energy,
                     optimal_value=exact.objective_value,
-                    seed=seed, runtime_seconds=fg_runtime,
+                    seed=seed,
+                    runtime_seconds=fg_runtime,
                     energy_evaluations=dsb_agents * dsb_steps,
                     repair_evaluations=fg.repair_candidates_evaluated,
                 )
@@ -638,9 +713,17 @@ def run_benchmark(
     evaluation_budget: int = DEFAULT_EVALUATION_BUDGET,
     instance_seed: int = 20261107,
 ) -> dict[str, object]:
-    if isinstance(seed_count, bool) or not isinstance(seed_count, int) or seed_count < 1:
+    if (
+        isinstance(seed_count, bool)
+        or not isinstance(seed_count, int)
+        or seed_count < 1
+    ):
         raise ValueError("seed_count must be a positive integer")
-    if isinstance(seed_start, bool) or not isinstance(seed_start, int) or seed_start < 0:
+    if (
+        isinstance(seed_start, bool)
+        or not isinstance(seed_start, int)
+        or seed_start < 0
+    ):
         raise ValueError("seed_start must be a non-negative integer")
     seeds = tuple(range(seed_start, seed_start + seed_count))
     instances = build_instances(
@@ -672,9 +755,7 @@ def run_benchmark(
             ],
         },
         "results": [
-            run_instance(
-                instance, seeds=seeds, evaluation_budget=evaluation_budget
-            )
+            run_instance(instance, seeds=seeds, evaluation_budget=evaluation_budget)
             for instance in instances
         ],
     }
@@ -695,7 +776,11 @@ def run_public_maxcut_instance(
         raise ValueError("seeds must be non-empty and unique")
     if not isfinite(reference_energy):
         raise ValueError("reference_energy must be finite")
-    if isinstance(evaluation_budget, bool) or not isinstance(evaluation_budget, int) or evaluation_budget < 64:
+    if (
+        isinstance(evaluation_budget, bool)
+        or not isinstance(evaluation_budget, int)
+        or evaluation_budget < 64
+    ):
         raise ValueError("evaluation_budget must be an integer of at least 64")
 
     bit_count = len(instance.qubo.variable_order)
@@ -718,15 +803,17 @@ def run_public_maxcut_instance(
         )
         sa_runtime = perf_counter() - started
         sa_gap = sa.energy - reference_energy
-        records["simulated_annealing"].append({
-            "seed": seed,
-            "energy": sa.energy,
-            "gap_to_published_reference": sa_gap,
-            "matches_published_reference": abs(sa_gap) <= 1e-8,
-            "below_published_reference": sa_gap < -1e-8,
-            "energy_evaluations": sa.proposals_evaluated + sa_restarts,
-            "runtime_seconds": sa_runtime,
-        })
+        records["simulated_annealing"].append(
+            {
+                "seed": seed,
+                "energy": sa.energy,
+                "gap_to_published_reference": sa_gap,
+                "matches_published_reference": abs(sa_gap) <= 1e-8,
+                "below_published_reference": sa_gap < -1e-8,
+                "energy_evaluations": sa.proposals_evaluated + sa_restarts,
+                "runtime_seconds": sa_runtime,
+            }
+        )
 
         started = perf_counter()
         dsb = discrete_simulated_bifurcation_qubo(
@@ -737,33 +824,43 @@ def run_public_maxcut_instance(
         )
         dsb_runtime = perf_counter() - started
         dsb_gap = dsb.energy - reference_energy
-        records["discrete_sb"].append({
-            "seed": seed,
-            "energy": dsb.energy,
-            "gap_to_published_reference": dsb_gap,
-            "matches_published_reference": abs(dsb_gap) <= 1e-8,
-            "below_published_reference": dsb_gap < -1e-8,
-            "energy_evaluations": dsb.updates_evaluated,
-            "runtime_seconds": dsb_runtime,
-        })
+        records["discrete_sb"].append(
+            {
+                "seed": seed,
+                "energy": dsb.energy,
+                "gap_to_published_reference": dsb_gap,
+                "matches_published_reference": abs(dsb_gap) <= 1e-8,
+                "below_published_reference": dsb_gap < -1e-8,
+                "energy_evaluations": dsb.updates_evaluated,
+                "runtime_seconds": dsb_runtime,
+            }
+        )
 
     method_results = {}
     for name, method_records in records.items():
-        gaps = [float(record["gap_to_published_reference"]) for record in method_records]
+        gaps = [
+            float(record["gap_to_published_reference"]) for record in method_records
+        ]
         energies = [float(record["energy"]) for record in method_records]
         runtimes = [float(record["runtime_seconds"]) for record in method_records]
         method_results[name] = {
             "summary": {
                 "runs": len(method_records),
-                "reference_match_rate": mean(bool(r["matches_published_reference"]) for r in method_records),
-                "below_reference_runs": sum(bool(r["below_published_reference"]) for r in method_records),
+                "reference_match_rate": mean(
+                    bool(r["matches_published_reference"]) for r in method_records
+                ),
+                "below_reference_runs": sum(
+                    bool(r["below_published_reference"]) for r in method_records
+                ),
                 "best_energy": min(energies),
                 "mean_energy": mean(energies),
                 "mean_gap_to_reference": mean(gaps),
                 "median_gap_to_reference": median(gaps),
                 "median_runtime_seconds": median(runtimes),
                 "mean_runtime_seconds": mean(runtimes),
-                "mean_energy_evaluations": mean(int(r["energy_evaluations"]) for r in method_records),
+                "mean_energy_evaluations": mean(
+                    int(r["energy_evaluations"]) for r in method_records
+                ),
             },
             "runs": method_records,
         }
@@ -785,7 +882,8 @@ def run_public_maxcut_instance(
             "requested_energy_evaluation_budget": evaluation_budget,
             "sa_restarts": sa_restarts,
             "sa_sweeps_per_restart": sa_sweeps,
-            "sa_energy_evaluations_per_run": sa_restarts + sa_restarts * sa_sweeps * bit_count,
+            "sa_energy_evaluations_per_run": sa_restarts
+            + sa_restarts * sa_sweeps * bit_count,
             "dsb_agents": dsb_agents,
             "dsb_steps": dsb_steps,
             "d_sb_updates_per_run": dsb_agents * dsb_steps,
@@ -793,11 +891,14 @@ def run_public_maxcut_instance(
         "methods": method_results,
     }
 
+
 def _csv_ints(value: str, label: str) -> tuple[int, ...]:
     try:
         parsed = tuple(int(part.strip()) for part in value.split(",") if part.strip())
     except ValueError as error:
-        raise argparse.ArgumentTypeError(f"{label} must be comma-separated integers") from error
+        raise argparse.ArgumentTypeError(
+            f"{label} must be comma-separated integers"
+        ) from error
     if not parsed:
         raise argparse.ArgumentTypeError(f"{label} must not be empty")
     return parsed
@@ -810,12 +911,16 @@ def main() -> None:
         default=",".join(DEFAULT_FAMILIES),
         help="comma-separated: maxcut_sparse,maxcut_dense,knapsack",
     )
-    parser.add_argument("--sizes", default="8,12,16", help="comma-separated decision-variable counts")
+    parser.add_argument(
+        "--sizes", default="8,12,16", help="comma-separated decision-variable counts"
+    )
     parser.add_argument("--instances-per-setting", type=int, default=3)
     parser.add_argument("--instance-seed", type=int, default=20261107)
     parser.add_argument("--seed-count", type=int, default=DEFAULT_SEED_COUNT)
     parser.add_argument("--seed-start", type=int, default=0)
-    parser.add_argument("--evaluation-budget", type=int, default=DEFAULT_EVALUATION_BUDGET)
+    parser.add_argument(
+        "--evaluation-budget", type=int, default=DEFAULT_EVALUATION_BUDGET
+    )
     parser.add_argument("--public-maxcut-json", type=Path)
     parser.add_argument("--public-reference-energy", type=float)
     parser.add_argument("--public-gset-file", type=Path)
@@ -823,16 +928,24 @@ def main() -> None:
     parser.add_argument("--gset-certificate-json", type=Path)
     parser.add_argument("--gset-certificate-key")
     parser.add_argument("--skip-generated", action="store_true")
-    parser.add_argument("--output", type=Path, help="optional JSON output file; stdout if omitted")
+    parser.add_argument(
+        "--output", type=Path, help="optional JSON output file; stdout if omitted"
+    )
     args = parser.parse_args()
 
-    has_public_input = args.public_maxcut_json is not None or args.public_gset_file is not None
+    has_public_input = (
+        args.public_maxcut_json is not None or args.public_gset_file is not None
+    )
     if args.skip_generated and not has_public_input:
         parser.error("--skip-generated requires a public instance input")
     if (args.public_maxcut_json is None) != (args.public_reference_energy is None):
-        parser.error("--public-maxcut-json and --public-reference-energy must be provided together")
+        parser.error(
+            "--public-maxcut-json and --public-reference-energy must be provided together"
+        )
     if (args.public_gset_file is None) != (args.gset_best_known_cut is None):
-        parser.error("--public-gset-file and --gset-best-known-cut must be provided together")
+        parser.error(
+            "--public-gset-file and --gset-best-known-cut must be provided together"
+        )
     if args.gset_certificate_json is not None and args.public_gset_file is None:
         parser.error("--gset-certificate-json requires --public-gset-file")
     if args.gset_certificate_key is not None and args.gset_certificate_json is None:
@@ -879,7 +992,9 @@ def main() -> None:
             ),
         )
         if args.gset_certificate_json is not None:
-            certificate_doc = json.loads(args.gset_certificate_json.read_text(encoding="utf-8"))
+            certificate_doc = json.loads(
+                args.gset_certificate_json.read_text(encoding="utf-8")
+            )
             try:
                 certificate_key = args.gset_certificate_key or gset_instance.name
                 certificate = certificate_doc["solutions"][certificate_key]
@@ -887,7 +1002,9 @@ def main() -> None:
                 certificate_cut = certificate["cut"]
                 certificate_vertices = certificate["N"]
             except (KeyError, TypeError) as error:
-                parser.error(f"invalid Gset certificate JSON for {certificate_key}: {error}")
+                parser.error(
+                    f"invalid Gset certificate JSON for {certificate_key}: {error}"
+                )
             if certificate_vertices != gset_instance.vertex_count:
                 parser.error("Gset certificate vertex count does not match the graph")
             recomputed_cut = evaluate_gset_cut(args.public_gset_file, certificate_bits)

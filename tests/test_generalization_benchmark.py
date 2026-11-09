@@ -8,15 +8,19 @@ from pathlib import Path
 
 from examples.generalization_benchmark import (
     build_instance,
-    run_benchmark,
-    load_public_kipu_maxcut,
-    load_public_gset_maxcut,
-    run_public_maxcut_instance,
     evaluate_gset_cut,
+    load_public_gset_maxcut,
+    load_public_kipu_maxcut,
+    run_benchmark,
+    run_public_maxcut_instance,
 )
 
 
 class GeneralizationBenchmarkTests(unittest.TestCase):
+    def test_instance_seed_requires_integer_type(self):
+        with self.assertRaisesRegex(TypeError, "instance_seed must be an integer"):
+            build_instance("maxcut_sparse", 4, True)
+
     def test_generated_instances_are_deterministic_for_fixed_seed(self):
         first = build_instance("maxcut_sparse", 6, 1234)
         second = build_instance("maxcut_sparse", 6, 1234)
@@ -78,9 +82,7 @@ class GeneralizationBenchmarkTests(unittest.TestCase):
         self.assertEqual(instance.edge_count, 1)
         for bits in product((0, 1), repeat=2):
             spin0, spin1 = (1 - 2 * bit for bit in bits)
-            ising_energy = (
-                1.5 + 0.2 * spin0 - 0.4 * spin1 + 0.5 * spin0 * spin1
-            )
+            ising_energy = 1.5 + 0.2 * spin0 - 0.4 * spin1 + 0.5 * spin0 * spin1
             state = {name: bit for name, bit in zip(instance.qubo.variable_order, bits)}
             self.assertAlmostEqual(instance.qubo.energy(state), ising_energy)
 
@@ -111,7 +113,8 @@ class GeneralizationBenchmarkTests(unittest.TestCase):
         names = instance.qubo.variable_order
         for bits in product((0, 1), repeat=len(names)):
             cut = sum(
-                1 for left, right in ((0, 1), (1, 2), (2, 3), (3, 0))
+                1
+                for left, right in ((0, 1), (1, 2), (2, 3), (3, 0))
                 if bits[left] != bits[right]
             )
             state = dict(zip(names, bits))
@@ -137,14 +140,20 @@ class GeneralizationBenchmarkTests(unittest.TestCase):
         self.assertEqual(report["design"]["paired_solver_seeds"], (5, 6))
         results = report["results"]
         self.assertEqual(len(results), 2)
-        knapsack = next(item for item in results if item["instance"]["family"] == "knapsack")
-        maxcut = next(item for item in results if item["instance"]["family"] == "maxcut_sparse")
+        knapsack = next(
+            item for item in results if item["instance"]["family"] == "knapsack"
+        )
+        maxcut = next(
+            item for item in results if item["instance"]["family"] == "maxcut_sparse"
+        )
         self.assertIn("fg_dsb", knapsack["methods"])
         self.assertNotIn("fg_dsb", maxcut["methods"])
         for method in knapsack["methods"].values():
             self.assertEqual(method["summary"]["runs"], 2)
         self.assertGreaterEqual(
-            knapsack["methods"]["fg_dsb"]["summary"]["mean_repair_candidates_evaluated"],
+            knapsack["methods"]["fg_dsb"]["summary"][
+                "mean_repair_candidates_evaluated"
+            ],
             0,
         )
 
