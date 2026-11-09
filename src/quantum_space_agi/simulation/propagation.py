@@ -8,7 +8,12 @@ from .integrator import rk4_step
 
 
 def _stable_position_radius(position):
-    return float(np.hypot(np.hypot(abs(position[0]), abs(position[1])), abs(position[2])))
+    with np.errstate(over="ignore", invalid="ignore", under="ignore", divide="ignore"):
+        radius = np.hypot(np.hypot(abs(position[0]), abs(position[1])), abs(position[2]))
+    radius = float(radius)
+    if not math.isfinite(radius):
+        raise ValueError("Collision bracket contains a non-finite radius")
+    return radius
 
 
 def _numeric_state(state):
@@ -24,7 +29,10 @@ def _numeric_state(state):
             (bool, np.bool_, str, bytes, bytearray, complex, np.complexfloating, list, tuple, np.ndarray),
         ):
             raise ValueError("State must contain only real numeric values")
-    array = np.asarray(state, dtype=np.float64)
+    try:
+        array = np.asarray(state, dtype=np.float64)
+    except (TypeError, ValueError, OverflowError, FloatingPointError) as exc:
+        raise ValueError("State must be numeric") from exc
     if array.shape != (6,) or not np.all(np.isfinite(array)):
         raise ValueError("State must be a finite six-component vector")
     return array
@@ -60,8 +68,12 @@ def interpolate_collision_event(
         threshold = float(collision_radius_m)
     except (TypeError, ValueError, OverflowError) as exc:
         raise ValueError("Collision bracket times and threshold must be numeric") from exc
-    if not math.isfinite(previous_time) or not math.isfinite(next_time) or next_time < previous_time:
-        raise ValueError("Collision bracket times must be finite and ordered")
+    if (
+        not math.isfinite(previous_time)
+        or not math.isfinite(next_time)
+        or next_time <= previous_time
+    ):
+        raise ValueError("Collision bracket times must be finite and strictly increasing")
     if isinstance(collision_radius_m, (bool, np.bool_, str, bytes, bytearray)):
         raise ValueError("Collision threshold must be finite and positive")
     if not math.isfinite(threshold) or threshold <= 0:
@@ -85,8 +97,11 @@ def interpolate_collision_event(
     if alpha < 0.0 or alpha > 1.0:
         raise ValueError("Invalid collision interval: interpolation fraction is outside [0, 1]")
 
-    event_time = previous_time + alpha * (next_time - previous_time)
-    event_state = (1.0 - alpha) * previous + alpha * next_y
+    event_time = (1.0 - alpha) * previous_time + alpha * next_time
+    if not math.isfinite(event_time):
+        raise ValueError("Interpolated collision time is non-finite")
+    with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+        event_state = (1.0 - alpha) * previous + alpha * next_y
     if not np.all(np.isfinite(event_state)):
         raise ValueError("Interpolated collision state is non-finite")
     return event_time, event_state.astype(np.float64), "linear_radius_interpolation"
@@ -125,6 +140,8 @@ def propagate_two_body(
         raise ValueError("Timestep must be finite and positive")
     if not math.isfinite(collision_radius) or collision_radius <= 0:
         raise ValueError("Collision radius must be finite and positive")
+    if duration > timestep and timestep < math.ulp(duration):
+        raise ValueError("Timestep is too small to represent the simulation time grid")
 
     initial_radius = _stable_position_radius(y0[:3])
     if not math.isfinite(initial_radius) or initial_radius <= 0:
@@ -147,6 +164,9 @@ def propagate_two_body(
 
     while current_time < duration and collision_index is None:
         step = min(timestep, duration - current_time)
+        next_time = current_time + step
+        if next_time <= current_time:
+            raise ValueError("Timestep cannot advance the simulation time")
         previous_time = current_time
         previous_state = y.copy()
         y = rk4_step(
@@ -156,7 +176,7 @@ def propagate_two_body(
             _propagation_derivative,
             mu_value,
         )
-        current_time += step
+        current_time = next_time
         if abs(current_time - duration) <= 1e-12 * max(1.0, duration):
             current_time = duration
         times.append(current_time)

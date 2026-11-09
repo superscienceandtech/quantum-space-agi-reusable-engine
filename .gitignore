@@ -1,0 +1,18 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Notebook execution outputs and temp validation artifacts
+_arc05_exec/
+_nb_exec_check/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Local validation environment used only for clean-wheel verification
+.clean-wheel-venv/

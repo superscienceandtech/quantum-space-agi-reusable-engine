@@ -79,7 +79,7 @@ class OrbitalState(BaseModel):
 
         try:
             untyped_state = np.asarray(state_vector)
-        except (TypeError, ValueError, OverflowError) as exc:
+        except (TypeError, ValueError, OverflowError, FloatingPointError) as exc:
             raise ValueError("State vector must be a numeric array") from exc
 
         if untyped_state.dtype.kind not in "iuf":
@@ -87,7 +87,7 @@ class OrbitalState(BaseModel):
 
         try:
             state = np.asarray(untyped_state, dtype=np.float64)
-        except (TypeError, ValueError, OverflowError) as exc:
+        except (TypeError, ValueError, OverflowError, FloatingPointError) as exc:
             raise ValueError("State vector must be float64-compatible") from exc
 
         if state.shape != (6,):

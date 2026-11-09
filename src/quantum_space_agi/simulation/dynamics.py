@@ -18,10 +18,22 @@ def _numeric_state(state):
             (bool, np.bool_, str, bytes, bytearray, complex, np.complexfloating, list, tuple, np.ndarray),
         ):
             raise ValueError("State must contain only real numeric values")
-    array = np.asarray(state, dtype=np.float64)
+    try:
+        array = np.asarray(state, dtype=np.float64)
+    except (TypeError, ValueError, OverflowError, FloatingPointError) as exc:
+        raise ValueError("State must be numeric") from exc
     if array.shape != (6,) or not np.all(np.isfinite(array)):
         raise ValueError("State must be a finite six-component vector")
     return array
+
+
+def _position_radius(vector):
+    with np.errstate(over="ignore", invalid="ignore", under="ignore", divide="ignore"):
+        radius = np.hypot(np.hypot(abs(vector[0]), abs(vector[1])), abs(vector[2]))
+    radius = float(radius)
+    if not math.isfinite(radius) or radius <= 0:
+        raise ValueError("Position radius must be finite and positive")
+    return radius
 
 
 def two_body_derivative(state, mu):
@@ -37,16 +49,16 @@ def two_body_derivative(state, mu):
     if not math.isfinite(mu_value) or mu_value <= 0:
         raise ValueError("Gravitational parameter must be finite and positive")
 
-    radius = float(np.hypot(np.hypot(abs(y[0]), abs(y[1])), abs(y[2])))
-    if not math.isfinite(radius) or radius <= 0:
-        raise ValueError("Position radius must be finite and positive")
-    acceleration_scale = (mu_value / radius) / radius
+    radius = _position_radius(y)
+    with np.errstate(over="ignore", invalid="ignore", under="ignore", divide="ignore"):
+        acceleration_scale = (mu_value / radius) / radius
+        acceleration = -acceleration_scale * (y[:3] / radius)
     if not math.isfinite(acceleration_scale):
         raise ValueError("Acceleration magnitude is non-finite")
     if acceleration_scale == 0.0:
         raise ValueError("Acceleration magnitude underflows float64")
-
-    acceleration = -acceleration_scale * (y[:3] / radius)
+    if not np.all(np.isfinite(acceleration)):
+        raise ValueError("Derivative contains non-finite values")
     derivative = np.concatenate((y[3:], acceleration)).astype(np.float64)
     if not np.all(np.isfinite(derivative)):
         raise ValueError("Derivative contains non-finite values")

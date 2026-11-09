@@ -42,15 +42,39 @@ def rk4_step(state, time_s, time_step_s, derivative, *derivative_args):
         raise ValueError("Timestep must be finite and positive")
 
     y = _numeric_state(state)
-    k1 = np.asarray(derivative(time, y, *derivative_args), dtype=np.float64)
-    k2 = np.asarray(derivative(time + 0.5 * dt, y + 0.5 * dt * k1, *derivative_args), dtype=np.float64)
-    k3 = np.asarray(derivative(time + 0.5 * dt, y + 0.5 * dt * k2, *derivative_args), dtype=np.float64)
-    k4 = np.asarray(derivative(time + dt, y + dt * k3, *derivative_args), dtype=np.float64)
-    for stage in (k1, k2, k3, k4):
+    half_step_time = time + 0.5 * dt
+    end_time = time + dt
+    if not math.isfinite(half_step_time) or not math.isfinite(end_time):
+        raise ValueError("RK4 intermediate time is non-finite")
+
+    def evaluate_stage(stage_time, stage_state):
+        if not np.all(np.isfinite(stage_state)):
+            raise ValueError("RK4 intermediate state is non-finite")
+        try:
+            stage = np.asarray(
+                derivative(stage_time, stage_state.copy(), *derivative_args),
+                dtype=np.float64,
+            )
+        except (TypeError, ValueError, OverflowError, FloatingPointError) as exc:
+            raise ValueError("RK4 intermediate stage is invalid") from exc
         if stage.shape != y.shape or not np.all(np.isfinite(stage)):
             raise ValueError("RK4 intermediate stage is invalid")
+        return stage
 
-    result = y + dt / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+    def intermediate_state(stage, scale):
+        with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+            stage_state = y + scale * stage
+        if not np.all(np.isfinite(stage_state)):
+            raise ValueError("RK4 intermediate state is non-finite")
+        return stage_state
+
+    k1 = evaluate_stage(time, y)
+    k2 = evaluate_stage(half_step_time, intermediate_state(k1, 0.5 * dt))
+    k3 = evaluate_stage(half_step_time, intermediate_state(k2, 0.5 * dt))
+    k4 = evaluate_stage(end_time, intermediate_state(k3, dt))
+
+    with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+        result = y + dt / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
     if not np.all(np.isfinite(result)):
         raise ValueError("RK4 produced a non-finite state")
     return result.astype(np.float64)
