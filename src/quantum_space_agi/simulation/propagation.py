@@ -107,6 +107,24 @@ def interpolate_collision_event(
     return event_time, event_state.astype(np.float64), "linear_radius_interpolation"
 
 
+def linear_radius_collision_event(
+    previous_time_s,
+    previous_state,
+    next_time_s,
+    next_state,
+    collision_radius_m,
+):
+    """Backward-compatible alias for the linear-radius collision interpolation helper."""
+
+    return interpolate_collision_event(
+        previous_time_s,
+        previous_state,
+        next_time_s,
+        next_state,
+        collision_radius_m,
+    )
+
+
 def propagate_two_body(
     initial_state,
     mu,
@@ -156,7 +174,8 @@ def propagate_two_body(
 
     current_time = 0.0
     y = y0.copy()
-    if initial_radius <= collision_radius:
+    initial_velocity_zero = bool(np.all(y0[3:] == 0.0))
+    if initial_radius < collision_radius or (initial_radius == collision_radius and initial_velocity_zero):
         collision_index = 0
         collision_time_s = 0.0
         collision_state = y.copy()
@@ -169,6 +188,7 @@ def propagate_two_body(
             raise ValueError("Timestep cannot advance the simulation time")
         previous_time = current_time
         previous_state = y.copy()
+        previous_radius = _stable_position_radius(previous_state[:3])
         y = rk4_step(
             y,
             current_time,
@@ -182,7 +202,7 @@ def propagate_two_body(
         times.append(current_time)
         states.append(y.copy())
         current_radius = _stable_position_radius(y[:3])
-        if current_radius <= collision_radius:
+        if current_radius <= collision_radius and previous_radius > collision_radius:
             collision_index = len(states) - 1
             (
                 collision_time_s,
