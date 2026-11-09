@@ -14,7 +14,7 @@ This document records local conventions used by the ARC-06/ARC-07 starter. These
 - Represent objective functions, constraints, domains, and results with small typed interfaces and immutable result records.
 - Enumerate variable names in lexical order and values in caller-provided domain order.
 - Keep the first candidate when objective values are equal within the configured comparison tolerance.
-- Reject empty domains, non-finite numbers, missing variables, and extra variables with clear `ValueError`s.
+- Model-data errors such as empty domains, non-finite numbers, and missing/extra variables use `ValueError`. QUBO validators and explicitly typed example arguments use `TypeError` for runtime type mismatches; invalid values and ranges remain `ValueError`s.
 - Constraint feasibility uses each constraint's explicit non-negative tolerance. Objective comparison tolerance is separate.
 - A solver reports its scope and work count; it must not imply a global optimum when its algorithm does not establish one.
 

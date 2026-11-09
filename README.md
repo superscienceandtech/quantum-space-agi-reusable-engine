@@ -36,6 +36,15 @@ solution or an official NASA specification.
   notes; they are not a production dashboard or integrated backend. See
   [prototype handoff](arc09-ui-prototype/PROTOTYPE_HANDOFF.md).
 
+## Algorithm experiments and benchmark results
+
+ARC-07 also includes seeded classical simulated-annealing and discrete
+simulated-bifurcation experiments, compared with exact small-instance
+references. The feasibility-guided repair experiment is a heuristic pilot, not
+a proven novel algorithm. See [algorithm research](docs/algorithm-research.md)
+and the [generalization benchmark](docs/generalization-benchmark.md) for
+matched-budget methodology, generated instances, and reported limits.
+
 ## Scope and limits
 
 The modules are reusable starting points. They do not establish mission
