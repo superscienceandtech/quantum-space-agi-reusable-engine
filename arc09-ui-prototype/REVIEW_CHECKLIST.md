@@ -2,8 +2,8 @@
 
 **Prototype:** `C:\Nasa AGI\quantum-space-agi-reusable-engine\arc09-ui-prototype`
 
-**Owner:** Hridi  
-**Reviewer:** Rafi  
+**Owner:** Hridi
+**Reviewer:** Rafi
 **Review scope:** Isolated prototype only. This checklist does not approve production requirements, stack, or integration.
 
 For each item, select exactly one status: **Accept / Request Changes / Needs Verification**. Add evidence or a short note. The initial status is `Needs Verification`; no reviewer decision is pre-filled.
