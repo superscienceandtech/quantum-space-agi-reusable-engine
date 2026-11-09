@@ -1,6 +1,6 @@
 # Data Directory Guide
 
-This repository uses filesystem directories to keep source inputs, derived outputs, examples, and metadata separate. A generic CSV/JSON parser exists at `src/quantum_space_agi/data/loader.py`; schema validation and preprocessing are not implemented.
+This repository uses filesystem directories to keep source inputs, derived outputs, examples, and metadata separate. Generic local CSV/JSON ingestion, structured schema validation, dataset quality analysis, and deterministic scalar preprocessing are implemented. A bounded, read-only NASA Exoplanet Archive TAP JSON adapter is documented in [EXOPLANET_ARCHIVE_ADAPTER.md](../docs/EXOPLANET_ARCHIVE_ADAPTER.md); it returns data in memory and does not retain raw response files.
 
 ## Directory responsibilities
 
@@ -25,7 +25,7 @@ Future processing should write a new file under `data/processed/`; it must not o
 
 ## Sample data
 
-`sample_dataset.csv` and `sample_dataset.json` each contain one identical generic illustrative record. `record_id` begins with `EXAMPLE`, and `notes` marks it synthetic. Values are placeholders with no scientific meaning, external source, NASA mission association, or validation claim. Use these files as fixtures when CSV/JSON parsing is implemented.
+`sample_dataset.csv` and `sample_dataset.json` each contain one identical generic illustrative record. `record_id` begins with `EXAMPLE`, and `notes` marks it synthetic. Values are placeholders with no scientific meaning, external source, NASA mission association, or validation claim. Use these files as fixtures for CSV/JSON ingestion and validation tests.
 
 ## Configuration
 
@@ -33,11 +33,11 @@ Future processing should write a new file under `data/processed/`; it must not o
 
 - `data_root`: top-level data directory.
 - `raw_dir`, `processed_dir`, `samples_dir`, `metadata_dir`: locations for each data category.
-- `supported_formats`: initial format names (`csv`, `json`); this declares intent and does not implement readers.
+- `supported_formats`: local text formats (`csv`, `json`) supported by the generic readers.
 - `default_encoding`: default text encoding for future readers (`utf-8`).
 
-No size limit is configured because a sensible limit depends on deployment and loader implementation. Add limits only after expected dataset sizes and memory behavior are understood. Put machine-specific overrides in an untracked `config/data_config.local.json`; never put credentials in either config file.
+The generic data-directory configuration does not define a global size limit; a suitable local-file limit depends on deployment and loader behavior. The Exoplanet Archive TAP adapter independently rejects response bodies larger than 10 MiB. Put machine-specific overrides in an untracked `config/data_config.local.json`; never put credentials in either config file.
 
 ## Not implemented yet
 
-The loader reads one explicitly supplied file, and the separate validator checks its records against an explicit schema. There is no directory discovery API, preprocessing pipeline, checksum generator, storage service, or ML pipeline. Neither module alters raw files or provenance history. See the [loader guide](../docs/DATA_LOADER.md) and [validation guide](../docs/DATA_VALIDATION.md) for API, formats, error behavior, and scientific-validation limits.
+The local loader reads one explicitly supplied file, and the validators check records against explicit schemas. Deterministic scalar preprocessing is available separately; it does not perform learned transformations. There is no directory discovery API, general checksum generator, or storage service. The Exoplanet Archive adapter computes a response checksum but does not retain response bytes. No task-specific ML pipeline exists. See the [loader guide](../docs/DATA_LOADER.md), [validation guide](../docs/DATA_VALIDATION.md), and [Exoplanet Archive adapter guide](../docs/EXOPLANET_ARCHIVE_ADAPTER.md) for API and limits. Structural validation and successful parsing do not establish scientific validity.

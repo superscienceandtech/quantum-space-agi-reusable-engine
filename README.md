@@ -29,8 +29,9 @@ solution or an official NASA specification.
   [consolidated benchmark notes](docs/final-benchmark.md).
 - **ARC-08 — AI/ML readiness:** preprocessing utilities and a bounded,
   provenance-linked NASA Exoplanet Archive TAP adapter. The adapter is a data
-  integration example, not an official NASA requirement or a general NASA API
-  client. See [adapter documentation](docs/EXOPLANET_ARCHIVE_ADAPTER.md) and
+  integration example; it does not retain raw response files or provide a
+  general NASA API client. It is not an official NASA requirement. See
+  [adapter documentation](docs/EXOPLANET_ARCHIVE_ADAPTER.md) and
   [ML readiness notes](docs/ARC08_ML_READINESS_DECISION.md).
 - **ARC-09 — Visualization:** standalone UI and chart prototypes with handoff
   notes; they are not a production dashboard or integrated backend. See
