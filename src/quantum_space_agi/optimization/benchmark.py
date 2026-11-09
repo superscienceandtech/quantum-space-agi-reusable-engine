@@ -20,7 +20,9 @@ class BenchmarkReport:
     results: tuple[OptimizationResult, ...]
 
 
-def benchmark_solver(solver: Solver, problem: OptimizationProblem, repetitions: int = 3) -> BenchmarkReport:
+def benchmark_solver(
+    solver: Solver, problem: OptimizationProblem, repetitions: int = 3
+) -> BenchmarkReport:
     """Report repeated wall-clock timings; results remain machine-dependent."""
     if repetitions < 1:
         raise ValueError("repetitions must be at least 1")
@@ -30,5 +32,11 @@ def benchmark_solver(solver: Solver, problem: OptimizationProblem, repetitions: 
         start = perf_counter()
         results.append(solver.solve(problem))
         durations.append(perf_counter() - start)
-    return BenchmarkReport(solver.name, repetitions, tuple(durations), mean(durations),
-                          min(durations), tuple(results))
+    return BenchmarkReport(
+        solver.name,
+        repetitions,
+        tuple(durations),
+        mean(durations),
+        min(durations),
+        tuple(results),
+    )
