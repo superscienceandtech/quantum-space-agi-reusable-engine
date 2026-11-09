@@ -38,6 +38,20 @@ The candidate count is eight per solve because there are three binary variables.
 
 In addition to the three correctness scenarios, the script runs a deterministic scaling series with 3, 6, 9, and 12 binary variables. Each size uses generated objective/resource coefficients, one resource-capacity constraint, and the same exhaustive solver. Expected candidate counts are `8`, `64`, `512`, and `4096` per solve (`2^n`). Objective evaluations are counted separately because infeasible candidates are rejected before the objective runs. The series shows search-space growth; it does not compare algorithms or establish a runtime advantage.
 
+## Heuristic comparison (Nov 7–9)
+
+The synthetic output additionally runs a classical simulated-annealing heuristic
+on each QUBO encoding and compares its best visited state with exact enumeration
+of the encoded bitstrings and the original `EnumerativeSolver` result. The report
+uses 20 fixed seeds, four restarts per seed, and 64 sweeps per restart. For each
+seed it times both the heuristic run and exact QUBO enumeration, then records
+success rate, feasibility rate, proposal/acceptance counts, and per-seed timings. The heuristic is not guaranteed to find the optimum; rates describe only
+these small fixtures and this fixed configuration.
+
+This is a classical stochastic baseline for QUBO experiments. Calling it
+quantum-inspired would overstate its method; it does not simulate quantum states,
+use quantum hardware, or establish quantum advantage.
+
 ## Run
 
 From the repository root:

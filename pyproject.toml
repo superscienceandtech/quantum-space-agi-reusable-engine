@@ -9,5 +9,8 @@ description = "Reusable classical optimization interfaces and a finite-domain ba
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+qiskit-experiment = ["qiskit==2.6.1"]
+
 [tool.setuptools.packages.find]
 where = ["src"]

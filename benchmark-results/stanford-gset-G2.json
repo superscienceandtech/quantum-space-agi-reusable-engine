@@ -1,0 +1,164 @@
+{
+  "generated_benchmark": null,
+  "public_gset_benchmark": {
+    "instance": {
+      "edge_count": 19176,
+      "name": "qsagi-gset-G2",
+      "qubo_variable_count": 800,
+      "source_path": "/tmp/qsagi-gset-G2.txt",
+      "vertex_count": 800
+    },
+    "methods": {
+      "discrete_sb": {
+        "runs": [
+          {
+            "below_published_reference": false,
+            "energy": -11355.0,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 265.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 10.860826377997,
+            "seed": 0
+          },
+          {
+            "below_published_reference": false,
+            "energy": -11369.0,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 251.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 11.231023228996492,
+            "seed": 1
+          },
+          {
+            "below_published_reference": false,
+            "energy": -11340.0,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 280.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 11.536819704000663,
+            "seed": 2
+          },
+          {
+            "below_published_reference": false,
+            "energy": -11328.0,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 292.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 11.45773140899837,
+            "seed": 3
+          },
+          {
+            "below_published_reference": false,
+            "energy": -11384.0,
+            "energy_evaluations": 1024,
+            "gap_to_published_reference": 236.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 11.561166777995822,
+            "seed": 4
+          }
+        ],
+        "summary": {
+          "below_reference_runs": 0,
+          "best_energy": -11384.0,
+          "mean_energy": -11355.2,
+          "mean_energy_evaluations": 1024,
+          "mean_gap_to_reference": 264.8,
+          "mean_runtime_seconds": 11.32951349959767,
+          "median_gap_to_reference": 265.0,
+          "median_runtime_seconds": 11.45773140899837,
+          "reference_match_rate": 0,
+          "runs": 5
+        }
+      },
+      "simulated_annealing": {
+        "runs": [
+          {
+            "below_published_reference": false,
+            "energy": -10555.0,
+            "energy_evaluations": 801,
+            "gap_to_published_reference": 1065.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 2.9103214330025367,
+            "seed": 0
+          },
+          {
+            "below_published_reference": false,
+            "energy": -10522.0,
+            "energy_evaluations": 801,
+            "gap_to_published_reference": 1098.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 2.9531520859964075,
+            "seed": 1
+          },
+          {
+            "below_published_reference": false,
+            "energy": -10655.0,
+            "energy_evaluations": 801,
+            "gap_to_published_reference": 965.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 3.2295294610012206,
+            "seed": 2
+          },
+          {
+            "below_published_reference": false,
+            "energy": -10535.0,
+            "energy_evaluations": 801,
+            "gap_to_published_reference": 1085.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 2.8912954709958285,
+            "seed": 3
+          },
+          {
+            "below_published_reference": false,
+            "energy": -10555.0,
+            "energy_evaluations": 801,
+            "gap_to_published_reference": 1065.0,
+            "matches_published_reference": false,
+            "runtime_seconds": 2.884344783000415,
+            "seed": 4
+          }
+        ],
+        "summary": {
+          "below_reference_runs": 0,
+          "best_energy": -10655.0,
+          "mean_energy": -10564.4,
+          "mean_energy_evaluations": 801,
+          "mean_gap_to_reference": 1055.6,
+          "mean_runtime_seconds": 2.9737286467992816,
+          "median_gap_to_reference": 1065.0,
+          "median_runtime_seconds": 2.9103214330025367,
+          "reference_match_rate": 0,
+          "runs": 5
+        }
+      }
+    },
+    "protocol": {
+      "d_sb_updates_per_run": 1024,
+      "dsb_agents": 8,
+      "dsb_steps": 128,
+      "paired_solver_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "requested_energy_evaluation_budget": 1024,
+      "sa_energy_evaluations_per_run": 801,
+      "sa_restarts": 1,
+      "sa_sweeps_per_restart": 1
+    },
+    "reference": {
+      "interpretation": "Upstream best-known cut converted to negative QUBO energy; this run does not independently certify optimality.",
+      "published_energy": -11620.0
+    },
+    "solution_certificate_check": {
+      "declared_cut": 11620,
+      "interpretation": "This validates an attainable cut value, not global optimality.",
+      "matches": true,
+      "recomputed_cut": 11620,
+      "source": "/tmp/qsagi-quicopt-gset-solutions.json"
+    }
+  },
+  "public_maxcut_benchmark": null
+}
