@@ -840,7 +840,7 @@ button,a,select {
 }
 
 .data-details summary:focus-visible,.state-tab:focus-visible,.button:focus-visible,.nav-item:focus-visible,.icon-button:focus-visible,.select-control:focus-visible,.skip-link:focus-visible {
-  outline: 3px solid #93b4ff;
+  outline: 3px solid var(--primary);
   outline-offset: 2px;
 }
 
