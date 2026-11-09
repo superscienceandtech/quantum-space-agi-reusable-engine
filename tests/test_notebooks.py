@@ -1,11 +1,10 @@
+import itertools
 import json
 from pathlib import Path
-import itertools
 
 import nbformat
 import pytest
 from nbclient import NotebookClient
-
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOKS = [
@@ -25,7 +24,9 @@ def validate_notebook(path: Path) -> None:
     assert data["cells"]
 
 
-@pytest.mark.parametrize("notebook_path", NOTEBOOKS, ids=lambda path: str(path.relative_to(ROOT)))
+@pytest.mark.parametrize(
+    "notebook_path", NOTEBOOKS, ids=lambda path: str(path.relative_to(ROOT))
+)
 def test_notebook_executes(notebook_path: Path) -> None:
     validate_notebook(notebook_path)
     with notebook_path.open("r", encoding="utf-8") as file:
@@ -40,7 +41,9 @@ def test_notebook_executes(notebook_path: Path) -> None:
     client.execute()
 
 
-def _expand_notebook_cases(notebook_path: Path) -> list[tuple[str, object, dict[str, object]]]:
+def _expand_notebook_cases(
+    notebook_path: Path,
+) -> list[tuple[str, object, dict[str, object]]]:
     with notebook_path.open("r", encoding="utf-8") as file:
         notebook = nbformat.read(file, as_version=4)
 
@@ -89,7 +92,9 @@ def _expand_notebook_cases(notebook_path: Path) -> list[tuple[str, object, dict[
             parameter_sets = next_sets
 
         for case_number, arguments in enumerate(parameter_sets, start=1):
-            case_id = test_name if len(parameter_sets) == 1 else f"{test_name}[{case_number}]"
+            case_id = (
+                test_name if len(parameter_sets) == 1 else f"{test_name}[{case_number}]"
+            )
             cases.append((case_id, test_function, arguments))
     return cases
 

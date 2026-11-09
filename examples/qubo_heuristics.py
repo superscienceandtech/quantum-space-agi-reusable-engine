@@ -8,7 +8,11 @@ from math import exp, isfinite
 from random import Random
 from types import MappingProxyType
 
-from quantum_space_agi.optimization.qubo import QUBOModel
+from quantum_space_agi.optimization.models import (
+    ConstraintRelation,
+    OptimizationProblem,
+)
+from quantum_space_agi.optimization.qubo import LinearConstraintSpec, QUBOModel
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,13 +94,6 @@ def simulated_annealing_qubo(
         accepted_moves=accepted,
         seed=seed,
     )
-
-
-from quantum_space_agi.optimization.models import (
-    ConstraintRelation,
-    OptimizationProblem,
-)
-from quantum_space_agi.optimization.qubo import LinearConstraintSpec
 
 
 @dataclass(frozen=True, slots=True)

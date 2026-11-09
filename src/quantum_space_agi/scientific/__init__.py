@@ -9,7 +9,6 @@ from pathlib import Path
 
 import nbformat
 
-
 _NOTEBOOK_DIR = Path(__file__).resolve().parent
 _NOTEBOOK_ORDER = (
     "errors",
@@ -34,7 +33,7 @@ def _execute_notebook_module(module_name: str) -> types.ModuleType:
         raise ImportError(f"Missing ARC-04 notebook module: {notebook_path}")
 
     with notebook_path.open("r", encoding="utf-8") as file:
-        notebook = nbformat.read(file, as_version=4)
+        notebook = nbformat.read(file, as_version=4)  # type: ignore[no-untyped-call]
 
     module = types.ModuleType(full_name)
     module.__file__ = str(notebook_path)
@@ -103,8 +102,13 @@ def load_notebook_modules() -> dict[str, types.ModuleType]:
             else:
                 sys.modules[full_name] = previous_module
 
-            if module_name in previous_attributes and previous_attributes[module_name] is not None:
-                setattr(sys.modules[__name__], module_name, previous_attributes[module_name])
+            if (
+                module_name in previous_attributes
+                and previous_attributes[module_name] is not None
+            ):
+                setattr(
+                    sys.modules[__name__], module_name, previous_attributes[module_name]
+                )
             elif hasattr(sys.modules[__name__], module_name):
                 delattr(sys.modules[__name__], module_name)
         raise

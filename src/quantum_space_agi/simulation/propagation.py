@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 from .integrator import rk4_step
 
 
-def _stable_position_radius(position):
-    return float(np.hypot(np.hypot(abs(position[0]), abs(position[1])), abs(position[2])))
+def _stable_position_radius(position: NDArray[np.float64]) -> float:
+    return float(
+        np.hypot(np.hypot(abs(position[0]), abs(position[1])), abs(position[2]))
+    )
 
 
-def _numeric_state(state):
+def _numeric_state(state: Any) -> NDArray[np.float64]:
     if isinstance(state, (str, bytes, bytearray, bool, np.bool_)):
         raise ValueError("State must be numeric")
     try:
@@ -21,7 +25,18 @@ def _numeric_state(state):
     for component in components:
         if isinstance(
             component,
-            (bool, np.bool_, str, bytes, bytearray, complex, np.complexfloating, list, tuple, np.ndarray),
+            (
+                bool,
+                np.bool_,
+                str,
+                bytes,
+                bytearray,
+                complex,
+                np.complexfloating,
+                list,
+                tuple,
+                np.ndarray,
+            ),
         ):
             raise ValueError("State must contain only real numeric values")
     array = np.asarray(state, dtype=np.float64)
@@ -30,7 +45,11 @@ def _numeric_state(state):
     return array
 
 
-def _propagation_derivative(time_s, state, mu):
+def _propagation_derivative(
+    time_s: float,
+    state: NDArray[np.float64],
+    mu: float,
+) -> NDArray[np.float64]:
     del time_s
     from .dynamics import two_body_derivative
 
@@ -38,29 +57,35 @@ def _propagation_derivative(time_s, state, mu):
 
 
 def interpolate_collision_event(
-    previous_time_s,
-    previous_state,
-    next_time_s,
-    next_state,
-    collision_radius_m,
-):
+    previous_time_s: Any,
+    previous_state: Any,
+    next_time_s: Any,
+    next_state: Any,
+    collision_radius_m: Any,
+) -> tuple[float, NDArray[np.float64], str]:
     previous = _numeric_state(previous_state)
     next_y = _numeric_state(next_state)
     previous_radius = _stable_position_radius(previous[:3])
     next_radius = _stable_position_radius(next_y[:3])
     if not math.isfinite(previous_radius) or not math.isfinite(next_radius):
         raise ValueError("Collision bracket contains a non-finite radius")
-    if isinstance(previous_time_s, (bool, np.bool_, str, bytes, bytearray)) or isinstance(
-        next_time_s, (bool, np.bool_, str, bytes, bytearray)
-    ):
+    if isinstance(
+        previous_time_s, (bool, np.bool_, str, bytes, bytearray)
+    ) or isinstance(next_time_s, (bool, np.bool_, str, bytes, bytearray)):
         raise ValueError("Collision bracket times must be finite numeric scalars")
     try:
         previous_time = float(previous_time_s)
         next_time = float(next_time_s)
         threshold = float(collision_radius_m)
     except (TypeError, ValueError, OverflowError) as exc:
-        raise ValueError("Collision bracket times and threshold must be numeric") from exc
-    if not math.isfinite(previous_time) or not math.isfinite(next_time) or next_time < previous_time:
+        raise ValueError(
+            "Collision bracket times and threshold must be numeric"
+        ) from exc
+    if (
+        not math.isfinite(previous_time)
+        or not math.isfinite(next_time)
+        or next_time < previous_time
+    ):
         raise ValueError("Collision bracket times must be finite and ordered")
     if isinstance(collision_radius_m, (bool, np.bool_, str, bytes, bytearray)):
         raise ValueError("Collision threshold must be finite and positive")
@@ -75,15 +100,25 @@ def interpolate_collision_event(
         raise ValueError(
             "Invalid collision interval: endpoint radii are degenerate and do not bracket the threshold"
         )
-    if not (min(previous_radius, next_radius) <= threshold <= max(previous_radius, next_radius)):
-        raise ValueError("Invalid collision interval: threshold is not bracketed by endpoint radii")
+    if not (
+        min(previous_radius, next_radius)
+        <= threshold
+        <= max(previous_radius, next_radius)
+    ):
+        raise ValueError(
+            "Invalid collision interval: threshold is not bracketed by endpoint radii"
+        )
 
     radius_difference = next_radius - previous_radius
     alpha = (threshold - previous_radius) / radius_difference
     if not math.isfinite(alpha):
-        raise ValueError("Invalid collision interval: interpolation fraction is non-finite")
+        raise ValueError(
+            "Invalid collision interval: interpolation fraction is non-finite"
+        )
     if alpha < 0.0 or alpha > 1.0:
-        raise ValueError("Invalid collision interval: interpolation fraction is outside [0, 1]")
+        raise ValueError(
+            "Invalid collision interval: interpolation fraction is outside [0, 1]"
+        )
 
     event_time = previous_time + alpha * (next_time - previous_time)
     event_state = (1.0 - alpha) * previous + alpha * next_y
@@ -93,12 +128,12 @@ def interpolate_collision_event(
 
 
 def propagate_two_body(
-    initial_state,
-    mu,
-    duration_s,
-    time_step_s,
-    collision_radius_m,
-):
+    initial_state: Any,
+    mu: Any,
+    duration_s: Any,
+    time_step_s: Any,
+    collision_radius_m: Any,
+) -> dict[str, Any]:
     """Propagate the unchanged Earth point-mass model with fixed-step classical RK4."""
 
     y0 = _numeric_state(initial_state)
@@ -182,6 +217,8 @@ def propagate_two_body(
         "collision_index": collision_index,
         "collision_radius_m": collision_radius,
         "collision_time_s": collision_time_s,
-        "collision_state": None if collision_state is None else collision_state.astype(np.float64),
+        "collision_state": None
+        if collision_state is None
+        else collision_state.astype(np.float64),
         "collision_method": collision_method,
     }

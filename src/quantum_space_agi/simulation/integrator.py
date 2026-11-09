@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 
 
-def _numeric_state(state):
+def _numeric_state(state: Any) -> NDArray[np.float64]:
     if isinstance(state, (str, bytes, bytearray, bool, np.bool_)):
         raise ValueError("State must be numeric")
     try:
@@ -15,7 +18,18 @@ def _numeric_state(state):
     for component in components:
         if isinstance(
             component,
-            (bool, np.bool_, str, bytes, bytearray, complex, np.complexfloating, list, tuple, np.ndarray),
+            (
+                bool,
+                np.bool_,
+                str,
+                bytes,
+                bytearray,
+                complex,
+                np.complexfloating,
+                list,
+                tuple,
+                np.ndarray,
+            ),
         ):
             raise ValueError("State must contain only real numeric values")
     array = np.asarray(state, dtype=np.float64)
@@ -24,7 +38,13 @@ def _numeric_state(state):
     return array
 
 
-def rk4_step(state, time_s, time_step_s, derivative, *derivative_args):
+def rk4_step(
+    state: Any,
+    time_s: Any,
+    time_step_s: Any,
+    derivative: Callable[..., ArrayLike],
+    *derivative_args: Any,
+) -> NDArray[np.float64]:
     """Advance one fixed step with classical fourth-order Runge-Kutta."""
 
     if isinstance(time_step_s, (bool, np.bool_, str, bytes, bytearray)):
@@ -43,9 +63,17 @@ def rk4_step(state, time_s, time_step_s, derivative, *derivative_args):
 
     y = _numeric_state(state)
     k1 = np.asarray(derivative(time, y, *derivative_args), dtype=np.float64)
-    k2 = np.asarray(derivative(time + 0.5 * dt, y + 0.5 * dt * k1, *derivative_args), dtype=np.float64)
-    k3 = np.asarray(derivative(time + 0.5 * dt, y + 0.5 * dt * k2, *derivative_args), dtype=np.float64)
-    k4 = np.asarray(derivative(time + dt, y + dt * k3, *derivative_args), dtype=np.float64)
+    k2 = np.asarray(
+        derivative(time + 0.5 * dt, y + 0.5 * dt * k1, *derivative_args),
+        dtype=np.float64,
+    )
+    k3 = np.asarray(
+        derivative(time + 0.5 * dt, y + 0.5 * dt * k2, *derivative_args),
+        dtype=np.float64,
+    )
+    k4 = np.asarray(
+        derivative(time + dt, y + dt * k3, *derivative_args), dtype=np.float64
+    )
     for stage in (k1, k2, k3, k4):
         if stage.shape != y.shape or not np.all(np.isfinite(stage)):
             raise ValueError("RK4 intermediate stage is invalid")

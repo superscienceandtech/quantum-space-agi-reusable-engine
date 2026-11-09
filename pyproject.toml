@@ -60,9 +60,11 @@ testpaths = ["tests"]
 line-length = 88
 target-version = "py311"
 src = ["src", "tests"]
+extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
+ignore = ["E501", "UP042"]
 
 [tool.mypy]
 files = ["src/quantum_space_agi"]

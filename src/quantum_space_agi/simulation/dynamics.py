@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 
-def _numeric_state(state):
+def _numeric_state(state: Any) -> NDArray[np.float64]:
     if isinstance(state, (str, bytes, bytearray, bool, np.bool_)):
         raise ValueError("State must be numeric")
     try:
@@ -15,7 +17,18 @@ def _numeric_state(state):
     for component in components:
         if isinstance(
             component,
-            (bool, np.bool_, str, bytes, bytearray, complex, np.complexfloating, list, tuple, np.ndarray),
+            (
+                bool,
+                np.bool_,
+                str,
+                bytes,
+                bytearray,
+                complex,
+                np.complexfloating,
+                list,
+                tuple,
+                np.ndarray,
+            ),
         ):
             raise ValueError("State must contain only real numeric values")
     array = np.asarray(state, dtype=np.float64)
@@ -24,7 +37,7 @@ def _numeric_state(state):
     return array
 
 
-def two_body_derivative(state, mu):
+def two_body_derivative(state: Any, mu: Any) -> NDArray[np.float64]:
     """Newtonian point-mass Earth derivative: dr/dt=v, dv/dt=-mu*r/|r|^3."""
 
     y = _numeric_state(state)

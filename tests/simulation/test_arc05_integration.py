@@ -9,7 +9,6 @@ from pydantic import ValidationError
 from quantum_space_agi.simulation import (
     OrbitalState,
     SimulationConfig,
-    diagnose_trajectory,
     interpolate_collision_event,
     propagate_two_body,
     rk4_step,
@@ -17,7 +16,6 @@ from quantum_space_agi.simulation import (
     two_body_derivative,
 )
 from quantum_space_agi.simulation.models import EARTH_MU_M3_S2, EARTH_REFERENCE_RADIUS_M
-
 
 ROOT = Path(__file__).resolve().parents[2]
 NOTEBOOK_DIR = ROOT / "notebooks" / "arc05_simulation"

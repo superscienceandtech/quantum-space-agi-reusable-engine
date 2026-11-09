@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import numpy as np
 
@@ -9,7 +10,9 @@ from .models import OrbitalState, SimulationConfig
 from .propagation import propagate_two_body
 
 
-def run_simulation(config: SimulationConfig, initial_time_s: float = 0.0):
+def run_simulation(
+    config: SimulationConfig, initial_time_s: Any = 0.0
+) -> dict[str, Any]:
     """Run the validated ARC-05 fixed-step Earth two-body workflow."""
 
     if isinstance(initial_time_s, (bool, np.bool_, str, bytes, bytearray)):

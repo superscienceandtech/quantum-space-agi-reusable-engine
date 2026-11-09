@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Literal
+from typing import Any, Literal, Self
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -13,7 +13,9 @@ EARTH_REFERENCE_RADIUS_M = 6_378_137.0
 class SimulationConfig(BaseModel):
     """Strict frozen input contract for the fixed-step ARC-05 workflow."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True, strict=True, allow_inf_nan=False)
+    model_config = ConfigDict(
+        extra="forbid", frozen=True, strict=True, allow_inf_nan=False
+    )
 
     initial_position_m: tuple[float, float, float]
     initial_velocity_mps: tuple[float, float, float]
@@ -26,13 +28,13 @@ class SimulationConfig(BaseModel):
 
     @field_validator("initial_position_m", "initial_velocity_mps", mode="before")
     @classmethod
-    def validate_vector_inputs(cls, value):
+    def validate_vector_inputs(cls, value: Any) -> Any:
         if isinstance(value, (str, bytes, bytearray)):
             raise ValueError("Position and velocity components must be numeric")
         return value
 
     @model_validator(mode="after")
-    def validate_physical_values(self):
+    def validate_physical_values(self) -> Self:
         values = (
             *self.initial_position_m,
             *self.initial_velocity_mps,
@@ -49,7 +51,9 @@ class SimulationConfig(BaseModel):
 class OrbitalState(BaseModel):
     """Immutable six-component translational state in Earth-centered inertial SI units."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True, strict=True, allow_inf_nan=False)
+    model_config = ConfigDict(
+        extra="forbid", frozen=True, strict=True, allow_inf_nan=False
+    )
 
     position_m: tuple[float, float, float]
     velocity_mps: tuple[float, float, float]
@@ -59,7 +63,7 @@ class OrbitalState(BaseModel):
         return np.asarray((*self.position_m, *self.velocity_mps), dtype=np.float64)
 
     @classmethod
-    def from_array(cls, state_vector, time_s) -> "OrbitalState":
+    def from_array(cls, state_vector: Any, time_s: Any) -> Self:
         if isinstance(state_vector, (str, bytes, bytearray, bool, np.bool_)):
             raise ValueError("State vector must be a numeric array")
 
@@ -105,7 +109,7 @@ class OrbitalState(BaseModel):
             raise ValueError("Time must be finite and non-negative")
 
         return cls(
-            position_m=tuple(float(x) for x in state[:3]),
-            velocity_mps=tuple(float(x) for x in state[3:]),
+            position_m=(float(state[0]), float(state[1]), float(state[2])),
+            velocity_mps=(float(state[3]), float(state[4]), float(state[5])),
             time_s=time_value,
         )

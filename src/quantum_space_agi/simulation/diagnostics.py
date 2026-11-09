@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 
-def _validated_state(state):
+def _validated_state(state: Any) -> NDArray[np.float64]:
     if isinstance(state, (str, bytes, bytearray, bool, np.bool_)):
         raise ValueError("State must be numeric")
     try:
@@ -15,7 +17,18 @@ def _validated_state(state):
     for component in components:
         if isinstance(
             component,
-            (bool, np.bool_, str, bytes, bytearray, complex, np.complexfloating, list, tuple, np.ndarray),
+            (
+                bool,
+                np.bool_,
+                str,
+                bytes,
+                bytearray,
+                complex,
+                np.complexfloating,
+                list,
+                tuple,
+                np.ndarray,
+            ),
         ):
             raise ValueError("State must contain only real numeric values")
     array = np.asarray(state, dtype=np.float64)
@@ -24,7 +37,7 @@ def _validated_state(state):
     return array
 
 
-def _validated_mu(mu):
+def _validated_mu(mu: Any) -> float:
     if isinstance(mu, (bool, np.bool_, str, bytes, bytearray)):
         raise ValueError("Gravitational parameter must be numeric")
     try:
@@ -36,7 +49,7 @@ def _validated_mu(mu):
     return mu_value
 
 
-def specific_orbital_energy(state, mu):
+def specific_orbital_energy(state: Any, mu: Any) -> float:
     y = _validated_state(state)
     mu_value = _validated_mu(mu)
     radius = float(np.linalg.norm(y[:3]))
@@ -46,7 +59,9 @@ def specific_orbital_energy(state, mu):
     return 0.5 * speed * speed - mu_value / radius
 
 
-def specific_angular_momentum(state):
+def specific_angular_momentum(
+    state: Any,
+) -> tuple[NDArray[np.float64], float]:
     y = _validated_state(state)
     angular_momentum = np.cross(y[:3], y[3:]).astype(np.float64)
     if not np.all(np.isfinite(angular_momentum)):
@@ -54,7 +69,7 @@ def specific_angular_momentum(state):
     return angular_momentum, float(np.linalg.norm(angular_momentum))
 
 
-def eccentricity_vector(state, mu):
+def eccentricity_vector(state: Any, mu: Any) -> tuple[NDArray[np.float64], float]:
     y = _validated_state(state)
     mu_value = _validated_mu(mu)
     position = y[:3]
@@ -71,12 +86,14 @@ def eccentricity_vector(state, mu):
     return vector.astype(np.float64), float(np.linalg.norm(vector))
 
 
-def diagnose_trajectory(times_s, states, mu):
+def diagnose_trajectory(times_s: Any, states: Any, mu: Any) -> dict[str, Any]:
     times = np.asarray(times_s, dtype=np.float64)
     trajectory = np.asarray(states, dtype=np.float64)
     mu_value = _validated_mu(mu)
     if times.ndim != 1 or trajectory.shape != (times.size, 6):
-        raise ValueError("Trajectory must contain matching six-component states and times")
+        raise ValueError(
+            "Trajectory must contain matching six-component states and times"
+        )
     if not np.all(np.isfinite(times)) or not np.all(np.isfinite(trajectory)):
         raise ValueError("Trajectory contains non-finite values")
     if times.size == 0 or np.any(np.diff(times) < 0.0):

@@ -7,7 +7,6 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
-
 ROOT = Path(__file__).resolve().parents[2]
 NOTEBOOK_DIR = ROOT / "notebooks" / "arc05_simulation"
 NOTEBOOK_NAMES = [
@@ -79,13 +78,17 @@ def test_stable_orbital_output_matches_current_source(notebook_namespaces):
     expected_elliptical_period = 2.0 * math.pi * math.sqrt(expected_semi_major**3 / mu)
     assert float(match.group(1)) == pytest.approx(expected_elliptical_period, rel=1e-12)
 
-    match = re.search(r"Return-position error with 20 s RK4 steps: ([0-9.e+-]+) m", text)
+    match = re.search(
+        r"Return-position error with 20 s RK4 steps: ([0-9.e+-]+) m", text
+    )
     assert match is not None
     assert abs(float(match.group(1)) - ns["position_error"]) < 1e-6
 
 
 @pytest.mark.parametrize("notebook_name", NOTEBOOK_NAMES)
-def test_notebook_is_valid_json_and_executes_notebook_cells(notebook_name, notebook_namespaces):
+def test_notebook_is_valid_json_and_executes_notebook_cells(
+    notebook_name, notebook_namespaces
+):
     assert notebook_namespaces[notebook_name]
     notebook = nbformat.read(NOTEBOOK_DIR / notebook_name, as_version=4)
     assert notebook.nbformat == 4
@@ -152,7 +155,9 @@ def test_configuration_is_frozen(notebook_namespaces):
 
 def test_orbital_state_round_trip_and_float64(notebook_namespaces):
     ns = notebook_namespaces[NOTEBOOK_NAMES[1]]
-    state = ns["OrbitalState"].from_array([7_000_000.0, 0.0, 0.0, 0.0, 7_500.0, 0.0], 3.5)
+    state = ns["OrbitalState"].from_array(
+        [7_000_000.0, 0.0, 0.0, 0.0, 7_500.0, 0.0], 3.5
+    )
     array = state.to_array()
     assert array.dtype == np.float64
     assert array.shape == (6,)
@@ -210,7 +215,6 @@ def test_two_body_derivatives_reject_tiny_radius_and_overflow_acceleration(
 ):
     ns = notebook_namespaces[notebook_name]
     mu = ns["EARTH_MU_M3_S2"] if notebook_name == NOTEBOOK_NAMES[2] else ns["MU"]
-    args = (mu,) if notebook_name == NOTEBOOK_NAMES[2] else (0.0, mu)
     if notebook_name == NOTEBOOK_NAMES[2]:
         with pytest.raises(ValueError):
             ns[derivative_name](np.array([1e-300, 0, 0, 0, 0, 0]), mu)
@@ -278,7 +282,9 @@ def test_rk4_exponential_reference_and_fourth_order_ratios(notebook_namespaces):
         y = initial.copy()
         actual_dt = 1.0 / steps
         for index in range(steps):
-            y = ns["rk4_step"](y, index * actual_dt, actual_dt, ns["linear_derivative"], 1.0)
+            y = ns["rk4_step"](
+                y, index * actual_dt, actual_dt, ns["linear_derivative"], 1.0
+            )
         errors.append(abs(y[0] - math.e))
     assert all(fine < coarse for coarse, fine in zip(errors, errors[1:]))
     ratios = [coarse / fine for coarse, fine in zip(errors, errors[1:])]
@@ -350,7 +356,9 @@ def test_propagation_initial_collision_is_not_silently_changed(notebook_namespac
     ns = notebook_namespaces[NOTEBOOK_NAMES[4]]
     collision_radius = 6_378_137.0
     initial = np.array([collision_radius, 0, 0, 0, 0, 0], dtype=np.float64)
-    trajectory = ns["propagate_two_body"](initial, ns["mu"], 100.0, 1.0, collision_radius)
+    trajectory = ns["propagate_two_body"](
+        initial, ns["mu"], 100.0, 1.0, collision_radius
+    )
     assert trajectory["collision_index"] == 0
     assert trajectory["collision_radius_m"] == collision_radius
     assert trajectory["states"].shape[0] == 1
@@ -366,8 +374,13 @@ def test_propagation_collision_between_samples_is_interpolated(notebook_namespac
     assert trajectory["collision_time_s"] is not None
     assert 0.0 < trajectory["collision_time_s"] <= 1.0
     assert trajectory["collision_method"] == "linear_radius_interpolation"
-    assert np.linalg.norm(trajectory["collision_state"][:3]) == pytest.approx(radius, rel=1e-4)
-    assert np.linalg.norm(trajectory["states"][trajectory["collision_index"], :3]) <= radius
+    assert np.linalg.norm(trajectory["collision_state"][:3]) == pytest.approx(
+        radius, rel=1e-4
+    )
+    assert (
+        np.linalg.norm(trajectory["states"][trajectory["collision_index"], :3])
+        <= radius
+    )
     assert trajectory["states"][-1, 0] <= radius
 
 
@@ -392,7 +405,9 @@ def test_propagation_exact_collision_sample_and_no_false_positive(notebook_names
     assert np.linalg.norm(exact_state[:3]) == radius
     assert exact_method == "exact_sample"
 
-    outside = np.array([7_000_000.0, 0, 0, 0, math.sqrt(mu / 7_000_000.0), 0], dtype=np.float64)
+    outside = np.array(
+        [7_000_000.0, 0, 0, 0, math.sqrt(mu / 7_000_000.0), 0], dtype=np.float64
+    )
     clear = ns["propagate_two_body"](outside, mu, 100.0, 10.0, radius)
     assert clear["collision_index"] is None
     assert clear["collision_time_s"] is None
@@ -498,7 +513,9 @@ def test_collision_oblique_3d_interpolation_is_radial_estimate(notebook_namespac
     alpha = (7.0 - previous_radius) / (next_radius - previous_radius)
     assert event_time == pytest.approx(alpha * 3.0)
     assert method == "linear_radius_interpolation"
-    assert event_state.tolist() == pytest.approx(((1.0 - alpha) * previous + alpha * next_y).tolist())
+    assert event_state.tolist() == pytest.approx(
+        ((1.0 - alpha) * previous + alpha * next_y).tolist()
+    )
 
 
 @pytest.mark.parametrize(
@@ -508,7 +525,9 @@ def test_collision_oblique_3d_interpolation_is_radial_estimate(notebook_namespac
         (8.0, 8.0),
     ],
 )
-def test_collision_degenerate_intervals_are_rejected(notebook_namespaces, previous_radius, next_radius):
+def test_collision_degenerate_intervals_are_rejected(
+    notebook_namespaces, previous_radius, next_radius
+):
     ns = notebook_namespaces[NOTEBOOK_NAMES[4]]
     with pytest.raises(ValueError, match="degenerate"):
         ns["interpolate_collision_event"](
@@ -527,7 +546,13 @@ def test_collision_degenerate_intervals_are_rejected(notebook_namespaces, previo
         ([0, 0, 0, 0, 0, 0], 3.986004418e14, 1.0, 0.1, 6_378_137.0),
         ([1, 2, 3, 4, 5, float("nan")], 3.986004418e14, 1.0, 0.1, 6_378_137.0),
         ([7_000_000, 0, 0, 0, 7_500, 0], 0.0, 1.0, 0.1, 6_378_137.0),
-        ([7_000_000, 0, 0, 0, 7_500, 0], 3.986004418e14, float("inf"), 0.1, 6_378_137.0),
+        (
+            [7_000_000, 0, 0, 0, 7_500, 0],
+            3.986004418e14,
+            float("inf"),
+            0.1,
+            6_378_137.0,
+        ),
         ([7_000_000, 0, 0, 0, 7_500, 0], 3.986004418e14, 1.0, True, 6_378_137.0),
         ([7_000_000, 0, 0, 0, 7_500, 0], 3.986004418e14, 1.0, 0.1, 0.0),
     ],
@@ -538,7 +563,9 @@ def test_propagation_rejects_invalid_inputs(notebook_namespaces, args):
         ns["propagate_two_body"](*args)
 
 
-def test_diagnostics_circular_reference_is_exact_for_repeated_state(notebook_namespaces):
+def test_diagnostics_circular_reference_is_exact_for_repeated_state(
+    notebook_namespaces,
+):
     ns = notebook_namespaces[NOTEBOOK_NAMES[5]]
     mu = ns["mu"]
     radius = ns["radius"]
@@ -618,7 +645,9 @@ def test_validation_elliptical_reference_and_partial_end_time(notebook_namespace
 
 
 @pytest.mark.parametrize("dt", [60.0, 30.0, 15.0])
-def test_validation_energy_and_angular_momentum_drift_is_bounded(notebook_namespaces, dt):
+def test_validation_energy_and_angular_momentum_drift_is_bounded(
+    notebook_namespaces, dt
+):
     ns = notebook_namespaces[NOTEBOOK_NAMES[6]]
     mu = ns["MU"]
     radius = 7_000_000.0
@@ -628,9 +657,13 @@ def test_validation_energy_and_angular_momentum_drift_is_bounded(notebook_namesp
     _, states, collision = ns["propagate"](initial, period, dt)
     assert collision is None
     energies = np.array([ns["orbital_energy"](state, mu) for state in states])
-    angular_momenta = np.array([ns["angular_momentum_magnitude"](state) for state in states])
+    angular_momenta = np.array(
+        [ns["angular_momentum_magnitude"](state) for state in states]
+    )
     relative_energy_drift = np.max(np.abs(energies - energies[0])) / abs(energies[0])
-    relative_angular_drift = np.max(np.abs(angular_momenta - angular_momenta[0])) / angular_momenta[0]
+    relative_angular_drift = (
+        np.max(np.abs(angular_momenta - angular_momenta[0])) / angular_momenta[0]
+    )
     if dt == 60.0:
         assert relative_energy_drift < 2e-5
         assert relative_angular_drift < 2e-6
@@ -657,7 +690,9 @@ def test_validation_timestep_sensitivity_converges(notebook_namespaces):
     assert all(12.0 < ratio < 64.0 for ratio in ratios)
 
 
-def test_validation_elliptical_elements_periapsis_apoapsis_and_period(notebook_namespaces):
+def test_validation_elliptical_elements_periapsis_apoapsis_and_period(
+    notebook_namespaces,
+):
     ns = notebook_namespaces[NOTEBOOK_NAMES[6]]
     mu = ns["MU"]
     rp = 7_000_000.0
@@ -690,13 +725,21 @@ def test_validation_elliptical_elements_periapsis_apoapsis_and_period(notebook_n
     analytical_apoapsis_speed = math.sqrt(mu * (2.0 / ra - 1.0 / a))
     assert math.isclose(speeds[apoapsis_index], analytical_apoapsis_speed, rel_tol=2e-5)
     assert math.isclose(speeds[periapsis_index], speed, rel_tol=2e-7)
-    assert math.isclose(ns["orbital_energy"](states[apoapsis_index], mu), energy, rel_tol=2e-6)
-    assert math.isclose(ns["angular_momentum_magnitude"](states[apoapsis_index]), angular_momentum, rel_tol=2e-6)
+    assert math.isclose(
+        ns["orbital_energy"](states[apoapsis_index], mu), energy, rel_tol=2e-6
+    )
+    assert math.isclose(
+        ns["angular_momentum_magnitude"](states[apoapsis_index]),
+        angular_momentum,
+        rel_tol=2e-6,
+    )
 
 
 @pytest.mark.parametrize("duration_fraction", [0.5, 1.0, 2.0])
 @pytest.mark.parametrize("dt", [60.0, 30.0, 15.0])
-def test_validation_elliptical_conservation_across_timesteps_and_durations(notebook_namespaces, duration_fraction, dt):
+def test_validation_elliptical_conservation_across_timesteps_and_durations(
+    notebook_namespaces, duration_fraction, dt
+):
     ns = notebook_namespaces[NOTEBOOK_NAMES[6]]
     mu = ns["MU"]
     rp = 7_000_000.0
@@ -708,7 +751,9 @@ def test_validation_elliptical_conservation_across_timesteps_and_durations(noteb
     assert collision is None
 
     energies = np.asarray([ns["orbital_energy"](state, mu) for state in states])
-    angular_momenta = np.asarray([ns["angular_momentum_magnitude"](state) for state in states])
+    angular_momenta = np.asarray(
+        [ns["angular_momentum_magnitude"](state) for state in states]
+    )
     energy_absolute = float(np.max(np.abs(energies - energies[0])))
     angular_absolute = float(np.max(np.abs(angular_momenta - angular_momenta[0])))
     relative_energy = energy_absolute / abs(energies[0])

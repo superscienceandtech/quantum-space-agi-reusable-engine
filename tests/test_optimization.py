@@ -16,6 +16,7 @@ from examples.synthetic_optimization import (
     run_case,
     run_qubo_case,
 )
+
 from quantum_space_agi.optimization import (
     ConstraintRelation,
     EnumerativeSolver,
