@@ -1,0 +1,25 @@
+{
+  "dataset_id": "example-dataset",
+  "title": "Example dataset title",
+  "description": "SYNTHETIC TEMPLATE — replace with verified dataset details.",
+  "source_type": "external | synthetic | internal",
+  "data_status": "real | synthetic | example",
+  "source": {
+    "organization": "Example organization",
+    "url_or_identifier": "https://example.invalid/dataset",
+    "citation": "Add the source citation, if applicable."
+  },
+  "access": {
+    "collection_timestamp": "Unknown or not applicable",
+    "retrieved_at": "2000-01-01T00:00:00Z",
+    "license_or_terms": "Unverified placeholder — review actual terms before use."
+  },
+  "formats": ["csv"],
+  "dataset_version": "1.0.0",
+  "schema_version": "1.0.0",
+  "declared_units": {
+    "value": "unitless"
+  },
+  "contact_or_owner": "Unassigned",
+  "notes": "Do not include credentials, tokens, or secrets."
+}
