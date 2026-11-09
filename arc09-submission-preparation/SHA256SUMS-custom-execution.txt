@@ -1,0 +1,15 @@
+# SHA-256 manifest for supplementary ARC-09 custom-runner evidence
+# Paths are relative to the repository root.
+# Scope: 11 files (candidate, runner, execution output, six PNGs, README, report).
+# Excludes this manifest, source/backup, earlier evidence, environment, and approval records.
+34054beef76ca277d0e19fc027eb4af4ea5e882fb75f5a6bb99b092c011a5874  arc09-submission-preparation/ARC09_Visualization_Research_and_Implementation.legend-final-candidate.ipynb
+53982a0342c532c01d5fe65b93acfb184b90da3c658d5c0c4726a9996e3746ad  arc09-submission-preparation/run_legend_final_custom_python_notebook.py
+de8a41dbe7589063c5db82490d136196c6534b9f44b4236fff9a1466877fc62c  arc09-submission-preparation/ARC09_Visualization_Research_and_Implementation.legend-final-custom-python-runner-execution.ipynb
+3569bfbedd54615daab5eb09820e1f08121b212e09d9f554dec0f652d954b268  arc09-submission-preparation/custom-python-runner-charts-legend-final/chart-cell-13-figure-1.png
+a5c21305aed1d590ce136649f3437eb03d646b013bb26e618da2ad320ddd7b38  arc09-submission-preparation/custom-python-runner-charts-legend-final/chart-cell-14-figure-2.png
+646e142327d757fcdc411906d1c3cdb5dc49897e254700ccdd920e57983c1800  arc09-submission-preparation/custom-python-runner-charts-legend-final/chart-cell-15-figure-3.png
+23cbf771d4f286aef418b9f04617911cd813f872bd7029065f6294111429d68a  arc09-submission-preparation/custom-python-runner-charts-legend-final/chart-cell-16-figure-4.png
+e5ce38723d7c94fd2bf9e891e98531bfd03a10d90c555e0116c35ee07e2b4884  arc09-submission-preparation/custom-python-runner-charts-legend-final/chart-cell-17-figure-5.png
+244007490bcca2b792aa72243ab953a34e3d943069d17b309073a700d54eb042  arc09-submission-preparation/custom-python-runner-charts-legend-final/chart-cell-18-figure-6.png
+2b3eb33c086b128b79dce13882fd8ab0b38307ad2d09af11ae81eb77727460cb  arc09-submission-preparation/README.md
+0df3b5c49a5445f4f9b1c3efb288a3e952a72c297fba631206c942322d1e0618  docs/ARC09_CUSTOM_EXECUTION_REPORT.md
