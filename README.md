@@ -1,69 +1,66 @@
 # Quantum Space AGI Reusable Engine
 
-A reusable engineering foundation for future space-mission design and other
-scientific computing projects.
+Reusable Python foundations for scientific computing, data engineering,
+simulation, optimization, machine-learning readiness, and visualization.
+This repository is an engineering project, not a complete mission-design
+solution or an official NASA specification.
 
-## Purpose
+## Current modules
 
-This project is intended to grow a collection of reusable, tested components for:
+- **ARC-03 — Data engineering:** validated datasets, provenance, local
+  ingestion/export, schemas, quality checks, and a provider-neutral adapter
+  contract. See [data architecture](docs/DATA_ARCHITECTURE.md) and
+  [data validation](docs/DATA_VALIDATION.md).
+- **ARC-04 — Scientific computing:** canonical Jupyter notebooks for numerical
+  precision, validation, vectors, matrices, and units. See
+  [scientific foundation](docs/scientific/arc04_foundation.md) and
+  [notebook migration](docs/arc04_notebook_migration.md).
+- **ARC-05 — Simulation:** an educational two-body orbital propagation
+  workflow using fixed-step RK4. Its assumptions and limits are in
+  [the simulation notes](docs/arc05_simulation.md).
+- **ARC-06 — Classical optimization:** generic objective/constraint interfaces,
+  finite-domain models, `EnumerativeSolver`, and repeatable synthetic
+  benchmarks. See [classical optimization practice](docs/classical-optimization-practice.md).
+- **ARC-07 — Quantum toolkit experiments:** optional QUBO encoding, classical
+  heuristics, and a local Qiskit statevector QAOA example. These are
+  experimental examples, not production solvers, hardware runs, or evidence
+  of quantum advantage. See [the QUBO experiment](docs/qubo-experiment.md),
+  [the Qiskit simulator experiment](docs/qiskit-experiment.md), and
+  [consolidated benchmark notes](docs/final-benchmark.md).
+- **ARC-08 — AI/ML readiness:** preprocessing utilities and a bounded,
+  provenance-linked NASA Exoplanet Archive TAP adapter. The adapter is a data
+  integration example, not an official NASA requirement or a general NASA API
+  client. See [adapter documentation](docs/EXOPLANET_ARCHIVE_ADAPTER.md) and
+  [ML readiness notes](docs/ARC08_ML_READINESS_DECISION.md).
+- **ARC-09 — Visualization:** standalone UI and chart prototypes with handoff
+  notes; they are not a production dashboard or integrated backend. See
+  [prototype handoff](arc09-ui-prototype/PROTOTYPE_HANDOFF.md).
 
-- scientific data processing and computing;
-- space-mission simulation interfaces;
-- classical optimization and optional quantum optimization experiments;
-- AI and machine-learning utilities;
-- visualization and API integration; and
-- testing, packaging, and deployment.
+## Scope and limits
 
-The repository includes ARC-00 governance, the ARC-01 Python package
-foundation, ARC-02 core utilities, and ARC-03 data engineering components.
+The modules are reusable starting points. They do not establish mission
+readiness, scientific validity for a specific mission, or official NASA
+requirements. Each scientific or optimization example documents its own
+inputs, assumptions, validation, and limitations. The finite enumerative
+solver is exponential and intended only for small problems. QUBO/QAOA examples
+remain optional experiments; the base package does not require Qiskit.
 
-## Scope and non-goals
+The ARC-03 `Dataset` keeps its top-level record and metadata mappings
+read-only, but nested dictionaries and lists are not deep-frozen. CSV export
+infers headers from record keys; empty datasets produce an empty CSV, and CSV
+cannot preserve provenance metadata. Use JSON export when that metadata is
+needed.
 
-The engine is intended to provide general-purpose infrastructure that can be
-reused across projects. It is not, at this stage, a complete NASA Space Apps
-Challenge solution, a mission-ready flight system, or a source of authoritative
-scientific data. Future scientific calculations and simulations must document
-their assumptions, inputs, limitations, and validation; no accuracy or quantum
-advantage is implied by the project's name or goals.
+## Install and verify
 
-The ARC-03 data package provides source and provenance models, JSON/CSV and
-local-file ingestion, declarative schema validation, basic quality analysis,
-safe JSON/CSV export, and a provider-neutral adapter contract. It does not
-include NASA-specific API clients, network retrieval, automatic type coercion,
-or scientific validation rules. Callers remain responsible for supplying
-accurate source metadata and domain-appropriate schemas.
-
-`Dataset` copies and exposes its top-level record and metadata mappings as
-read-only, but nested dictionaries and lists are not deep-copied or frozen.
-Mutating a nested value can therefore change the dataset; consumers such as
-quality analysis and JSON export inspect these values without mutating them.
-
-CSV export infers headers from record keys. An empty dataset has no keys from
-which to infer a header, so its CSV output is an empty file. CSV also cannot
-preserve provenance or dataset metadata; use JSON export when that traceability
-is needed. An explicit schema/header option may be considered in a future
-version, but is not currently provided.
-
-Quantum computing, AI/ML, visualization, and external API integrations remain
-future capabilities. They are not core dependencies and should only be
-introduced with a concrete use case and tests.
-
-## Project status
-
-Work is organized into ARC roadmap branches. See [CONTRIBUTING.md](CONTRIBUTING.md)
-for branch, review, and development conventions. The package is an early
-foundation; domain-specific scientific validation and optimization
-capabilities remain future work.
-
-## Development
-
-Install the package and development tools in an isolated environment:
+Use Python 3.11 or newer. Install test and quality tools in an isolated
+environment:
 
 ```shell
 python -m pip install -e ".[test,quality]"
 ```
 
-Run the available checks from the repository root:
+Run the repository checks from the root:
 
 ```shell
 python -m pytest
@@ -73,13 +70,31 @@ mypy
 python -m build
 ```
 
-Contributions should explain their purpose, include appropriate tests when
-code is introduced, and document user-visible behavior. See
-[CONTRIBUTING.md](CONTRIBUTING.md) and the [pull request template](.github/PULL_REQUEST_TEMPLATE.md).
+Notebook authoring tools are optional:
 
-## License
+```shell
+python -m pip install -e ".[notebooks]"
+```
 
-MIT is the project's selected license direction, but no `LICENSE` file has
-been added. Until a license is formally added, do not assume the repository is
-available for reuse under MIT terms. See
+The Qiskit simulator example is optional:
+
+```shell
+python -m pip install -e ".[qiskit-experiment]"
+PYTHONPATH=src python examples/qiskit_qaoa_experiment.py
+```
+
+For the deterministic classical examples, run:
+
+```shell
+PYTHONPATH=src python examples/synthetic_optimization.py
+```
+
+## Contribution and licensing
+
+Contributions should explain their purpose, include appropriate tests, and
+document user-visible behavior. See [CONTRIBUTING.md](CONTRIBUTING.md) and
+the [pull request template](.github/PULL_REQUEST_TEMPLATE.md).
+
+MIT is recorded as the intended license direction, but there is no `LICENSE`
+file yet. Do not assume reuse rights until a license is formally added; see
 [the license decision record](docs/governance/license-options.md).
