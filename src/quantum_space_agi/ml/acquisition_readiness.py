@@ -7,8 +7,9 @@ verify their authenticity, contact NASA, or authorize an acquisition request.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
+from pathlib import Path, PureWindowsPath
 
 from quantum_space_agi.errors import ValidationError
 
@@ -41,6 +42,21 @@ class EvidenceKind(StrEnum):
     HISTORICAL_OBSERVATION = "HISTORICAL_OBSERVATION"
 
 
+class EvidenceReferenceAvailability(StrEnum):
+    """On-disk availability of a reference, separate from evidence validity."""
+
+    NOT_CHECKED = "NOT_CHECKED"
+    AVAILABLE = "AVAILABLE"
+    MISSING = "MISSING"
+    UNRESOLVABLE = "UNRESOLVABLE"
+
+
+class EvidenceVerificationStatus(StrEnum):
+    """Verification state currently supportable by this offline gate."""
+
+    DECLARED_NOT_AUTHENTICATED = "DECLARED_NOT_AUTHENTICATED"
+
+
 class AcquisitionReadinessStatus(StrEnum):
     """Overall result; READY means only that this gate's declared criteria pass."""
 
@@ -52,13 +68,34 @@ class AcquisitionReadinessError(ValidationError):
     """An assessment contains malformed, incomplete, or duplicate input."""
 
 
+def _validate_declared_effective_status(
+    declared_status: PrerequisiteStatus | None,
+    effective_status: PrerequisiteStatus,
+) -> None:
+    """Keep caller-declared approvals blocked until independent verification exists."""
+    if (
+        declared_status is PrerequisiteStatus.APPROVED
+        and effective_status is not PrerequisiteStatus.BLOCKED
+    ):
+        raise AcquisitionReadinessError(
+            "declared APPROVED prerequisite must be effectively BLOCKED until "
+            "caller-declared evidence is independently verified"
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class EvidenceReference:
-    """A typed pointer to evidence; content and authority are not verified here."""
+    """Caller-declared evidence pointer; no authenticity check is performed."""
 
     kind: EvidenceKind
     reference: str
     note: str | None = None
+    availability: EvidenceReferenceAvailability = field(
+        default=EvidenceReferenceAvailability.NOT_CHECKED, init=False
+    )
+    verification_status: EvidenceVerificationStatus = field(
+        default=EvidenceVerificationStatus.DECLARED_NOT_AUTHENTICATED, init=False
+    )
 
     def __post_init__(self) -> None:
         if type(self.kind) is not EvidenceKind:
@@ -123,7 +160,7 @@ class PrerequisiteDefinition:
 
 @dataclass(frozen=True, slots=True)
 class PrerequisiteResult:
-    """Effective prerequisite state, with any unsupported approval downgraded."""
+    """Effective prerequisite state; declared approvals require external review."""
 
     prerequisite_id: str
     title: str
@@ -143,6 +180,11 @@ class PrerequisiteResult:
             and type(self.declared_status) is not PrerequisiteStatus
         ):
             raise AcquisitionReadinessError("result statuses are invalid")
+        if self.status is PrerequisiteStatus.APPROVED:
+            raise AcquisitionReadinessError(
+                "this gate cannot authenticate caller-declared evidence"
+            )
+        _validate_declared_effective_status(self.declared_status, self.status)
         if type(self.evidence) is not tuple or any(
             type(item) is not EvidenceReference for item in self.evidence
         ):
@@ -208,19 +250,10 @@ class AcquisitionReadinessAssessment:
                 raise AcquisitionReadinessError(
                     "result cannot override prerequisite blocking policy"
                 )
-            item_evidence_kinds = {reference.kind for reference in item.evidence}
-            if item.status is PrerequisiteStatus.APPROVED and (
-                not item.evidence_sufficient
-                or not set(definition.required_evidence_kinds).issubset(
-                    item_evidence_kinds
-                )
-                or (
-                    EvidenceKind.FORMAL_APPROVAL in definition.required_evidence_kinds
-                    and item.decision_authority is None
-                )
-            ):
+            if item.status is PrerequisiteStatus.APPROVED:
                 raise AcquisitionReadinessError(
-                    "approved result lacks the required evidence"
+                    "assessment cannot authenticate caller-declared evidence; "
+                    "approved results require an independent verification mechanism"
                 )
             if item.status is PrerequisiteStatus.NOT_APPLICABLE and (
                 definition.blocks_acquisition
@@ -415,11 +448,11 @@ def assess_acquisition_readiness(
 ) -> AcquisitionReadinessAssessment:
     """Assess declared decisions against fixed prerequisites, failing closed.
 
-    Missing decisions become ``PENDING``. An ``APPROVED`` declaration is only
-    effective when its required evidence kinds are present; formal approval
-    evidence also requires a named authority. Historical observations,
-    recommendations, and software tests cannot substitute for approval or a
-    current query observation.
+    Missing decisions become ``PENDING``. Evidence kinds and authority strings
+    are caller declarations only. Since this API has no independent evidence or
+    authority verifier, every declared ``APPROVED`` decision is downgraded to
+    ``BLOCKED``. Historical observations, recommendations, and software tests
+    cannot substitute for approval or a current query observation.
     """
     if type(decisions) is not tuple or any(
         type(item) is not PrerequisiteDecision for item in decisions
@@ -468,9 +501,9 @@ def assess_acquisition_readiness(
         else AcquisitionReadinessStatus.NOT_READY
     )
     explanation = (
-        "All blocking prerequisites have qualifying evidence. This result is a "
-        "readiness assessment only; it is not a NASA or organizational request "
-        "authorization."
+        "All blocking prerequisites passed the declared-evidence gate. This "
+        "assessment is not authorization to access NASA data, proof of evidence "
+        "authenticity, or scientific approval."
         if not blockers
         else f"Acquisition readiness is blocked by {len(blockers)} prerequisite(s)."
     )
@@ -487,11 +520,13 @@ def assess_acquisition_readiness(
 def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
     """Return the explicitly documented current ARC-08 decision snapshot.
 
-    This snapshot is maintained alongside the policy documents; it does not
-    inspect files dynamically. Update it only when the referenced evidence
-    changes, and independently verify referenced approvals before relying on
-    them.
+    Decision statuses are maintained alongside the policy documents. Reference
+    path availability is checked locally for this checkout, but file contents
+    and approval authenticity are not inspected. Update the decision snapshot
+    only when its referenced evidence changes, and independently verify
+    referenced approvals before relying on them.
     """
+    repository_root = _repository_root()
     project_docs = (
         "docs/ARC08_RECOMMENDED_DECISION_POLICY.md",
         "docs/ARC08_SCIENTIFIC_ELIGIBILITY_POLICY_REVIEW.md",
@@ -505,6 +540,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             task_doc,
             EvidenceKind.RECOMMENDATION,
             "The mass-from-radius objective remains exploratory and unapproved.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "candidate_cohort",
@@ -512,6 +548,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             task_doc,
             EvidenceKind.RECOMMENDATION,
             "The default/Mass predicate is a candidate, not an approved cohort.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "missing_nonfinite_policy",
@@ -519,6 +556,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             project_docs[1],
             EvidenceKind.RECOMMENDATION,
             "Mechanical handling is proposed; final scientific policy is not approved.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "zero_negative_policy",
@@ -526,6 +564,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             project_docs[1],
             EvidenceKind.RECOMMENDATION,
             "Quarantine/reporting is proposed; scientific disposition is unresolved.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "uncertainty_policy",
@@ -533,6 +572,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             project_docs[1],
             EvidenceKind.RECOMMENDATION,
             "Raw retention is proposed; no scientific uncertainty policy is approved.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "limit_code_semantics",
@@ -540,6 +580,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             "docs/ARC08_NASA_LIMIT_CODE_SEMANTICS.md",
             EvidenceKind.PROJECT_DOCUMENT,
             "Active ps limit-code meanings remain unresolved in repository evidence.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "limit_eligibility_policy",
@@ -547,6 +588,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             project_docs[1],
             EvidenceKind.RECOMMENDATION,
             "No approved eligibility consequence for limit fields is recorded.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "controversy_solution_policy",
@@ -554,6 +596,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             project_docs[1],
             EvidenceKind.RECOMMENDATION,
             "Preserve/report without filtering is proposed, not approved.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "identity_duplicate_policy",
@@ -561,6 +604,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             project_docs[2],
             EvidenceKind.RECOMMENDATION,
             "Identity and duplicate handling requires scientific-owner approval.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "host_split_policy",
@@ -569,6 +613,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.RECOMMENDATION,
             "Host-disjoint grouping is recommended but not approved or assessed "
             "on a snapshot.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "baseline_metric_policy",
@@ -577,6 +622,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.RECOMMENDATION,
             "Median baseline and metrics are proposed; thresholds and use remain "
             "unresolved.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "scientific_scope_and_claims",
@@ -585,6 +631,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.RECOMMENDATION,
             "Scope and permitted claims have not received recorded scientific "
             "approval.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "archive_access_reuse_terms",
@@ -593,6 +640,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.PROJECT_DOCUMENT,
             "Applicable retention/reuse permission is not established; silence is "
             "not permission.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "internal_snapshot_retention",
@@ -600,6 +648,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             project_docs[2],
             EvidenceKind.RECOMMENDATION,
             "No stakeholder-approved durable storage and retention plan is recorded.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "citation_requirements",
@@ -608,6 +657,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.AUTHORITATIVE_SOURCE,
             "Official NASA citation guidance is referenced for later use; this is "
             "not redistribution permission.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "extraction_completeness_method",
@@ -616,6 +666,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.PROJECT_DOCUMENT,
             "Full-scale effective limits and extraction completeness remain "
             "unverified.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "candidate_population_rechecked",
@@ -624,6 +675,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.HISTORICAL_OBSERVATION,
             "The 2,211 count is historical and cannot establish current "
             "acquisition feasibility.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "offline_ingestion_contract",
@@ -633,6 +685,7 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.SOFTWARE_TEST,
             "Offline synthetic-fixture validation exists; this is software "
             "evidence only.",
+            repository_root=repository_root,
         ),
         _snapshot_decision(
             "snapshot_consistency_policy",
@@ -641,16 +694,20 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             EvidenceKind.RECOMMENDATION,
             "The non-isolation limitation is documented but not recorded as "
             "approved for this task.",
+            repository_root=repository_root,
         ),
         PrerequisiteDecision(
             "public_redistribution_terms",
             PrerequisiteStatus.NOT_APPLICABLE,
             evidence=(
-                EvidenceReference(
+                _reference_with_availability(
                     EvidenceKind.PROJECT_DOCUMENT,
                     project_docs[2],
-                    "No public release is in scope for this acquisition-readiness "
-                    "snapshot.",
+                    repository_root,
+                    note=(
+                        "No public release is in scope for this acquisition-readiness "
+                        "snapshot."
+                    ),
                 ),
             ),
             explanation=(
@@ -666,10 +723,13 @@ def assess_current_repository_readiness() -> AcquisitionReadinessAssessment:
             "quantitative_group_feasibility",
             PrerequisiteStatus.PENDING,
             evidence=(
-                EvidenceReference(
+                _reference_with_availability(
                     EvidenceKind.HISTORICAL_OBSERVATION,
                     task_doc,
-                    "No retained eligible row-level snapshot or group counts exist.",
+                    repository_root,
+                    note=(
+                        "No retained eligible row-level snapshot or group counts exist."
+                    ),
                 ),
             ),
             explanation=(
@@ -689,6 +749,8 @@ def serialize_acquisition_readiness(
         raise AcquisitionReadinessError(
             "assessment must be an AcquisitionReadinessAssessment"
         )
+    for item in assessment.prerequisites:
+        _validate_declared_effective_status(item.declared_status, item.status)
     payload = {
         "status": assessment.status.value,
         "explanation": assessment.explanation,
@@ -710,6 +772,8 @@ def serialize_acquisition_readiness(
                         "kind": ref.kind.value,
                         "reference": ref.reference,
                         "note": ref.note,
+                        "availability": ref.availability.value,
+                        "verification_status": ref.verification_status.value,
                     }
                     for ref in item.evidence
                 ],
@@ -753,12 +817,19 @@ def _evaluate_one(
     status = decision.status
     explanation = decision.explanation
     evidence_sufficient = _has_required_evidence(definition, decision)
-    if status is PrerequisiteStatus.APPROVED and not evidence_sufficient:
+    if status is PrerequisiteStatus.APPROVED:
         status = PrerequisiteStatus.BLOCKED
-        explanation = (
-            "Declared APPROVED, but required evidence is missing or insufficient; "
-            "the gate fails closed."
-        )
+        if not evidence_sufficient:
+            explanation = (
+                "Declared APPROVED, but required evidence kinds are missing or "
+                "insufficient; the gate fails closed."
+            )
+        else:
+            explanation = (
+                "Declared APPROVED, but supplied evidence and authority labels "
+                "are not independently authenticated by this gate; human or "
+                "external verification is required."
+            )
     elif status is PrerequisiteStatus.NOT_APPLICABLE:
         if not definition.allows_not_applicable or not decision.not_applicable_reason:
             status = PrerequisiteStatus.BLOCKED
@@ -802,11 +873,81 @@ def _snapshot_decision(
     reference: str,
     evidence_kind: EvidenceKind,
     explanation: str,
+    *,
+    repository_root: Path,
 ) -> PrerequisiteDecision:
+    evidence = _reference_with_availability(
+        evidence_kind,
+        reference,
+        repository_root,
+    )
     return PrerequisiteDecision(
         prerequisite_id=prerequisite_id,
         status=status,
-        evidence=(EvidenceReference(evidence_kind, reference),),
+        evidence=(evidence,),
         decision_authority=None,
         explanation=explanation,
     )
+
+
+def _repository_root() -> Path:
+    """Locate this checkout from the installed source package, without Git calls."""
+    return Path(__file__).resolve().parents[3]
+
+
+def _reference_with_availability(
+    kind: EvidenceKind,
+    reference: str,
+    repository_root: Path,
+    note: str | None = None,
+) -> EvidenceReference:
+    """Create a reference annotated only with safe local path availability."""
+    evidence = EvidenceReference(kind, reference, note)
+    object.__setattr__(
+        evidence,
+        "availability",
+        _reference_availability(reference, repository_root),
+    )
+    return evidence
+
+
+def _reference_availability(
+    reference: str, repository_root: Path
+) -> EvidenceReferenceAvailability:
+    """Check a repository-relative file reference without following escapes.
+
+    URLs, composite prose references, absolute paths, and paths that resolve
+    outside the checkout are UNRESOLVABLE. This reports file presence only; it
+    does not establish that the referenced material is authentic or sufficient.
+    """
+    if type(reference) is not str or not reference:
+        return EvidenceReferenceAvailability.UNRESOLVABLE
+    if ";" in reference or "\\" in reference:
+        return EvidenceReferenceAvailability.UNRESOLVABLE
+
+    path_text = reference.split("#", maxsplit=1)[0]
+    candidate_path = Path(path_text)
+    if (
+        not path_text
+        or candidate_path.is_absolute()
+        or PureWindowsPath(path_text).is_absolute()
+        or any(part in {"", ".", ".."} for part in path_text.split("/"))
+        or ":" in path_text
+    ):
+        return EvidenceReferenceAvailability.UNRESOLVABLE
+
+    try:
+        root = repository_root.resolve()
+        candidate = (root / candidate_path).resolve()
+        candidate.relative_to(root)
+    except (OSError, RuntimeError, ValueError):
+        return EvidenceReferenceAvailability.UNRESOLVABLE
+
+    try:
+        if candidate.is_file():
+            return EvidenceReferenceAvailability.AVAILABLE
+        if candidate.exists():
+            return EvidenceReferenceAvailability.UNRESOLVABLE
+    except OSError:
+        return EvidenceReferenceAvailability.UNRESOLVABLE
+    return EvidenceReferenceAvailability.MISSING

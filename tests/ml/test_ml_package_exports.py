@@ -15,6 +15,10 @@ import sys
 import quantum_space_agi.ml as ml
 
 assert callable(ml.validate_baseline_dataset)
+assert callable(ml.prepare_regression_dataset)
+assert callable(ml.evaluate_regression_model)
+assert callable(ml.calculate_regression_metrics)
+assert callable(ml.prepare_and_evaluate_regression)
 assert callable(ml.ingest_votable_payload)
 assert callable(ml.split_by_host)
 assert callable(ml.write_snapshot_artifact)

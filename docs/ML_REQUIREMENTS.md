@@ -4,7 +4,7 @@
 
 ## Current readiness
 
-The project brief describes an educational mission-design game, but no dataset, measurable prediction target, or ML use case is specified. Therefore, the project is not currently ready to justify training a model. Prefer deterministic scientific computation, simulation, or optimization where those methods meet the product need. Reassess ML after a concrete task and suitable data are identified.
+The project brief describes an educational mission-design game. ARC-08 now includes reusable offline data-preparation, leakage-diagnostic, and regression-evaluation interfaces, but their presence is engineering capability only. The exploratory NASA mass–radius proposal in [`ARC08_BASELINE_ML_TASK_SPEC.md`](ARC08_BASELINE_ML_TASK_SPEC.md) is not an approved scientific prediction task, dataset, or evaluation. Baseline scientific implementation and model training remain NO-GO. Do not use the educational evaluator's fictional score as a scientific target. Prefer deterministic scientific computation, simulation, or optimization where those methods meet the product need.
 
 ## Candidate task definition (to complete later)
 
