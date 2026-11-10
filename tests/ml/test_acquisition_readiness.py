@@ -1,16 +1,24 @@
 import json
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 
+from quantum_space_agi.ml import EvidenceReferenceAvailability as PublicAvailability
 from quantum_space_agi.ml.acquisition_readiness import (
     PREREQUISITE_DEFINITIONS,
     AcquisitionReadinessError,
     AcquisitionReadinessStatus,
     EvidenceKind,
     EvidenceReference,
+    EvidenceReferenceAvailability,
+    EvidenceVerificationStatus,
     PrerequisiteDecision,
+    PrerequisiteResult,
     PrerequisiteStatus,
+    _reference_availability,
+    _reference_with_availability,
+    _repository_root,
     assess_acquisition_readiness,
     assess_current_repository_readiness,
     serialize_acquisition_readiness,
@@ -46,12 +54,83 @@ def replace_decision(
     )
 
 
-def test_all_prerequisites_approved_with_qualifying_evidence_is_ready() -> None:
-    result = assess_acquisition_readiness(approved_decisions())
+def test_caller_approvals_do_not_authenticate_or_make_gate_ready() -> None:
+    decisions = approved_decisions()
+    result = assess_acquisition_readiness(decisions)
 
-    assert result.status is AcquisitionReadinessStatus.READY_FOR_ACQUISITION
-    assert result.blocking_issues == ()
-    assert result.unresolved_decisions == ()
+    assert result.status is AcquisitionReadinessStatus.NOT_READY
+    assert result.blocking_issues
+    assert all(
+        item.status is PrerequisiteStatus.BLOCKED
+        for item in result.prerequisites
+        if item.declared_status is PrerequisiteStatus.APPROVED
+    )
+    assert all(
+        reference.verification_status
+        is EvidenceVerificationStatus.DECLARED_NOT_AUTHENTICATED
+        for item in result.prerequisites
+        for reference in item.evidence
+    )
+    assert any(
+        "not independently authenticated" in item for item in result.blocking_issues
+    )
+    assert all(item.status is PrerequisiteStatus.APPROVED for item in decisions)
+
+
+def test_direct_result_rejects_declared_approval_with_pending_effective_status() -> (
+    None
+):
+    pending = assess_acquisition_readiness().prerequisites[0]
+
+    with pytest.raises(AcquisitionReadinessError, match="effectively BLOCKED"):
+        PrerequisiteResult(
+            prerequisite_id=pending.prerequisite_id,
+            title=pending.title,
+            status=PrerequisiteStatus.PENDING,
+            declared_status=PrerequisiteStatus.APPROVED,
+            evidence=pending.evidence,
+            decision_authority="caller-declared authority",
+            explanation=pending.explanation,
+            blocks_acquisition=pending.blocks_acquisition,
+            evidence_sufficient=pending.evidence_sufficient,
+        )
+
+
+def test_direct_result_accepts_declared_approval_only_as_blocked() -> None:
+    assessed = assess_acquisition_readiness(approved_decisions())
+    effective = next(
+        item
+        for item in assessed.prerequisites
+        if item.declared_status is PrerequisiteStatus.APPROVED
+    )
+
+    constructed = PrerequisiteResult(
+        prerequisite_id=effective.prerequisite_id,
+        title=effective.title,
+        status=PrerequisiteStatus.BLOCKED,
+        declared_status=PrerequisiteStatus.APPROVED,
+        evidence=effective.evidence,
+        decision_authority=effective.decision_authority,
+        explanation=effective.explanation,
+        blocks_acquisition=effective.blocks_acquisition,
+        evidence_sufficient=effective.evidence_sufficient,
+    )
+
+    assert constructed.status is PrerequisiteStatus.BLOCKED
+    assert serialize_acquisition_readiness(assessed)
+
+
+def test_serializer_rejects_result_mutated_to_contradictory_status() -> None:
+    assessment = assess_acquisition_readiness(approved_decisions())
+    result = next(
+        item
+        for item in assessment.prerequisites
+        if item.declared_status is PrerequisiteStatus.APPROVED
+    )
+    object.__setattr__(result, "status", PrerequisiteStatus.PENDING)
+
+    with pytest.raises(AcquisitionReadinessError, match="effectively BLOCKED"):
+        serialize_acquisition_readiness(assessment)
 
 
 def test_one_pending_mandatory_prerequisite_blocks_readiness() -> None:
@@ -190,8 +269,14 @@ def test_non_applicable_optional_prerequisite_requires_reason_and_does_not_block
 
     result = assess_acquisition_readiness(decisions)
 
-    assert result.status is AcquisitionReadinessStatus.READY_FOR_ACQUISITION
-    assert result.blocking_issues == ()
+    assert result.status is AcquisitionReadinessStatus.NOT_READY
+    redistribution = next(
+        item
+        for item in result.prerequisites
+        if item.prerequisite_id == "public_redistribution_terms"
+    )
+    assert redistribution.status is PrerequisiteStatus.NOT_APPLICABLE
+    assert any("prediction_task" in item for item in result.blocking_issues)
 
     mandatory = replace_decision(
         approved_decisions(),
@@ -268,7 +353,7 @@ def test_assessment_is_deterministic_and_json_serializable() -> None:
     second = serialize_acquisition_readiness(assess_acquisition_readiness(decisions))
 
     assert first == second
-    assert json.loads(first)["status"] == "READY_FOR_ACQUISITION"
+    assert json.loads(first)["status"] == "NOT_READY"
     assert not first.startswith(b"\xef\xbb\xbf")
     assert b"\xc3\xa9" in first
 
@@ -290,8 +375,13 @@ def test_results_are_deeply_immutable() -> None:
             explanation=result.explanation,
         )
 
-    with pytest.raises(AcquisitionReadinessError, match="overall status"):
-        replace(result, status=AcquisitionReadinessStatus.NOT_READY)
+    with pytest.raises(AcquisitionReadinessError, match="cannot authenticate"):
+        replace(
+            result.prerequisites[0],
+            status=PrerequisiteStatus.APPROVED,
+            declared_status=PrerequisiteStatus.APPROVED,
+            evidence_sufficient=True,
+        )
 
     altered = replace(result.prerequisites[0], blocks_acquisition=False)
     with pytest.raises(AcquisitionReadinessError, match="cannot override"):
@@ -324,3 +414,155 @@ def test_duplicate_and_unknown_prerequisite_ids_are_rejected() -> None:
     )
     with pytest.raises(AcquisitionReadinessError, match="unknown"):
         assess_acquisition_readiness((unknown,))
+
+
+def test_evidence_reference_availability_defaults_to_not_checked() -> None:
+    reference = EvidenceReference(EvidenceKind.PROJECT_DOCUMENT, "docs/policy.md")
+
+    assert PublicAvailability is EvidenceReferenceAvailability
+    assert reference.availability is EvidenceReferenceAvailability.NOT_CHECKED
+    with pytest.raises(TypeError, match="availability"):
+        EvidenceReference(
+            EvidenceKind.PROJECT_DOCUMENT,
+            "docs/policy.md",
+            availability=EvidenceReferenceAvailability.AVAILABLE,  # type: ignore[call-arg]
+        )
+    serialized = json.loads(
+        serialize_acquisition_readiness(
+            assess_acquisition_readiness(
+                (
+                    PrerequisiteDecision(
+                        "prediction_task",
+                        PrerequisiteStatus.PENDING,
+                        evidence=(reference,),
+                        explanation="Awaiting review.",
+                    ),
+                )
+            )
+        )
+    )
+    prediction = next(
+        item
+        for item in serialized["prerequisites"]
+        if item["prerequisite_id"] == "prediction_task"
+    )
+    assert prediction["evidence"][0]["availability"] == "NOT_CHECKED"
+    assert (
+        prediction["evidence"][0]["verification_status"] == "DECLARED_NOT_AUTHENTICATED"
+    )
+
+
+def test_local_availability_and_authority_claim_do_not_authenticate_evidence() -> None:
+    local_reference = _reference_with_availability(
+        EvidenceKind.AUTHORITATIVE_SOURCE,
+        "pyproject.toml",
+        _repository_root(),
+    )
+    decision = PrerequisiteDecision(
+        "limit_code_semantics",
+        PrerequisiteStatus.APPROVED,
+        evidence=(local_reference,),
+        decision_authority="NASA",
+        explanation="Caller claims that local file is authoritative.",
+    )
+
+    result = assess_acquisition_readiness((decision,))
+    item = next(
+        value
+        for value in result.prerequisites
+        if value.prerequisite_id == "limit_code_semantics"
+    )
+
+    assert local_reference.availability is EvidenceReferenceAvailability.AVAILABLE
+    assert (
+        local_reference.verification_status
+        is EvidenceVerificationStatus.DECLARED_NOT_AUTHENTICATED
+    )
+    assert item.status is PrerequisiteStatus.BLOCKED
+    assert "not independently authenticated" in item.explanation
+    assert result.status is AcquisitionReadinessStatus.NOT_READY
+
+
+def test_evidence_verification_state_cannot_be_supplied_by_caller() -> None:
+    with pytest.raises(TypeError, match="verification_status"):
+        EvidenceReference(
+            EvidenceKind.FORMAL_APPROVAL,
+            "approval-record/claimed",
+            verification_status=EvidenceVerificationStatus.DECLARED_NOT_AUTHENTICATED,  # type: ignore[call-arg]
+        )
+
+
+def test_reference_availability_checks_only_safe_repository_files(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "present.md").write_text("supporting evidence", encoding="utf-8")
+    outside = tmp_path.parent / "outside-reference.md"
+    outside.write_text("outside checkout", encoding="utf-8")
+
+    assert (
+        _reference_availability("present.md#section", tmp_path)
+        is EvidenceReferenceAvailability.AVAILABLE
+    )
+    assert (
+        _reference_availability("missing.md", tmp_path)
+        is EvidenceReferenceAvailability.MISSING
+    )
+    assert (
+        _reference_availability("https://example.invalid/evidence", tmp_path)
+        is EvidenceReferenceAvailability.UNRESOLVABLE
+    )
+    assert (
+        _reference_availability("../outside-reference.md", tmp_path)
+        is EvidenceReferenceAvailability.UNRESOLVABLE
+    )
+    outside.unlink()
+
+
+def test_committed_repository_file_is_reported_available() -> None:
+    from quantum_space_agi.ml.acquisition_readiness import _repository_root
+
+    assert (
+        _reference_availability("pyproject.toml", _repository_root())
+        is EvidenceReferenceAvailability.AVAILABLE
+    )
+
+
+def test_reference_presence_does_not_change_readiness_or_approval(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import quantum_space_agi.ml.acquisition_readiness as readiness
+
+    monkeypatch.setattr(readiness, "_repository_root", lambda: tmp_path)
+    missing_result = assess_current_repository_readiness()
+    missing_prediction = next(
+        item
+        for item in missing_result.prerequisites
+        if item.prerequisite_id == "prediction_task"
+    )
+    assert missing_prediction.status is PrerequisiteStatus.PENDING
+    assert (
+        missing_prediction.evidence[0].availability
+        is EvidenceReferenceAvailability.MISSING
+    )
+
+    task_spec = tmp_path / "docs" / "ARC08_BASELINE_ML_TASK_SPEC.md"
+    task_spec.parent.mkdir(parents=True)
+    task_spec.write_text("proposal only", encoding="utf-8")
+    present_result = assess_current_repository_readiness()
+    present_prediction = next(
+        item
+        for item in present_result.prerequisites
+        if item.prerequisite_id == "prediction_task"
+    )
+
+    assert (
+        present_result.status
+        is missing_result.status
+        is AcquisitionReadinessStatus.NOT_READY
+    )
+    assert present_result.blocking_issues == missing_result.blocking_issues
+    assert present_prediction.status is PrerequisiteStatus.PENDING
+    assert (
+        present_prediction.evidence[0].availability
+        is EvidenceReferenceAvailability.AVAILABLE
+    )
