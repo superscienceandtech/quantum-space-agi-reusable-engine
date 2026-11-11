@@ -66,17 +66,18 @@
 
 ## 5. Reviewer and formal acceptance
 
-**Current status: PENDING**.
+**Current status: PENDING** — reviewer assignment is confirmed, but technical review completion and formal package acceptance remain pending.
 
-- Rafi is listed in `arc09-submission-preparation/README.md` for review coordination and is proposed here as the independent technical reviewer; assignment is **not confirmed**.
+- Reviewer assignment: **CONFIRMED — Rafi** for the ARC-09 notebook evidence package (confirmation supplied by the user).
 - Reviewer availability: **PENDING**.
+- Formal technical review completion: **PENDING**.
+- Formal package acceptance and submission approval: **PENDING**.
 - Formal acceptance criteria and how acceptance must be recorded: **PENDING**.
-- No formal reviewer acceptance or submission approval was found in the inspected files.
 
-**Available evidence:** The README names Rafi for review coordination and says formal acceptance is not recorded. `docs/ARC09_CUSTOM_EXECUTION_REPORT.md` says submission acceptance remains pending. `docs/ARC09_MANUAL_VERIFICATION_REPORT.md` records test results, not formal submission acceptance.
+**Available evidence:** The reviewer assignment confirmation was supplied by the user and is recorded in the README. `docs/ARC09_CUSTOM_EXECUTION_REPORT.md` provides technical execution evidence, and `docs/ARC09_MANUAL_VERIFICATION_REPORT.md` records test results; neither establishes formal review completion or package acceptance.
 
 **Decision owner:** No approver is explicitly named in an approval record.
-**Still required:** Confirm reviewer assignment and availability, objective review criteria, required evidence, and the authoritative record or system where acceptance is documented.
+**Still required:** Confirm reviewer availability, objective review criteria, required evidence, and the authoritative record or system where review completion and acceptance are documented.
 
 ## Next Actions After Confirmation
 
@@ -86,7 +87,7 @@ Proceed in this order only after decisions are documented:
 2. Confirm execution-method acceptance.
 3. Confirm destination and package structure.
 4. Confirm manifest scope and format.
-5. Confirm reviewer assignment and acceptance criteria.
+5. Confirm reviewer availability and acceptance criteria.
 6. Reconcile README and execution report.
 7. Rebuild ZIP and manifest.
 8. Verify all hashes and ZIP contents.

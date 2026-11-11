@@ -3,7 +3,7 @@
 **Project:** Quantum Space AGI — Space Mission Design Game  
 **Workstream:** ARC-09 Visualization  
 **Contributor:** Hridi  
-**Reviewer listed for coordination:** Rafi
+**Reviewer assignment for the ARC-09 notebook evidence package:** Confirmed — Rafi (confirmation supplied by the user).
 
 **Submission status:** Supplementary custom-runner evidence is available. Official submission location, requirements, and formal acceptance remain unconfirmed.
 
@@ -103,8 +103,8 @@ The existing ZIP and manifest are historical package evidence, not the current c
 - Data validation is demonstration-level structural validation, not domain or scientific validation.
 - No NASA/ARC-08 data, production API, mission result, or approved scientific contract is connected.
 - No NASA validation, scientific validity, or production readiness is claimed.
-- Official ARC-08.7.2 submission instructions, the required directory layout, the accepted execution method, and formal reviewer acceptance remain **unconfirmed**.
-- Rafi is listed for review coordination, but no formal reviewer acceptance is recorded here.
+- Official ARC-08.7.2 submission instructions, the required directory layout, the accepted execution method, formal technical review completion, and package acceptance remain **unconfirmed**.
+- Rafi’s reviewer assignment for the ARC-09 notebook evidence package is confirmed (confirmation supplied by the user); this does not indicate that the review is complete or the package accepted.
 - This work is not represented as a final or officially accepted submission.
 
 ## Submission checklist
@@ -117,4 +117,4 @@ The existing ZIP and manifest are historical package evidence, not the current c
 - [ ] Confirm official ARC-08.7.2 submission instructions and destination.
 - [ ] Confirm the accepted execution method and required package layout.
 - [ ] Reconcile the stale manifest and ZIP after package requirements are approved.
-- [ ] Record designated review and formal acceptance.
+- [ ] Record technical review completion and formal package acceptance.
