@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARC-09 prototype data validation tests</title>
+  <style>
+    body { font: 1rem/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 52rem; padding: 0 1rem; }
+    li { margin: 0.35rem 0; }
+    .pass { color: #176b3a; }
+    .fail { color: #a21d24; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ARC-09 prototype data validation tests</h1>
+    <p>Standalone checks for the prototype fixture shape validator. Empty collection arrays are accepted by the current validator.</p>
+    <p id="summary" role="status" aria-live="polite">Running tests...</p>
+    <ol id="results"></ol>
+  </main>
+  <script src="data.js"></script>
+  <script src="data-provider.js"></script>
+  <script src="data-validation.js"></script>
+  <script>
+    (function () {
+      const fixture = window.arc09PrototypeData;
+      const provider = window.arc09PrototypeProvider;
+      const validate = window.arc09PrototypeValidation.hasValidPrototypeData;
+      const results = document.getElementById('results');
+      const cases = [];
+
+      function cloneFixture() {
+        return JSON.parse(JSON.stringify(fixture));
+      }
+
+      function addCase(name, value, expected) {
+        cases.push({ name, actual: validate(value), expected });
+      }
+
+      addCase('Existing fixture is valid', fixture, true);
+      addCase('Null root is invalid', null, false);
+      addCase('Empty object is invalid', {}, false);
+      addCase('Array root is invalid', [], false);
+
+      const missingCollection = cloneFixture();
+      delete missingCollection.activity;
+      addCase('Missing required collection is invalid', missingCollection, false);
+
+      const nonArrayCollection = cloneFixture();
+      nonArrayCollection.resources = {};
+      addCase('Non-array required collection is invalid', nonArrayCollection, false);
+
+      const malformedEntry = cloneFixture();
+      malformedEntry.overview[0] = null;
+      addCase('Malformed collection entry is invalid', malformedEntry, false);
+
+      const invalidNumeric = cloneFixture();
+      invalidNumeric.resources[0].value = Number.NaN;
+      addCase('Non-finite numeric value is invalid', invalidNumeric, false);
+
+      const emptyCollections = cloneFixture();
+      emptyCollections.overview = [];
+      emptyCollections.resources = [];
+      emptyCollections.trend = [];
+      emptyCollections.comparison = [];
+      emptyCollections.scatter = [];
+      emptyCollections.relationshipGraph.nodes = [];
+      emptyCollections.relationshipGraph.edges = [];
+      emptyCollections.activity = [];
+      addCase('Empty collection arrays are valid under current rules', emptyCollections, true);
+
+      cases.forEach(({ name, actual, expected }) => {
+        const passed = actual === expected;
+        const item = document.createElement('li');
+        item.className = passed ? 'pass' : 'fail';
+        item.textContent = `${passed ? 'PASS' : 'FAIL'} - ${name} (expected ${expected}, got ${actual})`;
+        results.appendChild(item);
+      });
+
+      const allPassed = cases.every(({ actual, expected }) => actual === expected);
+      const fixturePreserved = window.arc09PrototypeData === fixture && provider === window.arc09PrototypeProvider && provider.getData() === fixture;
+      const integrityItem = document.createElement('li');
+      integrityItem.className = fixturePreserved ? 'pass' : 'fail';
+      integrityItem.textContent = `${fixturePreserved ? 'PASS' : 'FAIL'} - fixture and provider references remain unchanged`;
+      results.appendChild(integrityItem);
+
+      const passedCount = cases.filter(({ actual, expected }) => actual === expected).length + Number(fixturePreserved);
+      document.getElementById('summary').textContent = `${passedCount}/${cases.length + 1} checks passed.`;
+      document.title = `${allPassed && fixturePreserved ? 'PASS' : 'FAIL'} - ARC-09 data validation tests`;
+    }());
+  </script>
+</body>
+</html>

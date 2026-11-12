@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8fafc">
+    <title>Mission workspace — ARC-09 UI prototype</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="header-brand-wrap">
+          <button class="icon-button menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-controls="app-sidebar" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <a class="brand" href="#dashboard" aria-label="Mission workspace dashboard">
+            <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 21.5 21.5 5l5.5 5.5L10.5 27z"/><circle cx="21.5" cy="10.5" r="2.2"/></svg></span>
+            <span class="brand-name">QUANTUM SPACE AGI<span> / </span>CONCEPT</span>
+          </a>
+        </div>
+        <div class="header-right">
+          <span class="prototype-chip"><span class="chip-dot" aria-hidden="true"></span>Prototype</span>
+          <span class="avatar" aria-label="Prototype user">H</span>
+        </div>
+      </header>
+
+      <div class="shell-body">
+        <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+        <aside class="app-sidebar" id="app-sidebar" aria-label="Primary navigation">
+          <div class="workspace-label">WORKSPACE</div>
+          <nav class="primary-nav" id="primary-nav" aria-label="Proposed application views">
+            <a class="nav-item is-active" href="#dashboard" data-view="dashboard" aria-current="page"><span class="nav-icon" aria-hidden="true">▦</span><span>Mission Dashboard</span></a>
+            <a class="nav-item" href="#mission-builder" data-view="mission-builder"><span class="nav-icon" aria-hidden="true">＋</span><span>Mission Builder</span></a>
+            <a class="nav-item" href="#spacecraft" data-view="spacecraft"><span class="nav-icon" aria-hidden="true">◇</span><span>Spacecraft Configuration</span></a>
+            <a class="nav-item" href="#resources" data-view="resources"><span class="nav-icon" aria-hidden="true">◫</span><span>Resource Dashboard</span></a>
+            <a class="nav-item" href="#simulation" data-view="simulation"><span class="nav-icon" aria-hidden="true">▷</span><span>Simulation &amp; Results</span></a>
+            <a class="nav-item" href="#comparison" data-view="comparison"><span class="nav-icon" aria-hidden="true">⇄</span><span>Mission Comparison &amp; Report</span></a>
+          </nav>
+
+          <div class="sidebar-note">
+            <span class="note-icon" aria-hidden="true">i</span>
+            <p>Navigation items reflect <strong>proposed views</strong>. Only the dashboard has a sample layout.</p>
+          </div>
+          <div class="sidebar-bottom"><span class="online-dot" aria-hidden="true"></span> Standalone visual prototype</div>
+        </aside>
+
+        <main class="main-content" id="main-content" tabindex="-1">
+          <div class="prototype-notice" role="note">
+            <span class="notice-icon" aria-hidden="true">✳</span>
+            <span><strong>Independent UI prototype</strong> · Synthetic sample data only — not NASA data or actual mission results.</span>
+          </div>
+          <div class="state-box state-error" id="startup-error" role="alert" hidden></div>
+          <div class="state-box state-loading" id="dashboard-loading" role="status" aria-live="polite" aria-atomic="true" hidden>
+            <span class="loading-indicator" aria-hidden="true">···</span>
+            <strong>Loading dashboard data</strong>
+            <span>Preparing the prototype dashboard content.</span>
+          </div>
+
+          <section id="dashboard" data-page="dashboard" aria-labelledby="page-title" aria-busy="false">
+            <div class="page-header">
+              <div>
+                <div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> OVERVIEW</div>
+                <h1 id="page-title">Mission dashboard</h1>
+                <p class="page-description">A visual concept for a calm, data-aware mission workspace.</p>
+              </div>
+              <div class="page-actions"><span class="date-context">DEMO VIEW <span aria-hidden="true">·</span> NO LIVE DATA</span></div>
+            </div>
+
+            <div class="section-heading">
+              <div><h2>Mission overview</h2><p>Illustrative workspace counts</p></div>
+              <span class="sample-label">SYNTHETIC SAMPLE</span>
+            </div>
+            <div class="overview-grid" id="overview-grid" role="group" aria-label="Synthetic mission overview"></div>
+
+            <div class="section-heading resource-heading">
+              <div><h2>Resource summary</h2><p>Sample allocation shares · no limits implied</p></div>
+              <span class="sample-label">SYNTHETIC SAMPLE</span>
+            </div>
+            <div class="resource-grid" id="resource-grid" role="group" aria-label="Synthetic resource summary"></div>
+
+            <div class="section-heading chart-section-heading">
+              <div><h2>Practice visualizations</h2><p>Example charts using arbitrary, unitless sample values</p></div>
+              <span class="section-marker"><span></span> DATA EXPLORATION</span>
+            </div>
+            <div class="visual-grid">
+              <article class="panel chart-panel" aria-labelledby="trend-title">
+                <div class="panel-heading"><div><h3 id="trend-title">Sample index by step</h3><p>Ordered practice values</p></div><span class="chart-type">LINE CHART</span></div>
+                <div class="chart-host" id="line-chart" aria-busy="true"></div>
+                <div class="chart-tooltip" role="status" aria-live="polite" hidden></div>
+                <p class="chart-caption">Synthetic example · unitless practice index · no mission interpretation.</p>
+                <details class="data-details"><summary>View chart data table</summary><div class="table-scroll"><table><caption class="sr-only">Synthetic sample index values by step</caption><thead><tr><th scope="col">Step</th><th scope="col">Sample index (unitless)</th></tr></thead><tbody id="line-table"></tbody></table></div></details>
+              </article>
+
+              <article class="panel chart-panel" aria-labelledby="bar-chart-title">
+                <div class="panel-heading"><div><h3 id="bar-chart-title">Sample category comparison</h3><p>Two illustrative series</p></div><span class="chart-type">GROUPED BAR</span></div>
+                <ul class="chart-legend"><li><i class="legend-swatch legend-a" aria-hidden="true"></i>Series A</li><li><i class="legend-swatch legend-b" aria-hidden="true"></i>Series B</li></ul>
+                <div class="chart-host" id="bar-chart" aria-busy="true"></div>
+                <div class="chart-tooltip" role="status" aria-live="polite" hidden></div>
+                <p class="chart-caption">Synthetic example · unitless sample score · categories are placeholders.</p>
+                <details class="data-details"><summary>View chart data table</summary><div class="table-scroll"><table><caption class="sr-only">Synthetic category comparison for Series A and Series B</caption><thead><tr><th scope="col">Sample category</th><th scope="col">Series A</th><th scope="col">Series B</th></tr></thead><tbody id="bar-table"></tbody></table></div></details>
+              </article>
+              <article class="panel chart-panel" aria-labelledby="scatter-chart-title">
+                <div class="panel-heading"><div><h3 id="scatter-chart-title">Synthetic sample points</h3><p>Unitless X/Y practice pairs</p></div><span class="chart-type">SCATTER PLOT</span></div>
+                <div class="chart-host" id="scatter-chart" aria-busy="true"></div>
+                <div class="chart-tooltip" role="status" aria-live="polite" hidden></div>
+                <p class="chart-caption">Synthetic practice data only. A plotted pattern does not establish causation or describe mission data.</p>
+                <details class="data-details"><summary>View chart data table</summary><div class="table-scroll"><table><caption class="sr-only">Synthetic unitless X and Y sample point pairs</caption><thead><tr><th scope="col">X value (unitless)</th><th scope="col">Y value (unitless)</th></tr></thead><tbody id="scatter-table"></tbody></table></div></details>
+              </article>
+
+              <article class="panel chart-panel" aria-labelledby="relationship-chart-title">
+                <div class="panel-heading"><div><h3 id="relationship-chart-title">Conceptual relationship example</h3><p>Illustrative concepts and links</p></div><span class="chart-type">GRAPH</span></div>
+                <div class="chart-host graph-host" id="relationship-graph" aria-busy="true"></div>
+                <div class="chart-tooltip" role="status" aria-live="polite" hidden></div>
+                <p class="chart-caption">Placeholder associations only; these do not define a confirmed product data model or mission facts.</p>
+                <details class="data-details"><summary>View graph text alternative</summary><div class="table-scroll"><table><caption class="sr-only">Conceptual graph nodes and illustrative associations</caption><thead><tr><th scope="col">Kind</th><th scope="col">Elements</th><th scope="col">Description</th></tr></thead><tbody id="graph-table"></tbody></table></div></details>
+              </article>
+            </div>
+
+            <div class="lower-grid">
+              <section class="panel activity-panel" aria-labelledby="activity-title">
+                <div class="panel-heading activity-heading"><div><h3 id="activity-title">Recent activity</h3><p>Illustrative entries for layout review</p></div>
+                  <div class="form-field compact-field"><label for="activity-filter">Show</label><select id="activity-filter" aria-label="Filter synthetic sample activity"><option value="all">All samples</option><option value="Planning">Planning</option><option value="In progress">In progress</option><option value="Reviewed">Reviewed</option></select></div>
+                </div>
+                <ul class="activity-list" id="activity-list" aria-live="polite"></ul>
+              </section>
+              <section class="panel state-demo" aria-labelledby="state-title">
+                <div class="panel-heading"><div><h3 id="state-title">Feedback states</h3><p>Reusable pattern preview</p></div><span class="chart-type">COMPONENT DEMO</span></div>
+                <div class="state-tabs" role="group" aria-label="Choose feedback state preview">
+                  <button class="state-tab is-selected" type="button" data-state="loading" aria-pressed="true">Loading</button>
+                  <button class="state-tab" type="button" data-state="empty" aria-pressed="false">Empty</button>
+                  <button class="state-tab" type="button" data-state="error" aria-pressed="false">Error</button>
+                </div>
+                <div class="state-preview" id="state-preview" aria-live="polite"></div>
+              </section>
+            </div>
+
+            <footer class="page-footer"><span>ARC-09 visual exploration</span><span>Not a production application</span></footer>
+          </section>
+
+          <section id="mission-builder" class="placeholder-page" data-page="mission-builder" hidden aria-labelledby="mission-builder-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="mission-builder-title">Mission Builder</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
+            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          </section>
+          <section id="spacecraft" class="placeholder-page" data-page="spacecraft" hidden aria-labelledby="spacecraft-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="spacecraft-title">Spacecraft Configuration</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
+            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          </section>
+          <section id="resources" class="placeholder-page" data-page="resources" hidden aria-labelledby="resources-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="resources-title">Resource Dashboard</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
+            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          </section>
+          <section id="simulation" class="placeholder-page" data-page="simulation" hidden aria-labelledby="simulation-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="simulation-title">Simulation &amp; Results</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
+            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          </section>
+          <section id="comparison" class="placeholder-page" data-page="comparison" hidden aria-labelledby="comparison-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="comparison-title">Mission Comparison &amp; Report</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
+            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script src="data.js"></script>
+    <script src="data-provider.js"></script>
+    <script src="charts.js"></script>
+    <script src="data-validation.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
