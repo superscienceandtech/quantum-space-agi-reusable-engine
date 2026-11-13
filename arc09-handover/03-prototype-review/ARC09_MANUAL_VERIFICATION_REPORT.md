@@ -105,6 +105,85 @@ The following SHA-256 values and byte sizes identify the working-tree files capt
 | `arc09-ui-prototype/README.md` | 6387 | `B5D1A862A44E0A8D6B6BB752D8CE8E05FE36F95FA49FE5C447372CB6841447B2` |
 | `arc09-ui-prototype/PROTOTYPE_HANDOFF.md` | 10065 | `8C96242E9F6DCEE9C02E61DFE3D961B5F60F6A3BD21A921F8E11D1FF0AD8DFE0` |
 
-### 8.3 Git snapshot for this report update
+### 8.3 Historical Git snapshot from the prior report update
 
-Before this update, the repository was on `arc/09-visualization` at HEAD `1b7cbac6e88c99a47b689e6a45a2fcbdb9019db4`, tracking `origin/arc/09-visualization` in the locally available refs. The worktree already contained modifications to `arc09-ui-prototype/PROTOTYPE_HANDOFF.md`, `README.md`, `app.js`, `index.html`, `styles.css`, and `docs/ARC09_FINAL_DECISION_CONFIRMATION_REQUEST.md`, plus untracked `.venv/`, ARC-09 evidence artifacts, prototype provider/validator/test pages, and ARC-09 draft documents. No staged changes were present. This update adds only this report modification; no commit or push was performed.
+At the time of the prior report update, the repository was on `arc/09-visualization` at HEAD `1b7cbac6e88c99a47b689e6a45a2fcbdb9019db4`, tracking `origin/arc/09-visualization` in the locally available refs. The worktree already contained modifications to `arc09-ui-prototype/PROTOTYPE_HANDOFF.md`, `README.md`, `app.js`, `index.html`, `styles.css`, and `docs/ARC09_FINAL_DECISION_CONFIRMATION_REQUEST.md`, plus untracked `.venv/`, ARC-09 evidence artifacts, prototype provider/validator/test pages, and ARC-09 draft documents. No staged changes were present at that time. That earlier update added only this report modification; no commit or push was performed.
+
+## 9. Latest user-reported browser verification — 2026-11-13
+
+**Evidence classification:** The following observations and PASS results were reported by the user after manually opening `http://127.0.0.1:8000/`. They were not reproduced by Codex or independent browser automation. The date was supplied as 2026-11-13 (Asia/Dhaka); the exact run time was not supplied.
+
+### 9.1 Server and browser observations
+
+| Source of observation | User-reported result | Qualification |
+|---|---|---|
+| Python HTTP server | `/` returned HTTP 200. | Server request-log result, not a browser-console result. |
+| Python HTTP server | CSS and JavaScript resources returned HTTP 304 (cached). | Resource filenames were not supplied. |
+| Python HTTP server | `/favicon.ico` returned HTTP 404. | Kept as a known minor issue; this report does not claim it is fixed or currently reproducible. |
+
+### 9.2 Manual browser results
+
+| Check | Result | User-reported observation |
+|---|---|---|
+| Browser Console after refresh | PASS | User reported no red errors. No exported Console log was supplied; this does not establish absence of warnings. |
+| Dashboard rendering | PASS | Dashboard rendered successfully. |
+| Activity filter | PASS | Activity filtering worked. |
+| Keyboard navigation and visible focus | PASS | Keyboard navigation and visible focus outlines worked. This is not screen-reader or accessibility-tree evidence. |
+| Responsive mobile layout | PASS | User reported passing checks at **375 × 812** viewport. No screenshot was supplied. |
+| Line, grouped-bar, and scatter-chart tooltips | PASS | User reported that the three chart tooltips worked. |
+| Conceptual relationship graph | PASS | User reported that graph interaction worked. |
+| Chart data-table alternatives | PASS | User reported that the alternatives were readable. |
+| `data-validation.test.html` | PASS | Expected 10 assertions; user reported PASS. Individual assertion output was not supplied. |
+| `startup-rejection.test.html` | PASS | Expected 8 assertions; user reported PASS. Individual assertion output was not supplied. |
+| `startup-invalid-data.test.html` | PASS | Expected 9 assertions; user reported PASS. Individual assertion output was not supplied. |
+
+### 9.3 Evidence limitations
+
+- Browser name/version, operating-system version, exact run time, zoom level, and device scale factor were not supplied.
+- Screenshots, screen recordings, exported Console logs, and detailed test-page assertion output were not supplied.
+- Screen-reader and assistive-technology testing were not reported. No accessibility-compliance claim is made.
+- Codex did not operate or inspect the user's browser and did not independently reproduce these results.
+- These checks cover the isolated synthetic-data prototype only. They do not establish backend behavior, production API integration, or production readiness.
+
+## 10. Latest user-reported browser verification - 2026-11-14
+
+**Evidence classification:** These outcomes were reported by the user after a manual Chrome browser run on 2026-11-14. They were not independently reproduced by Codex or automated browser tooling.
+
+| Check | User-reported result | Qualification |
+|---|---|---|
+| `data-validation.test.html` | PASS - 10/10 assertions passed. | User-reported; detailed assertion output was not supplied. |
+| `startup-rejection.test.html` | PASS - 8/8 assertions passed. | User-reported; detailed assertion output was not supplied. |
+| `startup-invalid-data.test.html` | PASS - 9/9 assertions passed. | User-reported; detailed assertion output was not supplied. |
+| Chrome Console | PASS - user reported no red errors. | User-reported; no exported Console evidence was supplied. |
+
+**Aggregate:** 27/27 reported test assertions passed across the three pages. This is an arithmetic summary of the user-reported counts, not independent execution evidence.
+
+**Evidence limitations:** Screenshots, exported Console logs, browser version, operating-system details, viewport, zoom, device scale factor, and exact run time were not supplied. Only the date 2026-11-14 was provided. No screen-reader or assistive-technology result is implied. These prototype checks do not establish production API integration or production readiness.
+
+## 11. Latest user-reported responsive browser verification ? 2026-11-14
+
+**Evidence classification:** The five PASS results below were reported by the user after manual browser checks on 2026-11-14. They were not independently reproduced. No detailed observations beyond the reported outcomes are asserted.
+
+| Viewport/check | User-reported result | Qualification |
+|---|---|---|
+| Desktop ? 1440 ? 900 | PASS | User-reported; no further observations supplied. |
+| Tablet landscape ? 1024 ? 768 | PASS | User-reported; no further observations supplied. |
+| Tablet portrait ? 768 ? 1024 | PASS | User-reported. At 768 CSS pixels, the viewport remains above the 760px drawer breakpoint. |
+| Breakpoint transition ? 760 ? 1024 | PASS | User-reported; this width exercises the drawer layout at the 760px breakpoint. |
+| Breakpoint transition ? 759 ? 1024 | PASS | User-reported; this width exercises the drawer layout below the 760px breakpoint. |
+
+**Evidence limitations:** Screenshots, exported browser/Console evidence, browser version, OS details, zoom, device scale factor, and detailed observations were not supplied. These results remain user-reported and do not imply independent browser verification, screen-reader testing, accessibility compliance, or production API integration. The previously reported mobile 375 ? 812 result remains recorded in Section 9.
+
+## 12. User-reported accessibility and reduced-motion verification ? 2026-11-14
+
+**Evidence classification:** The outcomes below were reported by the user after manual checks on 2026-11-14. They were not independently reproduced or independently verified.
+
+| Check | User-reported result | Qualification |
+|---|---|---|
+| Keyboard accessibility | PASS | User reported the skip link, keyboard navigation, visible focus, and backward navigation passed. |
+| Mobile navigation drawer | PASS | User reported keyboard opening, focus entering the drawer, Tab navigation remaining within it, Escape closing it, and focus returning to the menu button. |
+| Menu button accessibility properties | PASS | User reported the role, accessible name, and expanded state appeared meaningful in both closed and open states. |
+| Drawer accessibility context | PASS | User reported the drawer role/name appeared meaningful and background content was unavailable to assistive technology while open, then available again after closing. |
+| Reduced-motion support | PASS | User reported that with Chrome emulating `prefers-reduced-motion: reduce`, drawer transitions/animations were minimized and functionality remained intact. |
+
+**Evidence limitations:** No screenshots, exported accessibility-tree evidence, or screen-reader recordings were supplied. Windows Narrator was turned off; screen-reader announcement testing was **NOT TESTED**. Turning Narrator off is not an accessibility test. These user-reported results do not constitute independent verification or an accessibility-compliance claim.

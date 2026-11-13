@@ -4,7 +4,9 @@
 
 - Repository: `C:\Nasa AGI\quantum-space-agi-reusable-engine`
 - Branch/HEAD at capture: `arc/09-visualization` / `1b7cbac6e88c99a47b689e6a45a2fcbdb9019db4`
-- This report covers 93 copied source artifacts. It does not treat inclusion as approval.
+- This report covers 94 copied source artifacts. It does not treat inclusion as approval.
+- The complete package contains 98 files: 96 manifest-covered files, the manifest itself, and the package-scoped `.gitattributes` file. The 96 manifest entries cover the 94 copied source artifacts plus this index and copy report; the manifest excludes itself and `.gitattributes`, preserving the existing validation semantics.
+- `arc09-handover/.gitattributes` contains `* -text`. This package-scoped byte-preservation control prevents Git text normalization from changing package line endings. It is a support file, not a copied source artifact, and is not a manifest entry.
 
 | Source path | Destination path | Source Git status | Source bytes | Destination bytes | Source SHA-256 | Destination SHA-256 | Result |
 | --- | --- | --- | ---: | ---: | --- | --- | --- |
@@ -23,7 +25,7 @@
 | arc09-ui-prototype/STATIC_AUDIT.md | 03-prototype-review/STATIC_AUDIT.md | clean | 18269 | 18269 | 1E4E94F6BB702A87455BA357C7F268919485599020C919F5418F9C142CCD4DF2 | 1E4E94F6BB702A87455BA357C7F268919485599020C919F5418F9C142CCD4DF2 | MATCH |
 | arc09-ui-prototype/REVIEW_CHECKLIST.md | 03-prototype-review/REVIEW_CHECKLIST.md |  M | 3830 | 3830 | B1F4B82E81CE62CFC6F5332C3AAA06079958DF6DFE105206943D8D59CA204BA0 | B1F4B82E81CE62CFC6F5332C3AAA06079958DF6DFE105206943D8D59CA204BA0 | MATCH |
 | arc09-ui-prototype/FINAL_REVIEW_SUMMARY.md | 03-prototype-review/FINAL_REVIEW_SUMMARY.md | clean | 5166 | 5166 | 8D1CF8D76F90369A1D54E0FFAE8A0BBB004F27F102C687F3B98CD500106A608D | 8D1CF8D76F90369A1D54E0FFAE8A0BBB004F27F102C687F3B98CD500106A608D | MATCH |
-| docs/ARC09_MANUAL_VERIFICATION_REPORT.md | 03-prototype-review/ARC09_MANUAL_VERIFICATION_REPORT.md |  M | 9491 | 9491 | 69F33915938039E1CDD6A0B5B1E517E87A6786EBC26437814FF2D5C6554F20FE | 69F33915938039E1CDD6A0B5B1E517E87A6786EBC26437814FF2D5C6554F20FE | MATCH |
+| docs/ARC09_MANUAL_VERIFICATION_REPORT.md | 03-prototype-review/ARC09_MANUAL_VERIFICATION_REPORT.md |  M | 16733 | 16733 | 43125E7E347055B5F292DEDB31EF3620F0D1F5835E349BB4E8A5DB75B8E3D9CD | 43125E7E347055B5F292DEDB31EF3620F0D1F5835E349BB4E8A5DB75B8E3D9CD | MATCH |
 | arc09-submission-preparation/ARC09_Visualization_Research_and_Implementation.cell-id-candidate.ipynb | 04-notebook-lineage/ARC09_Visualization_Research_and_Implementation.cell-id-candidate.ipynb | ?? | 44292 | 44292 | A53684EF51E3F8ED761644299A090B3F336CAE3CEB1891AE67EDDD3C091EF22D | A53684EF51E3F8ED761644299A090B3F336CAE3CEB1891AE67EDDD3C091EF22D | MATCH |
 | arc09-submission-preparation/ARC09_Visualization_Research_and_Implementation.custom-python-runner-execution.ipynb | 04-notebook-lineage/ARC09_Visualization_Research_and_Implementation.custom-python-runner-execution.ipynb | ?? | 404080 | 404080 | 7209DF222FE9C5982338D21AF848F8D85D9BCA2DA73597475CA0222F554B4127 | 7209DF222FE9C5982338D21AF848F8D85D9BCA2DA73597475CA0222F554B4127 | MATCH |
 | arc09-submission-preparation/ARC09_Visualization_Research_and_Implementation.ipynb | 04-notebook-lineage/ARC09_Visualization_Research_and_Implementation.ipynb | ?? | 43274 | 43274 | FBE44C2A946B0B04D4B8C9ABB50A0E543D8C0FD70EC6816631E9815368DC2E4F | FBE44C2A946B0B04D4B8C9ABB50A0E543D8C0FD70EC6816631E9815368DC2E4F | MATCH |
@@ -92,8 +94,9 @@
 | arc09-submission-preparation/requirements.txt | 07-requirements-and-integrity/requirements.txt | clean | 79 | 79 | 389B86C317ED57DD13A51089F8B58695212CACC444387852BFC5563D20C818F6 | 389B86C317ED57DD13A51089F8B58695212CACC444387852BFC5563D20C818F6 | MATCH |
 | arc09-submission-preparation/SHA256SUMS-custom-execution.txt | 07-requirements-and-integrity/SHA256SUMS-custom-execution.txt | clean | 1979 | 1979 | 5ECDEC3EF2F3EB67E37ADFF2844326DC7DA3979309016AD46894228C8AB95E47 | 5ECDEC3EF2F3EB67E37ADFF2844326DC7DA3979309016AD46894228C8AB95E47 | MATCH |
 | arc09-submission-preparation/ARC09_Hridi_Research_Evidence_Package.zip | 07-requirements-and-integrity/ARC09_Hridi_Research_Evidence_Package.zip | ?? | 552536 | 552536 | 3817D304231D0F302766BCD7578F0C0893E253DB8B0534C1CA47A5907998EE7A | 3817D304231D0F302766BCD7578F0C0893E253DB8B0534C1CA47A5907998EE7A | MATCH |
+| docs/ARC09_ASSIGNMENT_H1_H6_STATUS.md | 08-decisions-and-requests/ARC09_ASSIGNMENT_H1_H6_STATUS.md | ?? | 13972 | 13972 | 9DF2D67F31092EF1D35D7CF991C8F2C3209A9850D8E427DFEA23AB12A2FBA217 | 9DF2D67F31092EF1D35D7CF991C8F2C3209A9850D8E427DFEA23AB12A2FBA217 | MATCH |
 | docs/ARC09_BACKEND_DATA_CONTRACT_REQUEST.md | 08-decisions-and-requests/ARC09_BACKEND_DATA_CONTRACT_REQUEST.md | clean | 9106 | 9106 | 9CA6272095AB04E661989CDA582F3C35DD6D66DF5B830EA344162D635FFD33B5 | 9CA6272095AB04E661989CDA582F3C35DD6D66DF5B830EA344162D635FFD33B5 | MATCH |
-| docs/ARC09_CUSTOM_EXECUTION_REPORT.md | 08-decisions-and-requests/ARC09_CUSTOM_EXECUTION_REPORT.md | clean | 6511 | 6511 | 1139670B091F3B04999D6EF08D69111676FB07BE73701756D29E3A8FB822B707 | 1139670B091F3B04999D6EF08D69111676FB07BE73701756D29E3A8FB822B707 | MATCH |
+| docs/ARC09_CUSTOM_EXECUTION_REPORT.md | 08-decisions-and-requests/ARC09_CUSTOM_EXECUTION_REPORT.md | clean | 7569 | 7569 | 77EDBEB8497BEB32FDC2A4C05DC83064FBE776C26875FC3CA8D61157D33F996F | 77EDBEB8497BEB32FDC2A4C05DC83064FBE776C26875FC3CA8D61157D33F996F | MATCH |
 | docs/ARC09_DASHBOARD_API_INTEGRATION_REQUEST.md | 08-decisions-and-requests/ARC09_DASHBOARD_API_INTEGRATION_REQUEST.md | ?? | 1226 | 1226 | C8F483E43D9359A4D1291C07868E8B48A786E72C3260FF878ECB4D99DF369735 | C8F483E43D9359A4D1291C07868E8B48A786E72C3260FF878ECB4D99DF369735 | MATCH |
 | docs/ARC09_DASHBOARD_INTEGRATION_BLUEPRINT.md | 08-decisions-and-requests/ARC09_DASHBOARD_INTEGRATION_BLUEPRINT.md | ?? | 38181 | 38181 | 014F10FB9E385171DDFEE009A2D7D3732DB03D6C0C26E8D72DD01468CE7E0072 | 014F10FB9E385171DDFEE009A2D7D3732DB03D6C0C26E8D72DD01468CE7E0072 | MATCH |
 | docs/ARC09_DECISION_REGISTER.md | 08-decisions-and-requests/ARC09_DECISION_REGISTER.md | clean | 8008 | 8008 | 3C51DFDFE99CDB01A133964AD9CAC5FEA67F6D67202CB10AAD2B29C78C642FC5 | 3C51DFDFE99CDB01A133964AD9CAC5FEA67F6D67202CB10AAD2B29C78C642FC5 | MATCH |
@@ -108,8 +111,8 @@ After the read-only provenance audit, the two listed Markdown sources had only t
 
 ## Copy result
 
-- Source paths copied: 93.
-- Destination files byte-for-byte matched source bytes at copy validation: 93/93.
+- Source paths copied: 94.
+- Destination files byte-for-byte matched source bytes at copy validation: 94/94.
 - Skipped/unavailable items: none. All explicitly requested source items were present and copied. `.venv/` was intentionally excluded by the work order.
 - ZIP embedded notebook was read as one named archive member and written under a separate archive-origin filename; the ZIP itself was not modified or re-created.
 - This check verifies copy identity, not correctness, approval, scientific validity, or formal submission readiness.

@@ -74,6 +74,15 @@ The existing manifest `arc09-submission-preparation/SHA256SUMS-custom-execution.
 
 This evidence demonstrates successful custom in-process execution of 14 code cells and generation and visual inspection of six PNGs. It does not establish standard Jupyter execution, interactive notebook behavior, browser behavior, scientific validation, NASA data use, product readiness, or official submission acceptance.
 
-The standard Jupyter execution path remains unverified. A prior attempt failed before notebook cells started: IPython could not create `C:\Users\HP\.ipython`; a retry using temporary directories encountered `PermissionError: [WinError 5] Access is denied` while setting security on a temporary kernel connection file. No security controls or permissions were changed.
+The standard Jupyter execution path remains unverified. A prior attempt failed before notebook cells started: IPython could not create `[REDACTED LOCAL PROFILE PATH]`; a retry using temporary directories encountered `PermissionError: [WinError 5] Access is denied` while setting security on a temporary kernel connection file. No security controls or permissions were changed.
 
 The official ARC-08.7.2 submission directory, required package structure, and acceptance requirements remain pending confirmation by the responsible project owner. Do not represent this package as an official submission until those decisions are confirmed.
+
+## Provenance addendum - recovered v4 runner candidate
+
+- Recovered Git blob: `f30980fe0438d17f76c9ad023606b257b9a90769`; local Git reports it as an unreachable blob with no reachable commit path.
+- Preserved candidate: `arc09-submission-preparation/run_legend_final_custom_python_notebook_v4.recovered-historical-candidate.py`; 9,206 bytes; SHA-256 `70E979B335C2AB26A94E6C5D7F8E29D435C08FA285F35EEB8F1AD5AE92220D6C`.
+- Current runner: `arc09-submission-preparation/run_legend_final_custom_python_notebook_v4.py`; 9,203 bytes; SHA-256 `6EBD4E7A63775AE6A2245D44E03E449F1B56957662D2F01B83B1189C1A6287E1`.
+- Byte comparison found the candidate and current runner differ only by three blank lines at end of file (the candidate is three bytes longer); no other differences were found.
+- The recovered candidate matches the runner hash recorded above, but it is not independently proven to have produced the saved v4 execution notebook or six chart images. The execution-to-runner linkage remains incomplete.
+- Resolution status: **PARTIALLY RESOLVED**.

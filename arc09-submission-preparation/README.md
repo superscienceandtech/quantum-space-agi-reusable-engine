@@ -98,7 +98,7 @@ The existing ZIP and manifest are historical package evidence, not the current c
 
 ## Limitations and approval status
 
-- Standard Jupyter execution remains unverified. A previous attempt was blocked before notebook cells ran: IPython could not create `C:\Users\HP\.ipython`; a retry failed with `PermissionError: [WinError 5] Access is denied` while setting security on a temporary kernel connection file. No security settings or permissions were changed.
+- Standard Jupyter execution remains unverified. A previous attempt was blocked before notebook cells ran: IPython could not create `[REDACTED LOCAL PROFILE PATH]`; a retry failed with `PermissionError: [WinError 5] Access is denied` while setting security on a temporary kernel connection file. No security settings or permissions were changed.
 - PNG review is not browser, interactive notebook, or screen-reader testing.
 - Data validation is demonstration-level structural validation, not domain or scientific validation.
 - No NASA/ARC-08 data, production API, mission result, or approved scientific contract is connected.
