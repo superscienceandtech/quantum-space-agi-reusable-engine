@@ -17,6 +17,20 @@ Matrix = NDArray[np.float64]
 ORTHOGONAL_TOLERANCE = 1e-9
 
 
+def _contains_boolean(value) -> bool:
+    if isinstance(value, (bool, np.bool_)):
+        return True
+    if isinstance(value, np.ndarray):
+        if value.dtype.kind == "b":
+            return True
+        if value.dtype.kind == "O":
+            return any(_contains_boolean(component) for component in value.flat)
+        return False
+    if isinstance(value, (list, tuple)):
+        return any(_contains_boolean(component) for component in value)
+    return False
+
+
 def _validate_angle(angle: Real, *, field: str = "angle_radians") -> float:
     if isinstance(angle, (bool, np.bool_)) or not isinstance(angle, Real):
         raise ScientificError(
@@ -111,7 +125,7 @@ Frame = CoordinateFrame
 
 
 def _validate_vector(values: Sequence[Real] | NDArray[np.generic], *, field: str = "vector") -> Vector:
-    if isinstance(values, (str, bytes, bool)):
+    if isinstance(values, (str, bytes, bool)) or _contains_boolean(values):
         raise ScientificError(
             ScientificErrorCode.INVALID_STATE,
             "Coordinate vector must contain real numeric components.",
@@ -159,6 +173,14 @@ def _validate_vector(values: Sequence[Real] | NDArray[np.generic], *, field: str
 
 
 def _validate_rotation_matrix(values: Sequence[Sequence[Real]] | NDArray[np.generic], *, field: str = "rotation") -> Matrix:
+    if _contains_boolean(values):
+        raise ScientificError(
+            ScientificErrorCode.INVALID_STATE,
+            "Rotation components must be real numeric values, not booleans.",
+            field=field,
+            expected="real 3x3 matrix",
+            received=type(values).__name__,
+        )
     try:
         array = np.asarray(values)
     except (TypeError, ValueError) as exc:

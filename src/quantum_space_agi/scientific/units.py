@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
+from numbers import Integral
 from typing import Final
 
 from .errors import ScientificError, ScientificErrorCode
@@ -34,7 +36,7 @@ class Unit:
                 expected="unit name",
                 received=self.name,
             )
-        if not isinstance(self.scale, (int, float)) or not (float(self.scale) > 0.0):
+        if isinstance(self.scale, bool) or not isinstance(self.scale, (int, float)):
             raise ScientificError(
                 ScientificErrorCode.INVALID_STATE,
                 "Unit scale must be a positive finite real number.",
@@ -42,18 +44,54 @@ class Unit:
                 expected="positive finite real scale",
                 received=self.scale,
             )
-        if len(self.dimensions) != 7:
+        try:
+            scale = float(self.scale)
+        except (TypeError, OverflowError, ValueError) as exc:
+            raise ScientificError(
+                ScientificErrorCode.INVALID_STATE,
+                "Unit scale must be a positive finite real number.",
+                field="scale",
+                expected="positive finite real scale",
+                received=self.scale,
+            ) from exc
+        if not math.isfinite(scale) or scale <= 0.0:
+            raise ScientificError(
+                ScientificErrorCode.INVALID_STATE,
+                "Unit scale must be a positive finite real number.",
+                field="scale",
+                expected="positive finite real scale",
+                received=self.scale,
+            )
+        try:
+            dimensions = tuple(self.dimensions)
+        except TypeError as exc:
             raise ScientificError(
                 ScientificErrorCode.INVALID_SHAPE,
                 "Dimensions must contain seven exponents.",
                 field="dimensions",
                 expected="7 values",
-                received=len(self.dimensions),
+                received=type(self.dimensions).__name__,
+            ) from exc
+        if len(dimensions) != 7:
+            raise ScientificError(
+                ScientificErrorCode.INVALID_SHAPE,
+                "Dimensions must contain seven exponents.",
+                field="dimensions",
+                expected="7 values",
+                received=len(dimensions),
+            )
+        if any(isinstance(value, bool) or not isinstance(value, Integral) for value in dimensions):
+            raise ScientificError(
+                ScientificErrorCode.INVALID_STATE,
+                "Dimensions must be integer exponents.",
+                field="dimensions",
+                expected="seven integer exponents",
+                received=dimensions,
             )
         object.__setattr__(self, "symbol", self.symbol.strip())
         object.__setattr__(self, "name", self.name.strip())
-        object.__setattr__(self, "scale", float(self.scale))
-        object.__setattr__(self, "dimensions", tuple(int(v) for v in self.dimensions))
+        object.__setattr__(self, "scale", scale)
+        object.__setattr__(self, "dimensions", tuple(int(value) for value in dimensions))
 
     def __str__(self) -> str:
         return self.symbol

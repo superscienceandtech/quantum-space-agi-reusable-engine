@@ -1,5 +1,6 @@
 import math
 import re
+import sys
 from pathlib import Path
 
 import nbformat
@@ -10,6 +11,10 @@ from pydantic import ValidationError
 
 ROOT = Path(__file__).resolve().parents[2]
 NOTEBOOK_DIR = ROOT / "notebooks" / "arc05_simulation"
+ALL_NOTEBOOK_PATHS = sorted(
+    list((ROOT / "notebooks" / "arc04_scientific").glob("*.ipynb"))
+    + list(NOTEBOOK_DIR.glob("*.ipynb"))
+)
 NOTEBOOK_NAMES = [
     "01_simulation_configuration.ipynb",
     "02_orbital_state.ipynb",
@@ -18,6 +23,8 @@ NOTEBOOK_NAMES = [
     "05_orbital_propagation.ipynb",
     "06_simulation_diagnostics.ipynb",
     "07_orbital_validation.ipynb",
+    "00_simulation_package_overview.ipynb",
+    "08_workflow.ipynb",
 ]
 
 
@@ -96,6 +103,83 @@ def test_notebook_is_valid_json_and_executes_notebook_cells(notebook_name, noteb
 def test_notebook_has_stored_execution_output(notebook_name):
     notebook = nbformat.read(NOTEBOOK_DIR / notebook_name, as_version=4)
     assert any(getattr(cell, "outputs", None) for cell in notebook.cells)
+
+
+@pytest.mark.parametrize(
+    "notebook_path",
+    ALL_NOTEBOOK_PATHS,
+    ids=lambda path: path.relative_to(ROOT).as_posix(),
+)
+def test_notebook_bootstrap_adds_validated_src_path(monkeypatch, notebook_path):
+    notebook = nbformat.read(notebook_path, as_version=4)
+    first_code_cell = next(cell for cell in notebook.cells if cell.cell_type == "code")
+    src_path = str(ROOT / "src")
+    monkeypatch.chdir(notebook_path.parent)
+    monkeypatch.setattr(
+        sys,
+        "path",
+        [entry for entry in sys.path if str(Path(entry or ".").resolve()) != src_path],
+    )
+    namespace = {}
+
+    exec(
+        compile(first_code_cell.source, f"{notebook_path.name}:bootstrap-cell", "exec"),
+        namespace,
+    )
+
+    assert namespace["_notebook_repo_root"] == ROOT
+    assert namespace["_notebook_src_path"] == src_path
+    assert sys.path[0] == src_path
+
+
+def test_package_overview_notebook_uses_public_workflow(notebook_namespaces):
+    namespace = notebook_namespaces["00_simulation_package_overview.ipynb"]
+    result = namespace["example_result"]
+    times = result["times_s"]
+    states = result["states"]
+
+    assert isinstance(namespace["example_config"], namespace["SimulationConfig"])
+    assert isinstance(namespace["example_initial_state"], namespace["OrbitalState"])
+    assert isinstance(times, np.ndarray)
+    assert isinstance(states, np.ndarray)
+    assert states.shape == (times.size, 6)
+    assert times[-1] == namespace["example_config"].simulation_duration_s
+    assert np.all(np.isfinite(times))
+    assert np.all(np.isfinite(states))
+    assert result["diagnostics"]["radius_m"].shape == times.shape
+
+
+def test_end_to_end_workflow_notebook_reports_real_results(notebook_namespaces):
+    namespace = notebook_namespaces["08_workflow.ipynb"]
+    result = namespace["result"]
+    times = result["times_s"]
+    states = result["states"]
+    diagnostics = result["diagnostics"]
+    config = namespace["config"]
+
+    assert isinstance(namespace["initial_state"], namespace["OrbitalState"])
+    assert isinstance(config, namespace["SimulationConfig"])
+    assert set(result) >= {
+        "times_s",
+        "states",
+        "collision_index",
+        "collision_time_s",
+        "collision_state",
+        "collision_method",
+        "diagnostics",
+        "model",
+    }
+    assert isinstance(times, np.ndarray)
+    assert isinstance(states, np.ndarray)
+    assert states.shape == (times.size, 6)
+    assert times[0] == 0.0
+    assert times[-1] == config.simulation_duration_s
+    assert np.all(np.isfinite(times))
+    assert np.all(np.isfinite(states))
+    assert diagnostics["radius_m"].shape == times.shape
+    assert diagnostics["speed_m_s"].shape == times.shape
+    assert np.isfinite(diagnostics["max_abs_energy_drift_m2_s2"])
+    assert np.isfinite(diagnostics["max_abs_angular_momentum_drift_m2_s"])
 
 
 def test_configuration_defaults_and_si_contract(notebook_namespaces):
