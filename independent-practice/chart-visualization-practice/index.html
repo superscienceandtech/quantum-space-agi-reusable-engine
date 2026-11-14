@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f7fb">
+    <title>Chart Lab · Data Visualization Practice</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to charts</a>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="Chart Lab home">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span>Chart<span class="brand-light">Lab</span></span>
+        </a>
+        <div class="topbar-meta"><span class="status-dot" aria-hidden="true"></span> Interactive learning workspace</div>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <section class="intro" id="top" aria-labelledby="page-title">
+          <div class="eyebrow"><span class="eyebrow-line"></span> DATA VISUALIZATION PRACTICE</div>
+          <div class="intro-row">
+            <div>
+              <h1 id="page-title">See the story<br class="mobile-break"> in the data.</h1>
+              <p class="intro-copy">Three interactive chart types, one small dataset at a time. Explore the marks, compare patterns, and check the source values below each chart.</p>
+            </div>
+            <div class="practice-badge"><span class="badge-icon" aria-hidden="true">✳</span><span><strong>Practice mode</strong><br>Values are illustrative</span></div>
+          </div>
+          <p class="synthetic-notice"><span aria-hidden="true">ⓘ</span> Synthetic practice data — not real mission data.</p>
+        </section>
+
+        <section class="chart-grid" aria-label="Interactive chart examples">
+          <article class="chart-card chart-card-wide" aria-labelledby="line-title">
+            <div class="card-heading">
+              <div><div class="chart-kicker">01 / CHANGE</div><h2 id="line-title">Value across steps</h2><p class="chart-description">Follow how a practice value changes from one ordered step to the next.</p></div>
+              <span class="chart-type">LINE CHART</span>
+            </div>
+            <div class="chart-frame" id="line-chart" data-chart="line" aria-busy="true"></div>
+            <div class="chart-tooltip" role="status" aria-live="polite" hidden></div>
+            <p class="chart-takeaway"><span class="takeaway-mark" aria-hidden="true">↗</span><span><strong>Read the pattern</strong> The values rise overall, with a small dip at Step 3.</span></p>
+            <details class="data-details"><summary>View the data table</summary><div class="table-wrap"><table><caption class="sr-only">Synthetic practice data for value across steps</caption><thead><tr><th scope="col">Ordered step</th><th scope="col">Practice value (arbitrary units)</th></tr></thead><tbody id="line-table"></tbody></table></div></details>
+          </article>
+
+          <article class="chart-card" aria-labelledby="bar-title">
+            <div class="card-heading">
+              <div><div class="chart-kicker">02 / COMPARE</div><h2 id="bar-title">Compare categories</h2><p class="chart-description">See two practice series side by side in each category.</p></div>
+              <span class="chart-type">GROUPED BAR</span>
+            </div>
+            <div class="legend" aria-label="Chart legend"><span><i class="legend-swatch series-a" aria-hidden="true"></i>Series A</span><span><i class="legend-swatch series-b" aria-hidden="true"></i>Series B</span></div>
+            <div class="chart-frame" id="bar-chart" data-chart="bar" aria-busy="true"></div>
+            <div class="chart-tooltip" role="status" aria-live="polite" hidden></div>
+            <p class="chart-takeaway"><span class="takeaway-mark" aria-hidden="true">⇄</span><span><strong>Read the pattern</strong> Compare paired bars within each category.</span></p>
+            <details class="data-details"><summary>View the data table</summary><div class="table-wrap"><table><caption class="sr-only">Synthetic practice data for grouped category comparison</caption><thead><tr><th scope="col">Category</th><th scope="col">Series A</th><th scope="col">Series B</th></tr></thead><tbody id="bar-table"></tbody></table></div></details>
+          </article>
+
+          <article class="chart-card" aria-labelledby="scatter-title">
+            <div class="card-heading">
+              <div><div class="chart-kicker">03 / RELATE</div><h2 id="scatter-title">Explore a relationship</h2><p class="chart-description">Each dot is one pair of synthetic practice values.</p></div>
+              <span class="chart-type">SCATTER PLOT</span>
+            </div>
+            <div class="chart-frame" id="scatter-chart" data-chart="scatter" aria-busy="true"></div>
+            <div class="chart-tooltip" role="status" aria-live="polite" hidden></div>
+            <p class="chart-takeaway"><span class="takeaway-mark" aria-hidden="true">≈</span><span><strong>Interpret carefully</strong> A visible relationship does not prove that one value causes the other.</span></p>
+            <details class="data-details"><summary>View the data table</summary><div class="table-wrap"><table><caption class="sr-only">Synthetic practice data for scatter plot</caption><thead><tr><th scope="col">X (arbitrary units)</th><th scope="col">Y (arbitrary units)</th></tr></thead><tbody id="scatter-table"></tbody></table></div></details>
+          </article>
+        </section>
+
+        <footer class="footer"><span class="footer-mark" aria-hidden="true">✳</span><span>A small practice space for learning how charts communicate.</span><span class="footer-note">No real mission data</span></footer>
+      </main>
+    </div>
+    <script src="data.js"></script>
+    <script src="charts.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
