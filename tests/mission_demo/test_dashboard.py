@@ -98,9 +98,12 @@ def test_mission_builder_owns_form_and_views_have_result_hosts() -> None:
         "simulation-run-state": "simulation",
         "report-run-result": "comparison",
     }
-    form = (PROTOTYPE / "index.html").read_text(encoding="utf-8").split(
-        '<form id="mission-demo-form"', maxsplit=1
-    )[1].split("</form>", maxsplit=1)[0]
+    form = (
+        (PROTOTYPE / "index.html")
+        .read_text(encoding="utf-8")
+        .split('<form id="mission-demo-form"', maxsplit=1)[1]
+        .split("</form>", maxsplit=1)[0]
+    )
     assert 'name="destination_profile_id"' in form
     assert 'name="selected_payload_ids"' in form
 

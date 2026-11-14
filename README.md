@@ -81,6 +81,11 @@ py -3.11 -m venv .venv
 .venv\Scripts\python.exe -m pip install -e ".[dev,quality,notebooks]"
 ```
 
+For WSL checkouts stored under `/mnt/<drive>`, create the environment on the
+Linux filesystem instead of the mounted drive to avoid venv symlink and package
+installation performance issues. The local demo guide shows commands using a
+unique `$HOME/.venvs/` path for that checkout.
+
 To run the local mission dashboard, install its optional API dependencies and
 start the loopback-only server with the same environment's Python:
 

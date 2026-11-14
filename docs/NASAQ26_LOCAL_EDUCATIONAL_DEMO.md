@@ -29,6 +29,21 @@ The import check, package installation, and server launch all use the same
 environment-specific Python executable. The import path must point to this
 checkout's `src/quantum_space_agi`, not another worktree.
 
+For a WSL checkout under `/mnt/<drive>`, keep the environment on the Linux
+filesystem to avoid mounted-drive symlink and package-install performance
+problems. Give each checkout its own environment path:
+
+```bash
+mkdir -p "$HOME/.venvs"
+python3 -m venv "$HOME/.venvs/nasaq26-develop-worktree"
+"$HOME/.venvs/nasaq26-develop-worktree/bin/python" -m pip install -e ".[api]"
+"$HOME/.venvs/nasaq26-develop-worktree/bin/python" -c "from pathlib import Path; import quantum_space_agi; expected = (Path.cwd() / 'src/quantum_space_agi/__init__.py').resolve(); actual = Path(quantum_space_agi.__file__).resolve(); assert actual == expected, f'{actual} is not {expected}'; print(actual)"
+"$HOME/.venvs/nasaq26-develop-worktree/bin/python" -m quantum_space_agi.mission_demo.server
+```
+
+Use a different path for each checkout and run these commands from that
+checkout's repository root.
+
 Python 3.11 or later is declared in `pyproject.toml`. This environment's active interpreter should be checked before treating Python 3.11 runtime compatibility as verified.
 
 ## Versioned local API
