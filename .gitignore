@@ -9,6 +9,8 @@ config/data_config.local.json
 # Python caches and bytecode.
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
 *$py.class
 .pytest_cache/
 .mypy_cache/
@@ -21,6 +23,11 @@ data/**/__pycache__/
 .venv/
 venv/
 env/
+.clean-wheel-venv/
+
+# Notebook execution and validation artifacts.
+_arc05_exec/
+_nb_exec_check/
 
 # Build and coverage artifacts.
 build/
