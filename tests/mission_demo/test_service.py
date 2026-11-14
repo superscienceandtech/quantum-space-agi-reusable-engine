@@ -64,10 +64,7 @@ def test_infeasible_arc08_evaluation_does_not_gate_simulation() -> None:
     assert evaluation["status"] == "evaluated"
     assert evaluation["policy_approval_status"] == "pending"
     assert evaluation["result"]["feasible"] is False
-    assert (
-        evaluation["policy_authority"]
-        == "educational evaluator output only"
-    )
+    assert evaluation["policy_authority"] == "educational evaluator output only"
     assert result["trajectory"]["states"]
 
 
