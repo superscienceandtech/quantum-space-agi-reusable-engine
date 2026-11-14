@@ -1,10 +1,10 @@
 # Data Architecture
 
-**Status:** Initial architecture, updated after the ARC-03 Day 3 loader implementation. Components identified as future remain unimplemented.
+**Status:** Updated after ARC-03 data integration and the ARC-08 preprocessing and Exoplanet Archive adapter implementations. Components identified as future remain unimplemented.
 
 ## Purpose and scope
 
-The data layer ingests tabular or nested data, retains original inputs, and supports explicit structural validation while tracing outputs to their sources. It fits the planned Python/FastAPI/Pydantic/NumPy/SciPy modular monolith. The ARC-03 loader parses CSV and JSON and associates optional metadata; a separate validator checks records against caller-supplied schemas. Scientific validation and preprocessing remain future work.
+The data layer ingests tabular or nested data, retains source metadata, and supports explicit structural validation while tracing outputs to their sources. The ARC-03 package provides local CSV/JSON ingestion, structured schema validation, quality analysis, and export. ARC-08 provides deterministic scalar preprocessing. A read-only, bounded JSON adapter for the NASA Exoplanet Archive `ps` table demonstrates one source-specific network integration. Scientific validation and task-specific ML remain future work.
 
 ## Requirements and assumptions
 
@@ -12,7 +12,7 @@ The data layer ingests tabular or nested data, retains original inputs, and supp
 
 - CSV and JSON are the initial supported input formats.
 - Preserve source data and provenance; do not silently alter units or types.
-- NASA open datasets may be a future compatibility target, but no particular dataset is selected or confirmed available.
+- A small Exoplanet Archive TAP integration demonstration exists; it is not an approved ML dataset, and no prediction task or training dataset has been approved.
 - Future simulation and ML modules should be able to consume prepared data.
 - Keep the system a modular monolith and avoid unnecessary dependencies.
 - Do not train a model until there is suitable data and a measurable task.
@@ -34,7 +34,7 @@ external file/source
 raw/ (retained original) ---- source metadata + provenance
         |
         v
-implemented loader -> implemented structural validation -> future preprocessing
+implemented loader -> implemented structural validation -> scalar preprocessing
                                               |              |
                                               v              v
                                         reject/report   processed/
@@ -42,20 +42,23 @@ implemented loader -> implemented structural validation -> future preprocessing
                                             simulation / API / ML consumers
 ```
 
-The diagram shows the current module boundaries and future preprocessing step.
+The diagram shows the current module boundaries. Learned preprocessing and task-specific ML remain future work.
 
 | Component | Responsibility | Current design |
 | --- | --- | --- |
 | Raw data storage | Keep received files byte-for-byte for audit and reprocessing. | Future `data/raw/`; read-only after ingestion. Exclude large/private data from Git as appropriate. |
 | Processed data storage | Hold explicitly transformed outputs without replacing raw files. | Future `data/processed/`; associate each output with provenance. |
-| Sample data | Small, clearly synthetic fixtures for examples and future development. | Future `data/samples/`; label synthetic/example values in filenames and metadata. |
+| Sample data | Small, clearly synthetic fixtures for examples and future development. | Existing `data/samples/sample_dataset.csv` and `data/samples/sample_dataset.json` are synthetic/example fixtures, not NASA archive data or approved ML training data. |
 | Data schemas | Define fields, types, nullability, and simple constraints. | Explicit lightweight JSON-compatible schema at `schemas/`; version/migration policy remains future work. |
 | Source metadata | Describe where/how a dataset was obtained and its license/access details. | Use `source_metadata_template.json`. Never put credentials in metadata. |
 | Provenance metadata | Record file identity, transformations, timestamps, and parent inputs. | Use `provenance_template.json`; link processed outputs to source checksums. |
 | Data configuration | Hold non-secret dataset paths/options and supported-format defaults. | `config/data_config.json`; environment-specific secrets belong in secret management. |
 | Loader interface | Read CSV/JSON into a consistent record-list result while retaining source details. | Implemented in `src/quantum_space_agi/data/loader.py`; format-specific parsers are behind `load_dataset`. |
-| Validation interface | Check structure, declared types, missing values, basic constraints, and optional duplicates. | Implemented separately in `src/quantum_space_agi/data/validator.py`; returns structured issues without changing records. Scientific and unit validation remain future work. |
-| ML integration | Consume versioned processed data and return model/evaluation artifacts linked to inputs. | Future module boundary; must not own or mutate raw data. |
+| Structured schema validation | Check schema-declared required fields, nullability, and exact Python types without coercion or scientific validation. | `validate_dataset(dataset, schema)` in `src/quantum_space_agi/data/schemas.py`; `from quantum_space_agi.data import validate_dataset` refers to this structured `Dataset`/`DataSchema` API. |
+| Legacy record validation | Validate a legacy `DatasetLoadResult`, mapping, or record sequence against its configurable contract. | `validate_dataset()` in `src/quantum_space_agi/data/validator.py`; exported from the package as `validate_records`. |
+| ML preprocessing | Apply explicit deterministic scalar conversions and record transformations in provenance. | Implemented in `src/quantum_space_agi/ml/preprocessing.py`; learned preprocessing remains blocked pending an approved use case. |
+| NASA source integration | Retrieve one bounded JSON result from the Exoplanet Archive `ps` table and return a provenance-linked `Dataset`. | Implemented as a source-specific adapter at `src/quantum_space_agi/data/adapters/exoplanet_archive.py`; it does not retain response bytes or establish scientific/ML validity. |
+| ML integration | Consume task-approved data and return model/evaluation artifacts linked to inputs. | Future module boundary; must not own or mutate raw data. |
 
 ## Suggested future layout
 
@@ -71,14 +74,14 @@ schemas/              explicit data contracts
 src/<package>/data/   loader, validation, preprocessing interfaces and implementations
 ```
 
-The paths above are the initial repository layout. Generic loading and explicit-schema structural validation exist; scientific validation, schema migration, and processing code remain future work. Confirm repository packaging, storage, and ignore rules with the team as those components are implemented.
+The paths above describe the repository layout. Generic loading, explicit-schema structural validation, quality analysis, deterministic scalar preprocessing, and one source-specific TAP adapter exist. Scientific validation, schema migration, learned transformations, and model work remain future work. Confirm repository packaging, storage, and ignore rules with the team as those components are extended.
 
 ## Ingestion and quality contract
 
 1. Identify the source file and capture source metadata before parsing.
 2. Parse CSV/JSON without changing original bytes; the ARC-03 loader rejects malformed input with a useful error.
 3. Apply a declared schema version. Preserve source field names or document mappings.
-4. Apply an explicit schema for structural and basic data-quality checks. Report missing values, configured duplicates, type mismatches, and declared range violations without modifying source data. Unit and scientific rules must be domain-specific and explicit.
+4. Current structured schema validation checks declared required fields, nullability, and exact types; `analyze_quality()` reports missing values for observed fields, exact duplicate rows, and finite numeric summaries. The legacy validator has a separate configurable contract. A unified workflow for declared keys, ranges, and other domain-specific rules is a future desired contract, not a capability of the structured schema API. Unit and scientific rules must be explicit and domain-specific.
 5. Write accepted/processed output separately and capture every transformation in provenance.
 6. Make downstream consumers state which schema and processed-data version they accept.
 
@@ -86,11 +89,11 @@ Nulls must remain distinguishable from zero, empty string, and sentinel values. 
 
 ## NASA data compatibility
 
-Design for future external datasets by allowing source URLs/identifiers, access and retrieval timestamps, license/terms references, citation, units, coordinate/time conventions, and source-specific identifiers to be recorded. These are compatibility considerations, not evidence that a NASA source has been chosen, retrieved, endorsed, or scientifically validated. Dataset-specific documentation and terms must be reviewed when a source is selected.
+The Exoplanet Archive adapter records its source, endpoint, exact generated query, response format, retrieval time, checksum, ordering, identity fields, and citation guidance. The adapter-returned `Dataset` leaves archive version, DOI, column descriptions, and units explicitly unknown; information independently verified through authoritative documentation may be recorded separately. This adapter is a technical ingestion demonstration only; it does not imply NASA endorsement, scientific validation, or ML suitability. Review product documentation and terms before selecting data for research or training.
 
 ## Open decisions for implementation
 
 - Which storage backend and retention/access controls fit deployment?
-- What are the first real datasets, owners, license terms, schemas, keys, and units?
+- Which, if any, real datasets are approved for an identified scientific task, and what are their owners, terms, schemas, row keys, and units?
 - Which processed artifacts should be versioned in Git versus external storage?
 - Which module owns schema definitions and compatibility/version migration?

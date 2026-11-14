@@ -12,36 +12,41 @@ __pycache__/
 *.pyo
 *.pyd
 *$py.class
+data/**/__pycache__/
+*.cache
+
+# Testing and type checking.
 .pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
 .mypy_cache/
 .ruff_cache/
 .hypothesis/
-data/**/__pycache__/
-*.cache
 
 # Virtual environments.
 .venv/
 venv/
 env/
+ENV/
 .clean-wheel-venv/
 
 # Notebook execution and validation artifacts.
 _arc05_exec/
 _nb_exec_check/
 
-# Build and coverage artifacts.
+# Build artifacts.
 build/
 dist/
 *.egg-info/
-.coverage
-.coverage.*
-htmlcov/
 
-# Local environment files and secrets.
+# Environment files and secrets.
 .env
 .env.*
 !.env.example
 
-# Operating-system files.
+# IDE and operating-system files.
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
