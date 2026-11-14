@@ -57,8 +57,8 @@ estimates. Its presence does not authorize a training or prediction claim.
 The local mission demo uses synthetic Earth-orbit profiles with the ARC-05
 two-body simulator, then reports ARC-08's actual educational evaluator output
 with resource-policy approval explicitly pending. ARC-09's remaining overview
-panels are illustrative synthetic samples; only the mission result section is
-backed by live local calculations. See
+panels are illustrative synthetic samples; the Mission Builder and result views
+use live local API responses. See
 [`docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md`](docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md)
 for API routes, assumptions, and limitations.
 

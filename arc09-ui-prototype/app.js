@@ -49,6 +49,127 @@
     return card;
   }
 
+  const comparisonUnavailable = 'Cross-mission comparison unavailable: the local API has no comparison or mission-history endpoint.';
+  const emptyMissionMessage = 'Run a mission in Mission Builder to see the latest local API result.';
+  let latestMissionState = { status: 'empty', result: null, message: null };
+
+  function runStatePanel(host, title, message, state) {
+    const panel = node('section', `run-state-panel run-state-${state}`);
+    panel.setAttribute('role', state === 'error' ? 'alert' : 'status');
+    panel.append(node('h2', '', title), node('p', '', message));
+    host.appendChild(panel);
+  }
+
+  function renderSpacecraftResult(state) {
+    const host = document.getElementById('spacecraft-run-result');
+    host.replaceChildren();
+    if (state.status !== 'ready' || !state.result) {
+      const title = state.status === 'error' ? 'Mission result unavailable' : state.status === 'loading' ? 'Mission run in progress' : 'No mission results yet';
+      const message = state.status === 'error' ? state.message : state.status === 'loading' ? 'Previous mission results were cleared while this run is in progress.' : emptyMissionMessage;
+      runStatePanel(host, title, message, state.status);
+      return;
+    }
+
+    const mission = state.result.mission;
+    const panel = node('article', 'mission-summary-card');
+    panel.append(node('h2', '', 'Latest spacecraft configuration'));
+    panel.append(node('p', '', `Spacecraft profile: ${mission.spacecraft_profile_id}`));
+    panel.append(node('h3', '', 'Selected payloads'));
+    const payloads = node('ul', 'mission-value-list');
+    mission.selected_payload_ids.forEach((payloadId) => payloads.append(node('li', '', payloadId)));
+    panel.append(payloads);
+    panel.append(node('p', 'run-unavailable-note', 'physical spacecraft properties are unavailable: mass, dimensions, propulsion, fuel, capacity, and power are not represented by this API.'));
+    host.appendChild(panel);
+  }
+
+  function renderResourceResult(state) {
+    const host = document.getElementById('resource-run-result');
+    host.replaceChildren();
+    if (state.status !== 'ready' || !state.result) {
+      const title = state.status === 'error' ? 'Resource result unavailable' : state.status === 'loading' ? 'Mission run in progress' : 'No resource evaluation yet';
+      const message = state.status === 'error' ? state.message : state.status === 'loading' ? 'Previous mission results were cleared while this run is in progress.' : emptyMissionMessage;
+      runStatePanel(host, title, message, state.status);
+      return;
+    }
+
+    const evaluation = state.result.resource_evaluation;
+    const result = evaluation.result;
+    const panel = node('article', 'mission-summary-card');
+    panel.append(node('h2', '', 'ARC-08 educational evaluator'));
+    panel.append(node('p', '', `Evaluator version: ${result.evaluator_version}`));
+    panel.append(node('p', '', `Scenario: ${result.scenario_id}`));
+    panel.append(node('p', '', `Evaluation status: ${evaluation.status}`));
+    panel.append(node('p', 'run-warning', `policy approval pending (${evaluation.policy_approval_status}); this output is educational only.`));
+    panel.append(node('p', '', evaluation.warning));
+    const totals = node('ul', 'mission-value-list');
+    [
+      ['Budget', result.resource_totals.budget_units],
+      ['Mass', result.resource_totals.mass_units],
+      ['Power', result.resource_totals.power_units],
+      ['Payload slots', result.resource_totals.payload_slots]
+    ].forEach(([label, value]) => totals.append(node('li', '', `${label}: ${value} abstract units`)));
+    panel.append(node('h3', '', 'Resource totals · abstract units'));
+    panel.append(totals);
+    panel.append(node('p', '', `Educational scenario result: ${result.feasible ? 'within this scenario' : 'outside this scenario'}; this is not mission feasibility.`));
+    panel.append(node('h3', '', 'Scenario violations'));
+    if (result.violations.length) {
+      const violations = node('ul', 'mission-value-list mission-violations');
+      result.violations.forEach((violation) => violations.append(node(
+        'li',
+        '',
+        `${violation.code}: ${violation.observed_total} of ${violation.limit} abstract units`
+      )));
+      panel.append(violations);
+    } else {
+      panel.append(node('p', '', 'No violations reported by this educational scenario.'));
+    }
+    host.appendChild(panel);
+  }
+
+  function renderReportResult(state) {
+    const host = document.getElementById('report-run-result');
+    host.replaceChildren();
+    if (state.status !== 'ready' || !state.result) {
+      const title = state.status === 'error' ? 'Mission report unavailable' : state.status === 'loading' ? 'Mission run in progress' : 'No mission report yet';
+      const message = state.status === 'error' ? state.message : state.status === 'loading' ? 'Previous mission results were cleared while this run is in progress.' : emptyMissionMessage;
+      runStatePanel(host, title, message, state.status);
+      host.append(node('p', 'run-unavailable-note', comparisonUnavailable));
+      return;
+    }
+
+    const { mission, resource_evaluation: evaluation, trajectory } = state.result;
+    const panel = node('article', 'mission-summary-card');
+    panel.append(node('h2', '', 'Latest mission report'));
+    panel.append(node('p', '', `Destination: ${mission.destination_display_name} (${mission.destination_profile_id})`));
+    panel.append(node('p', '', `Selected payloads: ${mission.selected_payload_ids.join(', ')}`));
+    panel.append(node('p', '', `ARC-05: ${trajectory.model.integrator} integrator · ${trajectory.model.reference_frame} frame · ${trajectory.states.length} state samples`));
+    panel.append(node('p', '', `ARC-08 evaluator status: ${evaluation.status}; policy approval ${evaluation.policy_approval_status}.`));
+    panel.append(node('p', 'run-unavailable-note', comparisonUnavailable));
+    host.appendChild(panel);
+  }
+
+  function renderMissionState(state) {
+    latestMissionState = state;
+    renderSpacecraftResult(state);
+    renderResourceResult(state);
+    renderReportResult(state);
+
+    const status = document.getElementById('simulation-run-state');
+    const results = document.getElementById('mission-demo-results');
+    results.hidden = state.status !== 'ready';
+    if (state.status === 'ready') {
+      status.textContent = `Simulation complete: ${state.result.trajectory.states.length} state samples. Educational output only.`;
+    } else if (state.status === 'error') {
+      status.textContent = `Mission result unavailable: ${state.message}`;
+    } else if (state.status === 'loading') {
+      status.textContent = 'Mission run in progress. Previous mission results were cleared.';
+    } else {
+      status.textContent = emptyMissionMessage;
+    }
+  }
+
+  window.addEventListener('mission-demo:state', (event) => renderMissionState(event.detail));
+
   function fillTable(bodyId, rows, fields) {
     const body = document.getElementById(bodyId);
     body.replaceChildren(...rows.map((row) => {
@@ -216,6 +337,7 @@
 
   function start() {
     setupNavigation();
+    renderMissionState(latestMissionState);
     if (!data || !window.arc09Charts) {
       document.querySelectorAll('.chart-host').forEach((host) => {
         const message = !data ? 'Sample chart data is unavailable.' : 'Chart rendering is unavailable.';

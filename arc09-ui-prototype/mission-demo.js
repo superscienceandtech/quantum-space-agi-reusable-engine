@@ -8,6 +8,7 @@
   const destination = form.elements.destination_profile_id;
   const runButton = form.querySelector('button[type="submit"]');
   const SVG_NS = 'http://www.w3.org/2000/svg';
+  let result = null;
 
   function element(tag, text, parent) {
     const node = document.createElement(tag);
@@ -22,10 +23,18 @@
     status.textContent = message;
   }
 
+  function publishMissionState(status, result = null, message = null) {
+    window.dispatchEvent(new CustomEvent('mission-demo:state', {
+      detail: { status, result, message }
+    }));
+  }
+
   function showError(message) {
     setStatus(message, 'error');
     results.hidden = true;
     results.replaceChildren();
+    result = null;
+    publishMissionState('error', null, message);
   }
 
   async function responseJson(response) {
@@ -48,11 +57,14 @@
     };
   }
 
-  function drawTrajectory(host, states) {
-    if (!Array.isArray(states) || states.length < 2 || states.some((row) =>
-      !Array.isArray(row) || row.length !== 6 ||
-      row.slice(0, 2).some((value) => !Number.isFinite(value))
-    )) {
+  function drawTrajectory(host, trajectory) {
+    const { times_s: times, states } = trajectory || {};
+    if (!Array.isArray(times) || !Array.isArray(states) ||
+      states.length < 2 || times.length !== states.length ||
+      times.some((value) => !Number.isFinite(value)) ||
+      states.some((row) => !Array.isArray(row) || row.length !== 6 ||
+        row.some((value) => !Number.isFinite(value)))
+    ) {
       throw new Error('The local service returned an invalid trajectory for display.');
     }
     const xs = states.map((row) => row[0]);
@@ -91,7 +103,13 @@
     results.hidden = false;
     element('h3', 'Mission run results · synthetic educational output', results);
     element('p', `Profile: ${payload.mission.destination_display_name}; payloads: ${payload.mission.selected_payload_ids.join(', ')}.`, results);
-    element('p', `${payload.trajectory.model.dynamics} · ${payload.trajectory.model.integrator} · ${payload.trajectory.model.reference_frame}.`, results);
+    const trajectory = payload.trajectory;
+    const model = trajectory.model;
+    const diagnostics = trajectory.diagnostics;
+    element('p', `${model.dynamics} · ${model.integrator} · ${model.reference_frame}.`, results);
+    element('p', `Time: ${model.time_unit}; position: ${model.position_unit}; velocity: ${model.velocity_unit}.`, results);
+    element('p', `Maximum absolute energy drift: ${diagnostics.max_abs_energy_drift_m2_s2} m²/s²; maximum absolute angular-momentum drift: ${diagnostics.max_abs_angular_momentum_drift_m2_s} m²/s.`, results);
+    element('p', 'Synthetic educational two-body projection; not a transfer trajectory or validated mission prediction.', results);
     const limitations = element('ul', undefined, results);
     payload.limitations.forEach((item) => element('li', item, limitations));
 
@@ -110,12 +128,11 @@
       ));
     }
 
-    const trajectory = payload.trajectory;
     const grid = element('div', undefined, results);
     grid.className = 'mission-result-grid';
     const chartPanel = element('section', undefined, grid);
     element('h4', 'Projected trajectory (ECI X/Y)', chartPanel);
-    drawTrajectory(chartPanel, trajectory.states);
+    drawTrajectory(chartPanel, trajectory);
     const tablePanel = element('section', undefined, grid);
     element('h4', 'Trajectory state table', tablePanel);
     const details = element('details', undefined, tablePanel);
@@ -141,10 +158,15 @@
   async function loadDestinations() {
     destination.disabled = true;
     runButton.disabled = true;
+    result = null;
+    publishMissionState('loading', result);
     setStatus('Loading synthetic destination profiles…');
     try {
       const response = await fetch('/api/v1/missions/destinations');
       const payload = await responseJson(response);
+      if (!payload || !Array.isArray(payload.destinations)) {
+        throw new Error('The local service returned an invalid destination list.');
+      }
       destination.replaceChildren();
       payload.destinations.forEach((profile) => {
         const option = document.createElement('option');
@@ -158,6 +180,7 @@
       destination.disabled = false;
       runButton.disabled = false;
       setStatus('Ready. Configure a synthetic mission, then validate and run it locally.');
+      publishMissionState('empty', null);
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Could not load destinations from the local mission API.');
     }
@@ -165,6 +188,10 @@
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    result = null;
+    results.hidden = true;
+    results.replaceChildren();
+    publishMissionState('loading', result);
     const request = missionRequest();
     if (!request.selected_payload_ids.length) {
       showError('Select at least one payload before running the educational simulation.');
@@ -172,7 +199,6 @@
     }
     runButton.disabled = true;
     setStatus('Validating mission configuration…');
-    results.hidden = true;
     try {
       const validationResponse = await fetch('/api/v1/missions/validate', {
         method: 'POST',
@@ -187,7 +213,9 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request)
       });
-      render(await responseJson(runResponse));
+      result = await responseJson(runResponse);
+      render(result);
+      publishMissionState('ready', result);
     } catch (error) {
       showError(error instanceof Error ? error.message : 'The local mission run failed.');
     } finally {

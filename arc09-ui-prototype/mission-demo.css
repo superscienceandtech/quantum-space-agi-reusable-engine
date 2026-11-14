@@ -80,6 +80,53 @@
   text-align: left;
 }
 
+.mission-summary-card,
+.run-state-panel {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mission-summary-card h2,
+.mission-summary-card h3 {
+  margin-top: 0;
+}
+
+.mission-summary-card h3 {
+  margin-bottom: 8px;
+}
+
+.mission-value-list {
+  display: grid;
+  gap: 6px;
+  padding-left: 22px;
+}
+
+.run-unavailable-note,
+.run-warning {
+  padding: 12px 14px;
+  border-left: 3px solid #b45309;
+  background: #fffbeb;
+  color: #713f12;
+}
+
+.mission-violations {
+  color: #991b1b;
+}
+
+.run-state-loading {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.run-state-error {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
 @media (max-width: 760px) {
   .mission-form-grid,
   .mission-result-grid {

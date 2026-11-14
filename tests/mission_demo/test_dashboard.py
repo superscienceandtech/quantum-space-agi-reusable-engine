@@ -103,3 +103,37 @@ def test_mission_builder_owns_form_and_views_have_result_hosts() -> None:
     )[1].split("</form>", maxsplit=1)[0]
     assert 'name="destination_profile_id"' in form
     assert 'name="selected_payload_ids"' in form
+
+
+def test_dashboard_declares_live_result_pages_and_unavailable_capabilities() -> None:
+    html = (PROTOTYPE / "index.html").read_text(encoding="utf-8")
+    for text in ("Spacecraft configuration", "Educational resource evaluation"):
+        assert text in html
+
+    app = (PROTOTYPE / "app.js").read_text(encoding="utf-8")
+    adapter = (PROTOTYPE / "mission-demo.js").read_text(encoding="utf-8")
+    assert "mission-demo:state" in app
+    assert "mission-demo:state" in adapter
+    for text in (
+        "Selected payloads",
+        "physical spacecraft properties are unavailable",
+        "ARC-08 educational evaluator",
+        "abstract units",
+        "policy approval pending",
+    ):
+        assert text in app
+    assert "Cross-mission comparison unavailable" in app
+    assert "policy_approval_status" in app
+    assert "resource_totals" in app
+    assert "trajectory" in adapter
+
+
+def test_dashboard_mission_adapter_publishes_all_request_states() -> None:
+    adapter = (PROTOTYPE / "mission-demo.js").read_text(encoding="utf-8")
+    for status in ("empty", "loading", "ready", "error"):
+        assert f"'{status}'" in adapter
+    assert "result = null" in adapter
+    assert "new CustomEvent('mission-demo:state'" in adapter
+    assert "render(result)" in adapter
+    assert "publishMissionState('ready', result)" in adapter
+    assert "publishMissionState('error', null" in adapter

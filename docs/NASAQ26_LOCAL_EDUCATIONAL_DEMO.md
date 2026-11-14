@@ -64,6 +64,24 @@ The dashboard validates the configuration before running. A successful run respo
 - `trajectory.times_s` and `trajectory.states`; each state row is `[x_m, y_m, z_m, vx_mps, vy_mps, vz_mps]` in ECI SI units.
 - `trajectory.state_order`, collision index/time/state, diagnostics, and model metadata. Diagnostic arrays and trajectory data are JSON arrays; the response DTO rejects non-finite numeric values.
 
+## Dashboard result views
+
+The browser keeps the latest successful mission response in memory only. A new
+run or an API error clears the previous result; reloading the page returns the
+result views to their empty state.
+
+- Spacecraft Configuration shows the returned spacecraft profile ID and
+  selected payload IDs. Mass, dimensions, propulsion, fuel, capacity, and power
+  are unavailable because the API does not model those properties.
+- Resource Dashboard shows ARC-08's evaluator version, scenario, abstract-unit
+  totals, violations, warning, and policy-approval status. Scenario feasibility
+  is not mission feasibility; policy approval remains pending.
+- Simulation & Results shows ARC-05 model metadata, the ECI X/Y trajectory
+  projection, numeric state table, and returned drift diagnostics.
+- Mission Comparison & Report summarizes the latest run. Cross-mission
+  comparison and mission history are unavailable because the local API exposes
+  neither capability.
+
 Errors have the shape:
 
 ```json
