@@ -42,7 +42,7 @@
 
           <div class="sidebar-note">
             <span class="note-icon" aria-hidden="true">i</span>
-            <p>Navigation items reflect <strong>proposed views</strong>. Only the dashboard has a sample layout.</p>
+            <p>The dashboard panels are synthetic samples. Mission results appear in their dedicated workspace views.</p>
           </div>
           <div class="sidebar-bottom"><span class="online-dot" aria-hidden="true"></span> Standalone visual prototype</div>
         </aside>
@@ -50,38 +50,10 @@
         <main class="main-content" id="main-content" tabindex="-1">
           <div class="prototype-notice" role="note">
             <span class="notice-icon" aria-hidden="true">✳</span>
-            <span><strong>Local educational dashboard</strong> · The mission run below uses live local backend results; other overview panels remain illustrative synthetic samples.</span>
+            <span><strong>Local educational dashboard</strong> · Configure a mission in Mission Builder; overview panels remain illustrative synthetic samples.</span>
           </div>
 
           <section id="dashboard" data-page="dashboard" aria-labelledby="page-title">
-            <section class="mission-demo panel" aria-labelledby="mission-demo-title">
-              <div class="panel-heading">
-                <div><h2 id="mission-demo-title">Local educational mission run</h2><p>Runs the existing ARC-05 simulator from synthetic profile inputs.</p></div>
-                <span class="sample-label">SYNTHETIC ONLY</span>
-              </div>
-              <p class="mission-demo-limits">Synthetic educational profiles only. This is not a real destination, transfer, spacecraft performance model, or validated prediction. No fuel estimate. ARC-08 runs after ARC-05; resource-policy approval remains pending, so its abstract-unit result is informational and never gates simulation.</p>
-              <form id="mission-demo-form">
-                <div class="mission-form-grid">
-                  <div class="form-field">
-                    <label for="mission-destination">Educational orbit profile</label>
-                    <select id="mission-destination" name="destination_profile_id" required>
-                      <option value="" selected disabled>Loading synthetic profiles…</option>
-                    </select>
-                    <small>Altitude in metres above the simulator Earth reference radius; ECI +X start and prograde +Y velocity.</small>
-                  </div>
-                  <fieldset class="payload-options">
-                    <legend>Payload selection</legend>
-                    <label><input type="checkbox" name="selected_payload_ids" value="imager"> Imager</label>
-                    <label><input type="checkbox" name="selected_payload_ids" value="spectrometer"> Spectrometer</label>
-                    <label><input type="checkbox" name="selected_payload_ids" value="relay"> Relay</label>
-                    <small>Educational evaluator catalog identifiers only; no physical spacecraft properties are represented.</small>
-                  </fieldset>
-                </div>
-                <button class="button button-primary" type="submit" disabled>Validate and run mission</button>
-              </form>
-              <p id="mission-demo-status" role="status" aria-live="polite">Loading synthetic destination profiles from the local mission API…</p>
-              <section id="mission-demo-results" aria-live="polite" aria-label="Educational mission results" hidden></section>
-            </section>
             <div class="page-header">
               <div>
                 <div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> OVERVIEW</div>
@@ -162,25 +134,52 @@
             <footer class="page-footer"><span>ARC-09 visual exploration</span><span>Not a production application</span></footer>
           </section>
 
-          <section id="mission-builder" class="placeholder-page" data-page="mission-builder" hidden aria-labelledby="mission-builder-title">
-            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="mission-builder-title">Mission Builder</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
-            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          <section id="mission-builder" data-page="mission-builder" hidden aria-labelledby="mission-builder-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> MISSION BUILDER</div><h1 id="mission-builder-title">Mission Builder</h1><p class="page-description">Configure a synthetic educational mission, validate its inputs, and run the local ARC-05 and ARC-08 evaluators.</p></div></div>
+            <section class="mission-demo panel" aria-labelledby="mission-demo-title">
+              <div class="panel-heading">
+                <div><h2 id="mission-demo-title">Local educational mission run</h2><p>Runs the existing ARC-05 simulator from synthetic profile inputs.</p></div>
+                <span class="sample-label">SYNTHETIC ONLY</span>
+              </div>
+              <p class="mission-demo-limits">Synthetic educational profiles only. This is not a real destination, transfer, spacecraft performance model, or validated prediction. No fuel estimate. ARC-08 runs after ARC-05; resource-policy approval remains pending, so its abstract-unit result is informational and never gates simulation.</p>
+              <form id="mission-demo-form">
+                <div class="mission-form-grid">
+                  <div class="form-field">
+                    <label for="mission-destination">Educational orbit profile</label>
+                    <select id="mission-destination" name="destination_profile_id" required>
+                      <option value="" selected disabled>Loading synthetic profiles…</option>
+                    </select>
+                    <small>Altitude in metres above the simulator Earth reference radius; ECI +X start and prograde +Y velocity.</small>
+                  </div>
+                  <fieldset class="payload-options">
+                    <legend>Payload selection</legend>
+                    <label><input type="checkbox" name="selected_payload_ids" value="imager"> Imager</label>
+                    <label><input type="checkbox" name="selected_payload_ids" value="spectrometer"> Spectrometer</label>
+                    <label><input type="checkbox" name="selected_payload_ids" value="relay"> Relay</label>
+                    <small>Educational evaluator catalog identifiers only; no physical spacecraft properties are represented.</small>
+                  </fieldset>
+                </div>
+                <button class="button button-primary" type="submit" disabled>Validate and run mission</button>
+              </form>
+              <p id="mission-demo-status" role="status" aria-live="polite">Loading synthetic destination profiles from the local mission API…</p>
+            </section>
           </section>
-          <section id="spacecraft" class="placeholder-page" data-page="spacecraft" hidden aria-labelledby="spacecraft-title">
-            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="spacecraft-title">Spacecraft Configuration</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
-            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          <section id="spacecraft" data-page="spacecraft" hidden aria-labelledby="spacecraft-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> SPACECRAFT</div><h1 id="spacecraft-title">Spacecraft Configuration</h1><p class="page-description">Latest mission profile and selected payload identifiers.</p></div></div>
+            <section id="spacecraft-run-result" aria-live="polite"></section>
           </section>
-          <section id="resources" class="placeholder-page" data-page="resources" hidden aria-labelledby="resources-title">
-            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="resources-title">Resource Dashboard</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
-            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          <section id="resources" data-page="resources" hidden aria-labelledby="resources-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> RESOURCES</div><h1 id="resources-title">Resource Dashboard</h1><p class="page-description">Latest ARC-08 educational evaluator output.</p></div></div>
+            <section id="resource-run-result" aria-live="polite"></section>
           </section>
-          <section id="simulation" class="placeholder-page" data-page="simulation" hidden aria-labelledby="simulation-title">
-            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="simulation-title">Simulation &amp; Results</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
-            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          <section id="simulation" data-page="simulation" hidden aria-labelledby="simulation-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> SIMULATION</div><h1 id="simulation-title">Simulation &amp; Results</h1><p class="page-description">Latest educational ARC-05 trajectory and diagnostics.</p></div></div>
+            <p id="simulation-run-state" role="status" aria-live="polite"></p>
+            <section id="mission-demo-results" aria-live="polite" aria-label="Educational mission results" hidden></section>
           </section>
-          <section id="comparison" class="placeholder-page" data-page="comparison" hidden aria-labelledby="comparison-title">
-            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> PROPOSED VIEW</div><h1 id="comparison-title">Mission Comparison &amp; Report</h1><p class="page-description">A navigation placeholder for visual flow review.</p></div></div>
-            <div class="panel placeholder-panel"><div class="placeholder-illustration" aria-hidden="true">&#9675;</div><span class="sample-label">PROPOSED VIEW &middot; NOT A REQUIREMENT</span><h2>Layout preview not defined</h2><p>This prototype does not contain confirmed page requirements, API data, or scientific fields for this view.</p><button class="button button-secondary back-dashboard" type="button">Return to dashboard</button></div>
+          <section id="comparison" data-page="comparison" hidden aria-labelledby="comparison-title">
+            <div class="page-header"><div><div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> REPORT</div><h1 id="comparison-title">Mission Comparison &amp; Report</h1><p class="page-description">Report for the latest mission run. Cross-mission comparison is not available from the local API.</p></div></div>
+            <section id="report-run-result" aria-live="polite"></section>
           </section>
         </main>
       </div>

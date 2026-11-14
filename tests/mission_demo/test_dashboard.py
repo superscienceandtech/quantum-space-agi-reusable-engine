@@ -27,3 +27,79 @@ def test_dashboard_labels_synthetic_assumptions_and_policy_boundary() -> None:
     assert "resource-policy approval remains pending" in html
     assert "ARC-08 runs after ARC-05" in html
     assert "No fuel estimate" in html
+
+
+def test_mission_builder_owns_form_and_views_have_result_hosts() -> None:
+    from html.parser import HTMLParser
+
+    class PageOwnershipParser(HTMLParser):
+        def __init__(self) -> None:
+            super().__init__()
+            self.element_stack: list[tuple[str, str | None]] = []
+            self.form_page: str | None = None
+            self.host_pages: dict[str, str] = {}
+
+        @property
+        def current_page(self) -> str | None:
+            return next(
+                (page for _, page in reversed(self.element_stack) if page),
+                None,
+            )
+
+        def handle_starttag(
+            self,
+            tag: str,
+            attrs: list[tuple[str, str | None]],
+        ) -> None:
+            values = dict(attrs)
+            if tag == "form" and values.get("id") == "mission-demo-form":
+                self.form_page = self.current_page
+            host_ids = {
+                "mission-demo-results",
+                "spacecraft-run-result",
+                "resource-run-result",
+                "simulation-run-state",
+                "report-run-result",
+            }
+            if values.get("id") in host_ids:
+                self.host_pages[values["id"] or ""] = self.current_page
+            if tag not in {
+                "area",
+                "base",
+                "br",
+                "col",
+                "embed",
+                "hr",
+                "img",
+                "input",
+                "link",
+                "meta",
+                "param",
+                "source",
+                "track",
+                "wbr",
+            }:
+                self.element_stack.append((tag, values.get("data-page")))
+
+        def handle_endtag(self, tag: str) -> None:
+            for index in range(len(self.element_stack) - 1, -1, -1):
+                if self.element_stack[index][0] == tag:
+                    del self.element_stack[index:]
+                    return
+
+    parser = PageOwnershipParser()
+    parser.feed((PROTOTYPE / "index.html").read_text(encoding="utf-8"))
+
+    assert parser.form_page == "mission-builder"
+    assert parser.host_pages == {
+        "mission-demo-results": "simulation",
+        "spacecraft-run-result": "spacecraft",
+        "resource-run-result": "resources",
+        "simulation-run-state": "simulation",
+        "report-run-result": "comparison",
+    }
+    form = (PROTOTYPE / "index.html").read_text(encoding="utf-8").split(
+        '<form id="mission-demo-form"', maxsplit=1
+    )[1].split("</form>", maxsplit=1)[0]
+    assert 'name="destination_profile_id"' in form
+    assert 'name="selected_payload_ids"' in form
