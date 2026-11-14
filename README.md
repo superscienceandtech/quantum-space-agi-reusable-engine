@@ -16,11 +16,12 @@ data.
 | `src/quantum_space_agi/ml/` | ARC-08 dataset, reproducibility, and educational evaluator utilities |
 | `notebooks/` | Executable scientific and simulation learning material |
 | `tests/` | Focused package and integration tests |
-| `arc09-ui-prototype/` | Standalone synthetic HTML/CSS/JavaScript/SVG visualization prototype |
+| `arc09-ui-prototype/` | Dashboard with synthetic overview panels and a local ARC-05/ARC-08 mission run |
 
-These are reusable components and separate prototypes. Their presence does not
-establish a complete integrated mission-planning application, backend service,
-or production API.
+These reusable components include a local educational mission demo. The demo
+connects synthetic configuration inputs to ARC-05 and ARC-08 and displays their
+results in the ARC-09 dashboard; it is not a complete mission-planning game or
+production API.
 
 ## Scope and limitations
 
@@ -53,8 +54,13 @@ ARC-08 includes reusable dataset and ML utilities, plus a fictional
 payload/resource evaluator. The evaluator's budget, mass, power, and slot totals
 are abstract educational units, not physical spacecraft properties or fuel
 estimates. Its presence does not authorize a training or prediction claim.
-ARC-09 is a synthetic static visualization prototype, not connected to these
-Python components or a production API.
+The local mission demo uses synthetic Earth-orbit profiles with the ARC-05
+two-body simulator, then reports ARC-08's actual educational evaluator output
+with resource-policy approval explicitly pending. ARC-09's remaining overview
+panels are illustrative synthetic samples; only the mission result section is
+backed by live local calculations. See
+[`docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md`](docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md)
+for API routes, assumptions, and limitations.
 
 ## Installation
 
@@ -68,6 +74,18 @@ python -m pip install -e ".[dev,quality,notebooks]"
 ```
 
 On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`.
+
+To run the local mission dashboard, install its optional API dependencies and
+start the loopback-only server:
+
+```shell
+python -m pip install -e ".[api]"
+python -m quantum_space_agi.mission_demo.server
+```
+
+Open `http://127.0.0.1:8765/`. Windows PowerShell users can use the same commands
+after activating the virtual environment. The API and startup details are in
+[`docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md`](docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md).
 
 ## Minimal ARC-05 simulation example
 
@@ -117,3 +135,14 @@ include deterministic tests. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 MIT is the recorded license direction, but no `LICENSE` file is present. Do not
 assume reuse under MIT terms until the license is formally added; see
 [`docs/governance/license-options.md`](docs/governance/license-options.md).
+# NASAQ26 Local Educational Demo
+
+The integrated local-only mission demonstration and its route/input/output description are documented in [`docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md`](docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md). It uses synthetic Earth-orbit profiles, the existing ARC-05 educational simulator, and ARC-08 educational resource output. Resource policy approval remains pending; the evaluator's abstract units do not indicate mission eligibility. The local service is not an ARC-10 production API and makes no scientific validation claim.
+
+Start from the repository root with:
+
+```bash
+PYTHONPATH=src python -m quantum_space_agi.mission_demo.server
+```
+
+Open `http://127.0.0.1:8765/`.
