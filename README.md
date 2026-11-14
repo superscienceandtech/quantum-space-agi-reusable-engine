@@ -65,26 +65,33 @@ for API routes, assumptions, and limitations.
 ## Installation
 
 Python 3.11 or newer is required. Create and activate a virtual environment,
-then install the package with development and notebook dependencies:
+then install the package with development and notebook dependencies. Use a
+separate environment for each checkout or worktree so editable installs cannot
+resolve to a neighboring copy:
 
 ```shell
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e ".[dev,quality,notebooks]"
+python3 -m venv .venv
+.venv/bin/python -m pip install -e ".[dev,quality,notebooks]"
 ```
 
-On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`.
+On Windows PowerShell:
+
+```powershell
+py -3.11 -m venv .venv
+.venv\Scripts\python.exe -m pip install -e ".[dev,quality,notebooks]"
+```
 
 To run the local mission dashboard, install its optional API dependencies and
-start the loopback-only server:
+start the loopback-only server with the same environment's Python:
 
 ```shell
-python -m pip install -e ".[api]"
-python -m quantum_space_agi.mission_demo.server
+.venv/bin/python -m pip install -e ".[api]"
+.venv/bin/python -c "from pathlib import Path; import quantum_space_agi; expected = (Path.cwd() / 'src/quantum_space_agi/__init__.py').resolve(); actual = Path(quantum_space_agi.__file__).resolve(); assert actual == expected, f'{actual} is not {expected}'; print(actual)"
+.venv/bin/python -m quantum_space_agi.mission_demo.server
 ```
 
-Open `http://127.0.0.1:8765/`. Windows PowerShell users can use the same commands
-after activating the virtual environment. The API and startup details are in
+On Windows PowerShell, use `.venv\Scripts\python.exe` for each of those commands.
+Open `http://127.0.0.1:8765/`. The API and startup details are in
 [`docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md`](docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md).
 
 ## Minimal ARC-05 simulation example
@@ -137,12 +144,4 @@ assume reuse under MIT terms until the license is formally added; see
 [`docs/governance/license-options.md`](docs/governance/license-options.md).
 # NASAQ26 Local Educational Demo
 
-The integrated local-only mission demonstration and its route/input/output description are documented in [`docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md`](docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md). It uses synthetic Earth-orbit profiles, the existing ARC-05 educational simulator, and ARC-08 educational resource output. Resource policy approval remains pending; the evaluator's abstract units do not indicate mission eligibility. The local service is not an ARC-10 production API and makes no scientific validation claim.
-
-Start from the repository root with:
-
-```bash
-PYTHONPATH=src python -m quantum_space_agi.mission_demo.server
-```
-
-Open `http://127.0.0.1:8765/`.
+The integrated local-only mission demonstration and its route/input/output description are documented in [`docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md`](docs/NASAQ26_LOCAL_EDUCATIONAL_DEMO.md). It uses synthetic Earth-orbit profiles, the existing ARC-05 educational simulator, and ARC-08 educational resource output. Resource policy approval remains pending; the evaluator's abstract units do not indicate mission eligibility. The local service is not an ARC-10 production API and makes no scientific validation claim. Follow the isolated-environment startup instructions in the Installation section above; do not start it through a shared editable environment.

@@ -55,6 +55,8 @@ include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["quantum_space_agi*"]
+namespaces = false
 
 [tool.setuptools.package-data]
 quantum_space_agi = ["py.typed"]

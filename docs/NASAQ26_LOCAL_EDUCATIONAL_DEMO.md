@@ -4,28 +4,30 @@ This local-only demonstration connects synthetic mission-profile inputs to the e
 
 ## Run locally
 
-Install the optional API dependencies from the repository root:
+Create a separate virtual environment for this checkout or worktree. Editable
+install metadata is tied to the source directory, so do not reuse an environment
+from a neighboring checkout.
 
 ```bash
-python -m pip install -e ".[api]"
+python3 -m venv .venv
+.venv/bin/python -m pip install -e ".[api]"
+.venv/bin/python -c "from pathlib import Path; import quantum_space_agi; expected = (Path.cwd() / 'src/quantum_space_agi/__init__.py').resolve(); actual = Path(quantum_space_agi.__file__).resolve(); assert actual == expected, f'{actual} is not {expected}'; print(actual)"
+.venv/bin/python -m quantum_space_agi.mission_demo.server
 ```
 
-Start the application:
-
-```bash
-python -m quantum_space_agi.mission_demo.server
-```
-
-On Windows PowerShell, first create and activate an environment if needed:
+On Windows PowerShell:
 
 ```powershell
 py -3.11 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e ".[api,test]"
-python -m quantum_space_agi.mission_demo.server
+.venv\Scripts\python.exe -m pip install -e ".[api]"
+.venv\Scripts\python.exe -c "from pathlib import Path; import quantum_space_agi; expected=(Path.cwd() / 'src/quantum_space_agi/__init__.py').resolve(); actual=Path(quantum_space_agi.__file__).resolve(); assert actual == expected, f'{actual} is not {expected}'; print(actual)"
+.venv\Scripts\python.exe -m quantum_space_agi.mission_demo.server
 ```
 
 Open `http://127.0.0.1:8765/`. The server binds only to loopback and serves the ARC-09 dashboard alongside the versioned local API. Stop it with Ctrl+C.
+The import check, package installation, and server launch all use the same
+environment-specific Python executable. The import path must point to this
+checkout's `src/quantum_space_agi`, not another worktree.
 
 Python 3.11 or later is declared in `pyproject.toml`. This environment's active interpreter should be checked before treating Python 3.11 runtime compatibility as verified.
 
