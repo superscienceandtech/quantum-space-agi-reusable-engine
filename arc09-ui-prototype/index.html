@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#f8fafc">
     <title>Mission workspace — ARC-09 UI prototype</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mission-demo.css">
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -49,10 +50,38 @@
         <main class="main-content" id="main-content" tabindex="-1">
           <div class="prototype-notice" role="note">
             <span class="notice-icon" aria-hidden="true">✳</span>
-            <span><strong>Independent UI prototype</strong> · Synthetic sample data only — not NASA data or actual mission results.</span>
+            <span><strong>Local educational dashboard</strong> · The mission run below uses live local backend results; other overview panels remain illustrative synthetic samples.</span>
           </div>
 
           <section id="dashboard" data-page="dashboard" aria-labelledby="page-title">
+            <section class="mission-demo panel" aria-labelledby="mission-demo-title">
+              <div class="panel-heading">
+                <div><h2 id="mission-demo-title">Local educational mission run</h2><p>Runs the existing ARC-05 simulator from synthetic profile inputs.</p></div>
+                <span class="sample-label">SYNTHETIC ONLY</span>
+              </div>
+              <p class="mission-demo-limits">Synthetic educational profiles only. This is not a real destination, transfer, spacecraft performance model, or validated prediction. No fuel estimate. ARC-08 runs after ARC-05; resource-policy approval remains pending, so its abstract-unit result is informational and never gates simulation.</p>
+              <form id="mission-demo-form">
+                <div class="mission-form-grid">
+                  <div class="form-field">
+                    <label for="mission-destination">Educational orbit profile</label>
+                    <select id="mission-destination" name="destination_profile_id" required>
+                      <option value="" selected disabled>Loading synthetic profiles…</option>
+                    </select>
+                    <small>Altitude in metres above the simulator Earth reference radius; ECI +X start and prograde +Y velocity.</small>
+                  </div>
+                  <fieldset class="payload-options">
+                    <legend>Payload selection</legend>
+                    <label><input type="checkbox" name="selected_payload_ids" value="imager"> Imager</label>
+                    <label><input type="checkbox" name="selected_payload_ids" value="spectrometer"> Spectrometer</label>
+                    <label><input type="checkbox" name="selected_payload_ids" value="relay"> Relay</label>
+                    <small>Educational evaluator catalog identifiers only; no physical spacecraft properties are represented.</small>
+                  </fieldset>
+                </div>
+                <button class="button button-primary" type="submit" disabled>Validate and run mission</button>
+              </form>
+              <p id="mission-demo-status" role="status" aria-live="polite">Loading synthetic destination profiles from the local mission API…</p>
+              <section id="mission-demo-results" aria-live="polite" aria-label="Educational mission results" hidden></section>
+            </section>
             <div class="page-header">
               <div>
                 <div class="breadcrumb">WORKSPACE <span aria-hidden="true">/</span> OVERVIEW</div>
@@ -159,5 +188,6 @@
     <script src="data.js"></script>
     <script src="charts.js"></script>
     <script src="app.js"></script>
+    <script src="mission-demo.js"></script>
   </body>
 </html>
