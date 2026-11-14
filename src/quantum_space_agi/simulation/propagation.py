@@ -174,8 +174,7 @@ def propagate_two_body(
 
     current_time = 0.0
     y = y0.copy()
-    initial_velocity_zero = bool(np.all(y0[3:] == 0.0))
-    if initial_radius < collision_radius or (initial_radius == collision_radius and initial_velocity_zero):
+    if initial_radius <= collision_radius:
         collision_index = 0
         collision_time_s = 0.0
         collision_state = y.copy()
@@ -202,7 +201,7 @@ def propagate_two_body(
         times.append(current_time)
         states.append(y.copy())
         current_radius = _stable_position_radius(y[:3])
-        if current_radius <= collision_radius and previous_radius > collision_radius:
+        if current_radius <= collision_radius and previous_radius >= collision_radius:
             collision_index = len(states) - 1
             (
                 collision_time_s,

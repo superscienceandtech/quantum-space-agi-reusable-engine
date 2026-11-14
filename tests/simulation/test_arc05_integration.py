@@ -1055,6 +1055,25 @@ def test_approaching_but_not_yet_crossing_collision_boundary_reports_no_event():
     assert result["collision_state"] is None
 
 
+def test_collision_detection_recognizes_initial_state_on_boundary_for_inward_motion():
+    initial = np.array(
+        [EARTH_REFERENCE_RADIUS_M, 0.0, 0.0, -1_000.0, 0.0, 0.0],
+        dtype=np.float64,
+    )
+    result = propagate_two_body(
+        initial,
+        EARTH_MU_M3_S2,
+        5.0,
+        0.5,
+        EARTH_REFERENCE_RADIUS_M,
+    )
+
+    assert result["collision_index"] == 0
+    assert result["collision_time_s"] == 0.0
+    assert result["collision_method"] == "exact_sample"
+    assert np.allclose(result["collision_state"][:3], initial[:3], atol=1e-12)
+
+
 def test_collision_interpolation_rejects_decreasing_endpoint_times():
     previous = np.array([6_400_000.0, 0.0, 0.0, 0.0, 7_500.0, 0.0])
     following = np.array([6_300_000.0, 0.0, 0.0, 0.0, 7_400.0, 0.0])

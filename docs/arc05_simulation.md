@@ -7,6 +7,8 @@ simulation package for an educational two-body orbital model. It models one
 spacecraft in an Earth-centered inertial frame using Newtonian point-mass
 gravity and fixed-step classical RK4 propagation.
 
+ARC-05 owner: Amran. Team Leader: Yousuf.
+
 The following are outside the baseline:
 
 - attitude and rotational dynamics;
@@ -45,6 +47,19 @@ package implementation is available under `quantum_space_agi.simulation`.
 Package tests compare selected RK4 and propagation behavior against notebook
 implementations. The notebooks remain the scientific walkthrough; this package
 is the reusable Python interface.
+
+`00_simulation_package_overview.ipynb` is an introductory notebook that can be
+run before the numbered sequence. `08_workflow.ipynb` demonstrates the complete
+configuration-to-result workflow and can be run after the numbered sequence.
+Both execute the public package API; their purpose and examples are covered by
+the ARC-05 pytest notebook tests.
+
+The ARC-05 notebook pytest tests execute selected cells with Python `exec`;
+they are not Jupyter-kernel tests. For full kernel execution of all 13 ARC-04
+and ARC-05 notebooks, use the appropriate Windows or WSL setup and `nbconvert`
+command in the [README](../README.md#installation). An `nbconvert`
+pass establishes command-line Jupyter execution only, not VS Code interactive
+UI verification.
 
 ## Scientific Assumptions and Equations
 
@@ -212,6 +227,8 @@ fail, `run_simulation` raises and returns no partial result.
 
 This section is an analysis proposal only. It does not impose a sample limit,
 memory budget, warning, or runtime behavior change.
+The current recommended candidate and its proposed test plan are recorded in
+[arc05_resource_policy_proposal.md](arc05_resource_policy_proposal.md).
 
 ### Current implementation and estimate
 
@@ -327,34 +344,52 @@ The provided tolerances are local to those experiments; they are not universal
 aerospace tolerances. Tests use fixed input values and do not claim certified
 mission accuracy.
 
-## Automated Tests
+## Automated Tests and Verification Record
 
 The active dependency and Python-version manifest is `pyproject.toml`. It
 declares Python `>=3.11`, runtime constraints for NumPy, Pydantic, and nbformat,
 and optional development and notebook dependencies. These declarations do not
 prove compatibility for every matching interpreter and package version.
 
-In the current worktree, `python -m pytest tests/simulation -q` and
-`python -m pytest -q` each passed all 270 tests on Python 3.14.1. Pytest reported
-one third-party AnyIO deprecation warning. No dependency was installed or
-changed for these runs.
+**Verified 2026-11-14 — Windows, CPython 3.14.1:** 291 ARC-05 simulation tests,
+12 ARC-04 scientific tests, and all 303 project tests passed. No test was
+skipped or failed. Pytest reported an AnyIO deprecation warning and a cache
+write-permission warning; neither affected the result. `pip check` reported no
+broken requirements, and public ARC-04/ARC-05 imports succeeded. The 0.1.0
+wheel built successfully and its package imports and dependency metadata were
+verified.
+
+All 13 ARC-04 and ARC-05 notebooks passed nbformat validation and executed with
+Jupyter `nbconvert` on CPython 3.14.1. Executed copies were written to the
+system temporary directory. Jupyter reported the Windows Proactor/ZeroMQ
+selector-thread compatibility warning. This verifies kernel execution only;
+VS Code interactive UI execution remains unverified.
+
+Python 3.11 compatibility is unverified. The 2026-11-14 Windows runtime audit
+(`py -0p`) found only Python 3.14.1. The isolated installation and verification
+procedure is documented in the [README](../README.md#isolated-python-311-verification);
+it requires authorization to install the Python install manager/runtime.
+
+Historical evidence: an earlier report recorded 284 tests on WSL Python 3.12.3.
+Its execution date was not recorded, and it predates the current notebook and
+regression-test changes. It is retained as historical evidence only and is not
+used as a current acceptance result.
 
 Run the ARC-05 tests:
 
 ```powershell
-python -m pytest tests/simulation/test_arc05_notebooks.py -v
+.\.venv\Scripts\python.exe -m pytest tests\simulation\test_arc05_notebooks.py -v
 ```
 
 Run the complete available suite:
 
 ```powershell
-python -m pytest -v
+.\.venv\Scripts\python.exe -m pytest -v
 ```
 
-Tests execute each notebook independently, compile notebook code in order within
-that notebook, and therefore do not rely on notebook execution-order state.
-The notebook execution outputs and displayed checks remain reproducible
-evidence; pytest is the automated interface-level regression suite.
+The ARC-05 notebook pytest tests execute selected cells with Python `exec`;
+they do not start Jupyter kernels. The dated `nbconvert` result above verifies
+Jupyter-kernel execution. Neither method constitutes VS Code UI verification.
 
 ## Integration Readiness
 
