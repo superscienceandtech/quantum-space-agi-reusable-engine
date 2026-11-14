@@ -1,0 +1,2 @@
+record_id,observed_at,value,unit,category,notes
+EXAMPLE-001,2000-01-01T00:00:00Z,12.5,unitless,example,"SYNTHETIC PLACEHOLDER — replace with real data"
