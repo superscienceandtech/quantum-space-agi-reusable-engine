@@ -1,0 +1,52 @@
+# Local datasets can be large or restricted; keep the directory markers tracked.
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/tmp/
+config/data_config.local.json
+
+# Python caches and bytecode.
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+data/**/__pycache__/
+*.cache
+
+# Testing and type checking.
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Virtual environments.
+.venv/
+venv/
+env/
+ENV/
+.clean-wheel-venv/
+
+# Notebook execution and validation artifacts.
+_arc05_exec/
+_nb_exec_check/
+
+# Build artifacts.
+build/
+dist/
+*.egg-info/
+
+# Environment files and secrets.
+.env
+.env.*
+!.env.example
+
+# IDE and operating-system files.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

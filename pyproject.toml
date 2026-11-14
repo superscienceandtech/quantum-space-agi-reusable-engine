@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantum-space-agi-reusable-engine"
+version = "0.1.0"
+description = "Scientific and simulation foundation for the Quantum Space AGI educational mission-design game"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0,<3.0",
+    "pydantic>=2.0,<3.0",
+    "nbformat>=5.10,<6.0",
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8,<10",
+    "pytest-cov>=6,<8",
+    "httpx>=0.27,<1.0",
+]
+api = [
+    "fastapi>=0.115,<1.0",
+    "uvicorn>=0.34,<1.0",
+]
+quality = [
+    "build>=1.2,<2",
+    "mypy>=1.15,<2",
+    "ruff>=0.11,<1",
+]
+dev = [
+    "pytest>=8,<10",
+    "nbclient>=0.10,<1.0",
+    "ipykernel>=6.29,<7.0",
+]
+notebooks = [
+    "jupyterlab>=4.0,<5.0",
+    "matplotlib>=3.8,<4.0",
+    "nbconvert>=7.0,<8.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+quantum_space_agi = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+src = ["src", "tests"]
+extend-exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+files = ["src/quantum_space_agi"]
+mypy_path = "src"
+python_version = "3.11"
+strict = true

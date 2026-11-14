@@ -1,0 +1,8 @@
+{
+  "record_id": "EXAMPLE-001",
+  "observed_at": "2000-01-01T00:00:00Z",
+  "value": 12.5,
+  "unit": "unitless",
+  "category": "example",
+  "notes": "SYNTHETIC PLACEHOLDER — replace with real data"
+}

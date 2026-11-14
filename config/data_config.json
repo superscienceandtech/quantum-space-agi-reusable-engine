@@ -1,0 +1,9 @@
+{
+  "data_root": "data",
+  "raw_dir": "data/raw",
+  "processed_dir": "data/processed",
+  "samples_dir": "data/samples",
+  "metadata_dir": "data/metadata",
+  "supported_formats": ["csv", "json"],
+  "default_encoding": "utf-8"
+}
