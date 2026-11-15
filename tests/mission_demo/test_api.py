@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 from quantum_space_agi.mission_demo.api import create_app
 from quantum_space_agi.mission_demo.auth import ClerkAuthSettings, ClerkTokenVerifier
+from quantum_space_agi.mission_demo.rate_limit import FixedWindowRateLimiter
 from quantum_space_agi.mission_demo.service import MissionDemoService
 
 VALID_REQUEST = {
@@ -92,6 +93,7 @@ def _authenticated_client(
     service: MissionDemoService | None = None,
     token_verifier: Any | None = None,
     token: str | None = None,
+    rate_limiter: FixedWindowRateLimiter | None = None,
 ) -> SyncASGIClient:
     verifier = (
         ClerkTokenVerifier(
@@ -103,7 +105,12 @@ def _authenticated_client(
     )
     session_token = _test_token(signing_key) if token is None else token
     return SyncASGIClient(
-        create_app(service, auth_settings=auth_settings, token_verifier=verifier),
+        create_app(
+            service,
+            auth_settings=auth_settings,
+            token_verifier=verifier,
+            rate_limiter=rate_limiter,
+        ),
         headers={"Authorization": f"Bearer {session_token}"},
     )
 
@@ -331,6 +338,78 @@ def test_authentication_failure_does_not_log_bearer_token(
     )
 
     assert token not in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("method", "path", "limit"),
+    [
+        ("POST", "/api/v1/missions/run", 5),
+        ("POST", "/api/v1/missions/validate", 30),
+        ("GET", "/api/v1/missions/destinations", 60),
+    ],
+)
+def test_mission_routes_enforce_per_user_limits_and_recover(
+    method: str,
+    path: str,
+    limit: int,
+    auth_settings: ClerkAuthSettings,
+    signing_key: Any,
+) -> None:
+    current_time = [0.0]
+    limiter = FixedWindowRateLimiter(clock=lambda: current_time[0])
+    client = _authenticated_client(auth_settings, signing_key, rate_limiter=limiter)
+
+    def request() -> httpx.Response:
+        if method == "GET":
+            return client.get(path)
+        return client.post(path, json=VALID_REQUEST)
+
+    for _ in range(limit):
+        assert request().status_code == 200
+
+    limited = request()
+    assert limited.status_code == 429
+    assert limited.json()["error"]["code"] == "rate_limited"
+    assert int(limited.headers["retry-after"]) > 0
+
+    current_time[0] = 60.0
+    assert request().status_code == 200
+
+
+def test_unauthenticated_requests_do_not_consume_user_quota(
+    auth_settings: ClerkAuthSettings, signing_key: Any
+) -> None:
+    current_time = [0.0]
+    limiter = FixedWindowRateLimiter(clock=lambda: current_time[0])
+    verifier = ClerkTokenVerifier(
+        auth_settings,
+        jwks_client=FixedKeyResolver(signing_key.public_key()),
+    )
+    app = create_app(
+        auth_settings=auth_settings,
+        token_verifier=verifier,
+        rate_limiter=limiter,
+    )
+    unauthenticated = SyncASGIClient(app)
+    authenticated = SyncASGIClient(
+        app,
+        headers={"Authorization": f"Bearer {_test_token(signing_key)}"},
+    )
+
+    for _ in range(6):
+        assert (
+            unauthenticated.post("/api/v1/missions/run", json=VALID_REQUEST).status_code
+            == 401
+        )
+    for _ in range(5):
+        assert (
+            authenticated.post("/api/v1/missions/run", json=VALID_REQUEST).status_code
+            == 200
+        )
+    assert (
+        authenticated.post("/api/v1/missions/run", json=VALID_REQUEST).status_code
+        == 429
+    )
 
 
 def test_validate_returns_canonical_mission_without_running_simulation(

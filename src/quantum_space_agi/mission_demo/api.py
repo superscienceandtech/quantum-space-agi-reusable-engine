@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +41,7 @@ from .dto import (
     MissionSummaryDTO,
     MissionValidationDTO,
 )
+from .rate_limit import FixedWindowRateLimiter
 from .service import MissionDemoService
 
 logger = logging.getLogger(__name__)
@@ -55,6 +57,7 @@ def _error_response(
     code: str,
     message: str,
     details: list[ApiErrorFieldDTO] | None = None,
+    headers: Mapping[str, str] | None = None,
 ) -> JSONResponse:
     payload = ApiErrorDTO(
         error=ApiErrorDetailDTO(
@@ -64,7 +67,9 @@ def _error_response(
         )
     )
     return JSONResponse(
-        status_code=status_code, content=payload.model_dump(mode="json")
+        status_code=status_code,
+        content=payload.model_dump(mode="json"),
+        headers=headers,
     )
 
 
@@ -84,6 +89,7 @@ def create_app(
     service: MissionDemoService | None = None,
     auth_settings: ClerkAuthSettings | None = None,
     token_verifier: ClerkTokenVerifier | None = None,
+    rate_limiter: FixedWindowRateLimiter | None = None,
 ) -> FastAPI:
     """Create the mission API with injectable domain and auth dependencies."""
     mission_service = MissionDemoService() if service is None else service
@@ -92,6 +98,9 @@ def create_app(
     )
     verifier = (
         ClerkTokenVerifier(settings) if token_verifier is None else token_verifier
+    )
+    mission_rate_limiter = (
+        FixedWindowRateLimiter() if rate_limiter is None else rate_limiter
     )
     application = FastAPI(
         title="NASAQ26 Local Mission API",
@@ -162,11 +171,13 @@ def create_app(
             401: "authentication_required",
             403: "forbidden",
             503: "authentication_unavailable",
+            429: "rate_limited",
         }.get(exc.status_code, "http_error")
         default_messages = {
             401: "A valid Clerk session token is required.",
             403: "The authenticated session is not authorized for this application.",
             503: "Authentication verification is temporarily unavailable.",
+            429: "The mission request limit has been reached.",
         }
         message = default_messages.get(exc.status_code, "The request failed.")
         if isinstance(exc.detail, str) and exc.status_code not in default_messages:
@@ -178,7 +189,7 @@ def create_app(
                 code = detail_code
             if isinstance(detail_message, str):
                 message = detail_message
-        return _error_response(exc.status_code, code, message)
+        return _error_response(exc.status_code, code, message, headers=exc.headers)
 
     @application.exception_handler(Exception)
     async def unexpected_error(_request: Request, exc: Exception) -> JSONResponse:
@@ -255,10 +266,23 @@ def create_app(
                 },
             ) from exc
 
+    def enforce_rate_limit(user: AuthenticatedUser, route_key: str, limit: int) -> None:
+        retry_after = mission_rate_limiter.check(user.user_id, route_key, limit)
+        if retry_after is not None:
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "code": "rate_limited",
+                    "message": "The mission request limit has been reached.",
+                },
+                headers={"Retry-After": str(retry_after)},
+            )
+
     @application.get("/api/v1/missions/destinations", response_model=DestinationListDTO)
     async def destinations(
-        _user: AuthenticatedUser = Depends(require_authenticated_user),
+        user: AuthenticatedUser = Depends(require_authenticated_user),
     ) -> DestinationListDTO:
+        enforce_rate_limit(user, "destinations", 60)
         return DestinationListDTO(
             destinations=[
                 DestinationProfileDTO(
@@ -277,15 +301,17 @@ def create_app(
     @application.post("/api/v1/missions/validate", response_model=MissionValidationDTO)
     async def validate_mission(
         request: MissionRequestDTO,
-        _user: AuthenticatedUser = Depends(require_authenticated_user),
+        user: AuthenticatedUser = Depends(require_authenticated_user),
     ) -> MissionValidationDTO:
+        enforce_rate_limit(user, "validate", 30)
         return MissionValidationDTO(valid=True, mission=_mission_summary(request))
 
     @application.post("/api/v1/missions/run", response_model=MissionRunResponseDTO)
     async def run_mission(
         request: MissionRequestDTO,
-        _user: AuthenticatedUser = Depends(require_authenticated_user),
+        user: AuthenticatedUser = Depends(require_authenticated_user),
     ) -> MissionRunResponseDTO:
+        enforce_rate_limit(user, "run", 5)
         result: dict[str, Any] = mission_service.run(request.model_dump(mode="json"))
         return MissionRunResponseDTO.model_validate(result)
 
