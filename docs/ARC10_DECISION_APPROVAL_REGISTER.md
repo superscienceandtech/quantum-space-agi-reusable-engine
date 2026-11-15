@@ -6,7 +6,7 @@
 
 **Readiness: planning and requirements work may continue; backend/API implementation and ARC-09 production client integration remain blocked.** None of the four source reports approves an API, architecture, framework, endpoint, schema, or implementation. The reports explicitly describe themselves as an audit, planning document, proposal, or contract-design preparation. Draft endpoints and JSON shapes in the endpoint report are marked illustrative and not approved.
 
-The four source files were available in `C:\Users\HP\Downloads`, not in this repository's tracked tree. Their paths, sizes, and SHA-256 values are recorded below. Their claims about a refreshed ARC-10 branch are reported observations from the documents, not a live remote verification performed for this register. The readiness report identifies the snapshot as `origin/arc/10-api-integration` at `19157592d389f7fbb41830379a38efc464680c94`, dated 2026-11-12, with only `README.md`; the other reports repeat this snapshot. Local/cached refs can become stale and do not establish current GitHub contents.
+The four source files were available outside this repository; their filenames, sizes, and SHA-256 values are recorded below. Their claims about a refreshed ARC-10 branch are reported observations from the documents, not a live remote verification performed for this register. The readiness report identifies the snapshot as `origin/arc/10-api-integration` at `19157592d389f7fbb41830379a38efc464680c94`, dated 2026-11-12, with only `README.md`; the other reports repeat this snapshot. Local/cached refs can become stale and do not establish current GitHub contents.
 
 **No decision below is marked approved.** Role descriptions in the source reports are task-provided ownership context; they do not establish per-decision approval authority. Explicit decision records from the authorized project process are still needed.
 
@@ -14,10 +14,10 @@ The four source files were available in `C:\Users\HP\Downloads`, not in this rep
 
 | Source report | Exact available path | Size (bytes) | SHA-256 | Evidentiary status |
 |---|---|---:|---|---|
-| ARC-10 Repository & API Readiness Report | `C:\Users\HP\Downloads\ARC10_REPOSITORY_API_READINESS_REPORT.md` | 13,998 | `495A4FD181D1C3CEFEE5FE0AB0783B8B1220F913DBC9DEA3E2C4045282D06940` | Read in full; point-in-time audit, not approval. |
-| ARC-10 Implementation Plan, Task Breakdown & Test Strategy | `C:\Users\HP\Downloads\ARC10_IMPLEMENTATION_PLAN_AND_TEST_STRATEGY.md` | 15,462 | `283C7B8BBACB7C54707E4215A073D5125A16429AD8EE781A0C90E9D0B9C54FBF` | Read in full; planning only, not approval. |
-| ARC-10 Backend/API Architecture Proposal | `C:\Users\HP\Downloads\ARC10_BACKEND_API_ARCHITECTURE_PROPOSAL.md` | 14,083 | `2D3DA096C91C76EBF84E35C0A175652A16A604EAE73D89E290DF48C8B93A94D4` | Read in full; proposal only, not approval. |
-| ARC-10 API Endpoint Requirements and Draft Response Schemas | `C:\Users\HP\Downloads\ARC10_API_ENDPOINT_REQUIREMENTS_AND_DRAFT_SCHEMAS.md` | 14,920 | `2F25F3E2489F9D2AF87DA94BD6B4A88384F296CA397B34121015F2A83B6CB661` | Read in full; contract-design preparation, examples explicitly not approved. |
+| ARC-10 Repository & API Readiness Report | External source file: `ARC10_REPOSITORY_API_READINESS_REPORT.md` | 13,998 | `495A4FD181D1C3CEFEE5FE0AB0783B8B1220F913DBC9DEA3E2C4045282D06940` | Read in full; point-in-time audit, not approval. |
+| ARC-10 Implementation Plan, Task Breakdown & Test Strategy | External source file: `ARC10_IMPLEMENTATION_PLAN_AND_TEST_STRATEGY.md` | 15,462 | `283C7B8BBACB7C54707E4215A073D5125A16429AD8EE781A0C90E9D0B9C54FBF` | Read in full; planning only, not approval. |
+| ARC-10 Backend/API Architecture Proposal | External source file: `ARC10_BACKEND_API_ARCHITECTURE_PROPOSAL.md` | 14,083 | `2D3DA096C91C76EBF84E35C0A175652A16A604EAE73D89E290DF48C8B93A94D4` | Read in full; proposal only, not approval. |
+| ARC-10 API Endpoint Requirements and Draft Response Schemas | External source file: `ARC10_API_ENDPOINT_REQUIREMENTS_AND_DRAFT_SCHEMAS.md` | 14,920 | `2F25F3E2489F9D2AF87DA94BD6B4A88384F296CA397B34121015F2A83B6CB661` | Read in full; contract-design preparation, examples explicitly not approved. |
 
 These files were not found in the repository workspace during discovery. Their download location and hashes identify the exact local inputs reviewed; they do not prove authorship, remote branch membership, owner review, or acceptance. The reports describe a refreshed branch snapshot, but no remote refresh was performed for this task. The latest directly inspected local cached ARC-10 ref previously contained only `README.md`; that cached observation is not current remote evidence.
 

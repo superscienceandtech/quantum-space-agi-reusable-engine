@@ -26,7 +26,7 @@ environment and proposed work that requires an owner decision.
 The host's legacy `py -0p` launcher reports only:
 
 ```text
--V:3.14 * C:\Users\UseR\AppData\Local\Programs\Python\Python314\python.exe
+Python 3.14 interpreter (Windows installation)
 ```
 
 The latest Python 3.11 security updates are source-only; the last traditional
