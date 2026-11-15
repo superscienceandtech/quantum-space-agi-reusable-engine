@@ -113,6 +113,11 @@ solely from attacker-controlled token headers.
   wildcard origins or credentialed cookies.
 - Use bearer headers rather than application cookies, avoiding cookie-based
   CSRF for mission requests.
+- Add compatible baseline response headers: `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy: strict-origin-when-cross-origin`, and
+  `X-Frame-Options: DENY`. Do not add a restrictive Content Security Policy
+  until the Clerk-hosted script, UI, and connection requirements have been
+  verified; avoid a policy that silently breaks sign-in.
 - Render-managed HTTPS must be enabled and verified before a public staging
   preview is used. Do not claim HTTPS or access controls are operational before
   provider verification.
@@ -166,6 +171,7 @@ never use real Clerk credentials. Cover:
 - Authentication required on each mission route and valid authenticated
   destinations, validation, and synthetic execution.
 - 401/403/429 behavior, CORS allowlist behavior, and token non-disclosure.
+- Baseline security headers on API, health, and static responses.
 - Existing mission validation, error, ARC-05/ARC-08, and dashboard regression
   tests.
 
