@@ -6,13 +6,24 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import RequestResponseEndpoint
 from starlette.requests import Request
+from starlette.responses import Response
 from starlette.staticfiles import StaticFiles
 
+from .auth import (
+    AuthenticatedUser,
+    ClerkAuthSettings,
+    ClerkTokenVerifier,
+    ClerkVerificationUnavailable,
+    ForbiddenAuthorizedParty,
+    InvalidSessionToken,
+)
 from .configuration import (
     ORBIT_DESTINATION_PROFILES,
     MissionDemoConfiguration,
@@ -69,14 +80,41 @@ def _mission_summary(request: MissionRequestDTO) -> MissionSummaryDTO:
     )
 
 
-def create_app(service: MissionDemoService | None = None) -> FastAPI:
-    """Create the local mission API with an injectable domain service."""
+def create_app(
+    service: MissionDemoService | None = None,
+    auth_settings: ClerkAuthSettings | None = None,
+    token_verifier: ClerkTokenVerifier | None = None,
+) -> FastAPI:
+    """Create the mission API with injectable domain and auth dependencies."""
     mission_service = MissionDemoService() if service is None else service
+    settings = (
+        ClerkAuthSettings.from_environment() if auth_settings is None else auth_settings
+    )
+    verifier = (
+        ClerkTokenVerifier(settings) if token_verifier is None else token_verifier
+    )
     application = FastAPI(
         title="NASAQ26 Local Mission API",
         version="1.0.0",
         description="Synthetic educational mission simulation; local use only.",
     )
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=list(settings.allowed_origins),
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
+        allow_credentials=False,
+    )
+
+    @application.middleware("http")
+    async def security_headers(
+        request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-Frame-Options"] = "DENY"
+        return response
 
     @application.exception_handler(RequestValidationError)
     async def request_validation_error(
@@ -121,8 +159,25 @@ def create_app(service: MissionDemoService | None = None) -> FastAPI:
         code = {
             404: "not_found",
             405: "method_not_allowed",
+            401: "authentication_required",
+            403: "forbidden",
+            503: "authentication_unavailable",
         }.get(exc.status_code, "http_error")
-        message = exc.detail if isinstance(exc.detail, str) else "The request failed."
+        default_messages = {
+            401: "A valid Clerk session token is required.",
+            403: "The authenticated session is not authorized for this application.",
+            503: "Authentication verification is temporarily unavailable.",
+        }
+        message = default_messages.get(exc.status_code, "The request failed.")
+        if isinstance(exc.detail, str) and exc.status_code not in default_messages:
+            message = exc.detail
+        elif isinstance(exc.detail, dict):
+            detail_code = exc.detail.get("code")
+            detail_message = exc.detail.get("message")
+            if isinstance(detail_code, str):
+                code = detail_code
+            if isinstance(detail_message, str):
+                message = detail_message
         return _error_response(exc.status_code, code, message)
 
     @application.exception_handler(Exception)
@@ -138,8 +193,72 @@ def create_app(service: MissionDemoService | None = None) -> FastAPI:
     async def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    @application.get("/api/v1/auth/config")
+    async def auth_config() -> dict[str, Any]:
+        if not settings.configured:
+            return {"enabled": False}
+        return {
+            "enabled": True,
+            "publishable_key": settings.publishable_key,
+            "frontend_api_url": settings.frontend_api_url,
+        }
+
+    def require_authenticated_user(
+        authorization: str | None = Header(default=None),
+    ) -> AuthenticatedUser:
+        if authorization is None or not authorization.strip():
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "code": "authentication_required",
+                    "message": "A valid Clerk session token is required.",
+                },
+            )
+        parts = authorization.split()
+        if len(parts) != 2 or parts[0].lower() != "bearer":
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "code": "invalid_session_token",
+                    "message": "A valid Clerk session token is required.",
+                },
+            )
+        try:
+            return verifier.verify(parts[1])
+        except InvalidSessionToken as exc:
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "code": "invalid_session_token",
+                    "message": "A valid Clerk session token is required.",
+                },
+            ) from exc
+        except ForbiddenAuthorizedParty as exc:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "code": "forbidden",
+                    "message": (
+                        "The authenticated session is not authorized for this "
+                        "application."
+                    ),
+                },
+            ) from exc
+        except ClerkVerificationUnavailable as exc:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "authentication_unavailable",
+                    "message": (
+                        "Authentication verification is temporarily unavailable."
+                    ),
+                },
+            ) from exc
+
     @application.get("/api/v1/missions/destinations", response_model=DestinationListDTO)
-    async def destinations() -> DestinationListDTO:
+    async def destinations(
+        _user: AuthenticatedUser = Depends(require_authenticated_user),
+    ) -> DestinationListDTO:
         return DestinationListDTO(
             destinations=[
                 DestinationProfileDTO(
@@ -156,11 +275,17 @@ def create_app(service: MissionDemoService | None = None) -> FastAPI:
         )
 
     @application.post("/api/v1/missions/validate", response_model=MissionValidationDTO)
-    async def validate_mission(request: MissionRequestDTO) -> MissionValidationDTO:
+    async def validate_mission(
+        request: MissionRequestDTO,
+        _user: AuthenticatedUser = Depends(require_authenticated_user),
+    ) -> MissionValidationDTO:
         return MissionValidationDTO(valid=True, mission=_mission_summary(request))
 
     @application.post("/api/v1/missions/run", response_model=MissionRunResponseDTO)
-    async def run_mission(request: MissionRequestDTO) -> MissionRunResponseDTO:
+    async def run_mission(
+        request: MissionRequestDTO,
+        _user: AuthenticatedUser = Depends(require_authenticated_user),
+    ) -> MissionRunResponseDTO:
         result: dict[str, Any] = mission_service.run(request.model_dump(mode="json"))
         return MissionRunResponseDTO.model_validate(result)
 
