@@ -49,6 +49,46 @@
     return card;
   }
 
+  function renderCollection(host, items, isValidItem, renderItem, emptyMessage, label) {
+    if (!Array.isArray(items) || !items.every(isValidItem)) {
+      const box = node('div', 'state-box state-error collection-state');
+      box.setAttribute('role', 'alert');
+      box.append(
+        node('strong', '', `${label} unavailable`),
+        node('span', '', `${label} items could not be displayed because the data is missing or invalid.`)
+      );
+      host.replaceChildren(box);
+      return;
+    }
+
+    if (items.length === 0) {
+      const box = node('div', 'state-box state-empty collection-state');
+      box.setAttribute('role', 'status');
+      box.append(node('strong', '', emptyMessage));
+      host.replaceChildren(box);
+      return;
+    }
+
+    host.replaceChildren(...items.map(renderItem));
+  }
+
+  function validOverviewItem(item) {
+    return item !== null && typeof item === 'object' &&
+      typeof item.label === 'string' &&
+      (typeof item.value === 'string' || typeof item.value === 'number') &&
+      typeof item.detail === 'string' &&
+      typeof item.icon === 'string' &&
+      typeof item.tone === 'string';
+  }
+
+  function validResourceItem(item) {
+    return item !== null && typeof item === 'object' &&
+      typeof item.label === 'string' &&
+      typeof item.value === 'number' && Number.isFinite(item.value) &&
+      typeof item.unit === 'string' &&
+      typeof item.detail === 'string';
+  }
+
   const comparisonUnavailable = 'Cross-mission comparison unavailable: the local API has no comparison or mission-history endpoint.';
   const emptyMissionMessage = 'Run a mission in Mission Builder to see the latest local API result.';
   let latestMissionState = { status: 'empty', result: null, message: null };
@@ -338,6 +378,22 @@
   function start() {
     setupNavigation();
     renderMissionState(latestMissionState);
+    renderCollection(
+      document.getElementById('overview-grid'),
+      data && data.overview,
+      validOverviewItem,
+      metricCard,
+      'No overview items are available.',
+      'Overview'
+    );
+    renderCollection(
+      document.getElementById('resource-grid'),
+      data && data.resources,
+      validResourceItem,
+      resourceCard,
+      'No resource items are available.',
+      'Resource'
+    );
     if (!data || !window.arc09Charts) {
       document.querySelectorAll('.chart-host').forEach((host) => {
         const message = !data ? 'Sample chart data is unavailable.' : 'Chart rendering is unavailable.';
@@ -346,10 +402,6 @@
       });
       return;
     }
-    const overview = document.getElementById('overview-grid');
-    overview.replaceChildren(...data.overview.map(metricCard));
-    const resources = document.getElementById('resource-grid');
-    resources.replaceChildren(...data.resources.map(resourceCard));
     const lineRendered = window.arc09Charts.renderLine(document.getElementById('line-chart'), data.trend);
     const barsRendered = window.arc09Charts.renderBars(document.getElementById('bar-chart'), data.comparison);
     const scatterRendered = window.arc09Charts.renderScatter(document.getElementById('scatter-chart'), data.scatter);

@@ -714,7 +714,8 @@ button,a,select {
   box-shadow: 0 4px 14px rgba(15,23,42,.18);
   font-size: 13px;
   font-weight: 650;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .chart-tooltip[hidden] {
@@ -776,7 +777,7 @@ button,a,select {
 }
 
 .graph-edge {
-  stroke: var(--border);
+  stroke: var(--muted);
   stroke-width: 2;
 }
 
@@ -1017,6 +1018,10 @@ td {
   font-size: 13px;
 }
 
+.collection-state {
+  grid-column: 1 / -1;
+}
+
 .state-box strong {
   font-size: 14px;
 }
@@ -1127,6 +1132,17 @@ td {
   }
   .shell-body {
     grid-template-columns: 220px minmax(0,1fr);
+  }
+  .visual-grid {
+    grid-template-columns: minmax(0,1fr);
+  }
+  .graph-host {
+    height: 330px;
+    overflow-x: auto;
+  }
+  .graph-host svg {
+    width: 560px;
+    height: 330px;
   }
   .lower-grid {
     grid-template-columns: minmax(0,1fr);
@@ -1296,7 +1312,7 @@ td {
     height: 220px;
   }
   .graph-host {
-    height: 290px;
+    height: 330px;
   }
   .chart-tick {
     font-size: 13px;

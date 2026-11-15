@@ -61,7 +61,21 @@
     group.addEventListener('pointerenter', (event) => showTip(tipText, event, group));
     group.addEventListener('pointermove', (event) => showTip(tipText, event, group));
     group.addEventListener('pointerleave', () => showTip('', null, group));
-    group.addEventListener('focus', () => showTip(tipText, null, group));
+    group.addEventListener('focus', () => {
+      if (className === 'graph-edge-mark') {
+        const host = svg.parentElement;
+        const label = group.querySelector('.graph-edge-label');
+        if (host && label) {
+          const hostRect = host.getBoundingClientRect();
+          const labelRect = label.getBoundingClientRect();
+          const visibleLeft = hostRect.left + host.clientLeft;
+          const visibleRight = visibleLeft + host.clientWidth;
+          if (labelRect.left < visibleLeft) host.scrollLeft -= visibleLeft - labelRect.left;
+          else if (labelRect.right > visibleRight) host.scrollLeft += labelRect.right - visibleRight;
+        }
+      }
+      showTip(tipText, null, group);
+    });
     group.addEventListener('blur', () => showTip('', null, group));
     svg.appendChild(group);
     return group;
@@ -151,6 +165,92 @@
     return null;
   }
 
+  function boxesOverlap(first, second, padding = 3) {
+    return first.x - padding < second.x + second.width &&
+      first.x + first.width + padding > second.x &&
+      first.y - padding < second.y + second.height &&
+      first.y + first.height + padding > second.y;
+  }
+
+  function setGraphLabelPosition(element, x, y) {
+    element.setAttribute('x', x);
+    element.setAttribute('y', y);
+    element.querySelectorAll('tspan').forEach((line) => line.setAttribute('x', x));
+  }
+
+  function placeGraphLabels(svg, labels, width, height) {
+    const nodeBoxes = Array.from(svg.querySelectorAll('rect.graph-node'), (node) => {
+      const box = node.getBBox();
+      return { x: box.x, y: box.y, width: box.width, height: box.height };
+    });
+    const placed = [];
+    const horizontalOffsets = [0, -20, 20, -40, 40, -60, 60, -80, 80, -100, 100, -120, 120, -160, 160, -200, 200];
+    const verticalOffsets = [0, -18, 18, -36, 36, -54, 54, -72, 72, -108, 108, -144, 144];
+    const offsets = horizontalOffsets.flatMap((x) => verticalOffsets.map((y) => ({ x, y })))
+      .sort((first, second) =>
+        first.x * first.x + first.y * first.y - second.x * second.x - second.y * second.y);
+
+    labels.forEach(({ element, x, y }) => {
+      const originalLabel = element.textContent;
+      const words = originalLabel.split(/\s+/).filter(Boolean);
+      const lines = [];
+      let line = '';
+      words.forEach((word) => {
+        const candidate = line ? `${line} ${word}` : word;
+        element.textContent = candidate;
+        if (line && element.getComputedTextLength() > 210) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = candidate;
+        }
+      });
+      if (line) lines.push(line);
+      if (lines.length > 1) {
+        element.setAttribute('xml:space', 'preserve');
+        element.replaceChildren(...lines.map((value, index) =>
+          el('tspan', {
+            x,
+            dy: index === 0 ? `${-0.6 * (lines.length - 1)}em` : '1.2em'
+          }, index < lines.length - 1 ? `${value} ` : value)
+        ));
+      } else {
+        element.textContent = originalLabel;
+      }
+
+      let fallback = null;
+      for (const offset of offsets) {
+        let candidateX = x + offset.x;
+        let candidateY = y + offset.y;
+        setGraphLabelPosition(element, candidateX, candidateY);
+        let bounds = element.getBBox();
+        let box = { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+        if (box.x < 4) candidateX += 4 - box.x;
+        else if (box.x + box.width > width - 4) candidateX += width - 4 - (box.x + box.width);
+        if (box.y < 4) candidateY += 4 - box.y;
+        else if (box.y + box.height > height - 4) candidateY += height - 4 - (box.y + box.height);
+        setGraphLabelPosition(element, candidateX, candidateY);
+        bounds = element.getBBox();
+        box = { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+        const inViewBox = box.x >= 4 && box.y >= 4 &&
+          box.x + box.width <= width - 4 && box.y + box.height <= height - 4;
+        const collisions = [...nodeBoxes, ...placed].filter((other) => boxesOverlap(box, other)).length;
+        const score = (inViewBox ? 0 : 1000000000) +
+          collisions * 100000 + offset.x * offset.x + offset.y * offset.y;
+        if (!fallback || score < fallback.score) fallback = { box, candidateX, candidateY, score };
+        if (inViewBox && collisions === 0) {
+          placed.push(box);
+          return;
+        }
+      }
+      if (fallback) {
+        setGraphLabelPosition(element, fallback.candidateX, fallback.candidateY);
+        const bounds = element.getBBox();
+        placed.push({ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height });
+      }
+    });
+  }
+
   function drawLine(host, rows, showTip) {
     const issue = validateLineRows(rows);
     if (issue === 'empty') return showEmpty(host);
@@ -233,15 +333,17 @@
     ];
     const svg = baseChart(host, 'Conceptual relationship graph', 'Illustrative links among Mission, Spacecraft, Payload, Resources, and Simulation concepts. The relationships are placeholders, not a confirmed product data model or mission facts.', width, height);
     const lookup = new Map(graph.nodes.map((item, index) => [item.id, { ...item, ...positions[index] }]));
+    const labels = [];
 
     graph.edges.forEach((edge) => {
       const from = lookup.get(edge.from);
       const to = lookup.get(edge.to);
       const line = el('line', { x1: from.x, y1: from.y, x2: to.x, y2: to.y, class: 'graph-edge' });
       const midX = (from.x + to.x) / 2;
-      const midY = (from.y + to.y) / 2 - 5;
-      const label = el('text', { x: midX, y: midY, class: 'graph-edge-label', 'text-anchor': 'middle' }, 'example link');
-      addTooltipGroup(svg, [line, label], `${from.label} to ${to.label}: ${edge.label.toLowerCase()}`, `${from.label} to ${to.label}: ${edge.label.toLowerCase()}. No confirmed product relationship is implied.`, showTip, 'graph-edge-mark');
+      const midY = (from.y + to.y) / 2;
+      const label = el('text', { x: midX, y: midY, class: 'graph-edge-label', 'text-anchor': 'middle', 'dominant-baseline': 'middle' }, edge.label);
+      labels.push({ element: label, x: midX, y: midY });
+      addTooltipGroup(svg, [line, label], `${from.label} to ${to.label}: ${edge.label}`, `${from.label} to ${to.label}: ${edge.label}. No confirmed product relationship is implied.`, showTip, 'graph-edge-mark');
     });
 
     graph.nodes.forEach((item, index) => {
@@ -255,6 +357,7 @@
     });
 
     host.replaceChildren(svg);
+    placeGraphLabels(svg, labels, width, height);
     host.setAttribute('aria-busy', 'false');
     return true;
   }
