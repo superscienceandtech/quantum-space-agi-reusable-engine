@@ -13,10 +13,44 @@ def test_dashboard_uses_local_mission_api_and_exposes_run_form() -> None:
     assert 'id="mission-demo-results"' in html
     assert adapter.is_file()
     script = adapter.read_text(encoding="utf-8")
-    assert "fetch('/api/v1/missions/destinations')" in script
-    assert "fetch('/api/v1/missions/validate'" in script
-    assert "fetch('/api/v1/missions/run'" in script
+    assert "authenticatedFetch('/api/v1/missions/destinations')" in script
+    assert "authenticatedFetch(" in script
+    assert all(
+        endpoint in script
+        for endpoint in (
+            "/api/v1/missions/validate",
+            "/api/v1/missions/run",
+        )
+    )
     assert "/local/mission-run" not in script
+    assert "disabled>Validate and run mission</button>" in html
+
+
+def test_dashboard_requires_clerk_auth_before_mission_requests() -> None:
+    html = (PROTOTYPE / "index.html").read_text(encoding="utf-8")
+    auth_script = PROTOTYPE / "auth.js"
+    adapter = (PROTOTYPE / "mission-demo.js").read_text(encoding="utf-8")
+
+    assert 'id="clerk-sign-in"' in html
+    assert 'id="clerk-user-button"' in html
+    assert 'id="mission-demo-auth-status"' in html
+    assert auth_script.is_file()
+    assert html.index('src="auth.js"') < html.index('src="mission-demo.js"')
+    assert "await window.nasaqAuth.getToken()" in adapter
+    assert "Authorization" in adapter
+    assert all(
+        endpoint in adapter
+        for endpoint in (
+            "/api/v1/missions/destinations",
+            "/api/v1/missions/validate",
+            "/api/v1/missions/run",
+        )
+    )
+    assert "response.status === 401" in adapter
+    assert "response.status === 403" in adapter
+    assert "localStorage" not in adapter
+    assert "sessionStorage" not in adapter
+    assert "nasaq-auth:state" in auth_script.read_text(encoding="utf-8")
     assert "disabled>Validate and run mission</button>" in html
 
 

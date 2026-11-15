@@ -8,7 +8,24 @@
   const destination = form.elements.destination_profile_id;
   const runButton = form.querySelector('button[type="submit"]');
   const SVG_NS = 'http://www.w3.org/2000/svg';
+  const destinationLoadFallback =
+    'Could not load synthetic destination profiles. Check that the local mission service is running and try again.';
+  const formControls = [...form.querySelectorAll('input, select, button')];
+  let authReady = false;
+  let authConfigured = false;
+  let authStateReceived = false;
+  let signedIn = false;
+  let destinationsLoaded = false;
   let result = null;
+
+  class MissionAuthorizationError extends Error {
+    constructor(status) {
+      super(status === 401
+        ? 'Your sign-in has expired. Sign out and sign in again to continue.'
+        : 'Your account is not authorized to use this mission service.');
+      this.status = status;
+    }
+  }
 
   function element(tag, text, parent) {
     const node = document.createElement(tag);
@@ -18,6 +35,9 @@
   }
 
   function setStatus(message, tone) {
+    const isError = tone === 'error';
+    status.setAttribute('role', isError ? 'alert' : 'status');
+    status.setAttribute('aria-live', isError ? 'assertive' : 'polite');
     if (tone) status.dataset.tone = tone;
     else status.removeAttribute('data-tone');
     status.textContent = message;
@@ -37,14 +57,64 @@
     publishMissionState('error', null, message);
   }
 
+  function setControlsDisabled(disabled) {
+    formControls.forEach((control) => {
+      control.disabled = disabled;
+    });
+  }
+
+  function clearMissionResults() {
+    results.hidden = true;
+    results.replaceChildren();
+    result = null;
+    publishMissionState('empty', null);
+  }
+
+  function showRequestError(error, fallback) {
+    if (error instanceof MissionAuthorizationError) {
+      destinationsLoaded = false;
+      setControlsDisabled(true);
+      showError(error.message);
+      return;
+    }
+    const detail = error instanceof Error ? error.message.trim() : '';
+    showError(detail || fallback);
+  }
+
+  async function authenticatedFetch(path, options = {}) {
+    const token = await window.nasaqAuth.getToken();
+    if (!token) throw new MissionAuthorizationError(401);
+    const headers = {
+      ...options.headers,
+      Authorization: `Bearer ${token}`
+    };
+    return fetch(path, { ...options, headers });
+  }
+
   async function responseJson(response) {
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new MissionAuthorizationError(response.status);
+      }
       const error = payload && payload.error;
-      const details = error && Array.isArray(error.details)
-        ? error.details.map((detail) => `${detail.field}: ${detail.message}`).join(' ')
+      const message = error && typeof error.message === 'string'
+        ? error.message.trim()
         : '';
-      throw new Error([error && error.message, details].filter(Boolean).join(' '));
+      const details = error && Array.isArray(error.details)
+        ? error.details
+          .filter((detail) => detail &&
+            typeof detail.field === 'string' &&
+            typeof detail.message === 'string')
+          .map((detail) => {
+            const field = detail.field.trim();
+            const message = detail.message.trim();
+            return message ? `${field ? `${field}: ` : ''}${message}` : '';
+          })
+          .filter(Boolean)
+          .join(' ')
+        : '';
+      throw new Error([message, details].filter(Boolean).join(' ') || `HTTP ${response.status}`);
     }
     return payload;
   }
@@ -156,13 +226,13 @@
   }
 
   async function loadDestinations() {
-    destination.disabled = true;
-    runButton.disabled = true;
+    if (!authReady || !authConfigured || !signedIn) return;
+    setControlsDisabled(true);
     result = null;
     publishMissionState('loading', result);
     setStatus('Loading synthetic destination profiles…');
     try {
-      const response = await fetch('/api/v1/missions/destinations');
+      const response = await authenticatedFetch('/api/v1/missions/destinations');
       const payload = await responseJson(response);
       if (!payload || !Array.isArray(payload.destinations)) {
         throw new Error('The local service returned an invalid destination list.');
@@ -177,17 +247,34 @@
       if (!payload.destinations.length) {
         throw new Error('The local service returned no synthetic destination profiles.');
       }
-      destination.disabled = false;
-      runButton.disabled = false;
+      destinationsLoaded = true;
+      setControlsDisabled(false);
       setStatus('Ready. Configure a synthetic mission, then validate and run it locally.');
       publishMissionState('empty', null);
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Could not load destinations from the local mission API.');
+      if (error instanceof MissionAuthorizationError) {
+        showRequestError(error, destinationLoadFallback);
+        return;
+      }
+      const detail = error instanceof Error ? error.message.trim() : '';
+      showError(detail
+        ? `Could not load synthetic destination profiles: ${detail}. Check that the local mission service is running and try again.`
+        : destinationLoadFallback);
     }
   }
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (!authReady || !authConfigured || !signedIn || !destinationsLoaded) {
+      setControlsDisabled(true);
+      setStatus(
+        authConfigured
+          ? 'Sign in to load synthetic destination profiles and enable mission operations.'
+          : 'Clerk sign-in is not configured. Mission operations are disabled.',
+        'error'
+      );
+      return;
+    }
     result = null;
     results.hidden = true;
     results.replaceChildren();
@@ -200,15 +287,18 @@
     runButton.disabled = true;
     setStatus('Validating mission configuration…');
     try {
-      const validationResponse = await fetch('/api/v1/missions/validate', {
+      const validationResponse = await authenticatedFetch(
+        '/api/v1/missions/validate',
+        {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request)
-      });
+        }
+      );
       const validation = await responseJson(validationResponse);
       if (!validation.valid) throw new Error('The local mission configuration is invalid.');
       setStatus('Configuration validated. Running ARC-05 simulation and ARC-08 evaluation…');
-      const runResponse = await fetch('/api/v1/missions/run', {
+      const runResponse = await authenticatedFetch('/api/v1/missions/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request)
@@ -217,11 +307,64 @@
       render(result);
       publishMissionState('ready', result);
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'The local mission run failed.');
+      showRequestError(error, 'The local mission run failed.');
     } finally {
-      runButton.disabled = false;
+      runButton.disabled = !signedIn || !destinationsLoaded;
     }
   });
 
-  loadDestinations();
+  function applyAuthState(detail) {
+    authStateReceived = true;
+    authReady = true;
+    authConfigured = Boolean(detail && detail.configured);
+    const wasSignedIn = signedIn;
+    signedIn = Boolean(detail && detail.signedIn);
+    if (!authConfigured || !signedIn) {
+      destinationsLoaded = false;
+      setControlsDisabled(true);
+      clearMissionResults();
+      const authStatus = document.getElementById('mission-demo-auth-status');
+      const authFailed = authStatus && authStatus.dataset.tone === 'error';
+      const message = authFailed
+        ? authStatus.textContent
+        : authConfigured
+          ? 'Sign in above to load synthetic destination profiles.'
+          : 'Clerk sign-in is not configured. Mission operations are disabled.';
+      setStatus(message, authFailed ? 'error' : undefined);
+      return;
+    }
+    if (!wasSignedIn) loadDestinations();
+  }
+
+  setControlsDisabled(true);
+  window.addEventListener('nasaq-auth:state', (event) => {
+    applyAuthState(event.detail);
+  });
+  if (
+    window.nasaqAuth &&
+    window.nasaqAuth.ready &&
+    typeof window.nasaqAuth.getToken === 'function'
+  ) {
+    window.nasaqAuth.ready.then(() => {
+      if (!authStateReceived) {
+        applyAuthState({ configured: false, signedIn: false });
+        setStatus(
+          'Sign-in state could not be initialized. Mission operations are disabled.',
+          'error'
+        );
+      }
+    }, () => {
+      applyAuthState({ configured: false, signedIn: false });
+      setStatus(
+        'Sign-in state could not be initialized. Mission operations are disabled.',
+        'error'
+      );
+    });
+  } else {
+    applyAuthState({ configured: false, signedIn: false });
+    setStatus(
+      'Sign-in controller is unavailable. Mission operations are disabled.',
+      'error'
+    );
+  }
 }());

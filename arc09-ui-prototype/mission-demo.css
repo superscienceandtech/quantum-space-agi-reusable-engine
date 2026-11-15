@@ -37,6 +37,44 @@
   gap: 8px;
 }
 
+.clerk-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #475569;
+  font-size: 13px;
+}
+
+.clerk-account [hidden],
+#clerk-sign-in[hidden] {
+  display: none;
+}
+
+.mission-auth-panel {
+  margin: 18px 0;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.mission-auth-panel h3 {
+  margin: 0;
+}
+
+.mission-auth-panel p {
+  margin: 8px 0;
+}
+
+#mission-demo-auth-status[data-tone="error"] {
+  color: #991b1b;
+}
+
+#clerk-sign-in {
+  max-width: 480px;
+  margin-top: 12px;
+}
+
 #mission-demo-status[data-tone="error"] {
   color: #991b1b;
 }

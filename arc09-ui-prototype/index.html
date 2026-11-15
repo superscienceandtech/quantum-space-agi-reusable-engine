@@ -23,7 +23,10 @@
         </div>
         <div class="header-right">
           <span class="prototype-chip"><span class="chip-dot" aria-hidden="true"></span>Prototype</span>
-          <span class="avatar" aria-label="Prototype user">H</span>
+          <div class="clerk-account" aria-label="Account sign-in">
+            <span id="clerk-auth-status" role="status" aria-live="polite">Checking sign-in configuration…</span>
+            <div id="clerk-user-button" hidden></div>
+          </div>
         </div>
       </header>
 
@@ -142,6 +145,11 @@
                 <span class="sample-label">SYNTHETIC ONLY</span>
               </div>
               <p class="mission-demo-limits">Synthetic educational profiles only. This is not a real destination, transfer, spacecraft performance model, or validated prediction. No fuel estimate. ARC-08 runs after ARC-05; resource-policy approval remains pending, so its abstract-unit result is informational and never gates simulation.</p>
+              <section class="mission-auth-panel" aria-labelledby="mission-auth-title">
+                <h3 id="mission-auth-title">Sign in to use the mission demo</h3>
+                <p id="mission-demo-auth-status" role="status" aria-live="polite">Checking sign-in configuration…</p>
+                <div id="clerk-sign-in" hidden></div>
+              </section>
               <form id="mission-demo-form">
                 <div class="mission-form-grid">
                   <div class="form-field">
@@ -187,6 +195,7 @@
     <script src="data.js"></script>
     <script src="charts.js"></script>
     <script src="app.js"></script>
+    <script src="auth.js"></script>
     <script src="mission-demo.js"></script>
   </body>
 </html>
