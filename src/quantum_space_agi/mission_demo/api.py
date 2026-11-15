@@ -7,10 +7,11 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.requests import Request
@@ -73,6 +74,34 @@ def _error_response(
     )
 
 
+def _http_error_response(exc: StarletteHTTPException) -> JSONResponse:
+    code = {
+        404: "not_found",
+        405: "method_not_allowed",
+        401: "authentication_required",
+        403: "forbidden",
+        503: "authentication_unavailable",
+        429: "rate_limited",
+    }.get(exc.status_code, "http_error")
+    default_messages = {
+        401: "A valid Clerk session token is required.",
+        403: "The authenticated session is not authorized for this application.",
+        503: "Authentication verification is temporarily unavailable.",
+        429: "The mission request limit has been reached.",
+    }
+    message = default_messages.get(exc.status_code, "The request failed.")
+    if isinstance(exc.detail, str) and exc.status_code not in default_messages:
+        message = exc.detail
+    elif isinstance(exc.detail, dict):
+        detail_code = exc.detail.get("code")
+        detail_message = exc.detail.get("message")
+        if isinstance(detail_code, str):
+            code = detail_code
+        if isinstance(detail_message, str):
+            message = detail_message
+    return _error_response(exc.status_code, code, message, headers=exc.headers)
+
+
 def _mission_summary(request: MissionRequestDTO) -> MissionSummaryDTO:
     spacecraft = SpacecraftConfiguration(request.selected_payload_ids)
     mission = MissionDemoConfiguration(request.destination_profile_id, spacecraft)
@@ -119,7 +148,25 @@ def create_app(
     async def security_headers(
         request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        response = await call_next(request)
+        protected_request = (
+            request.method == "GET"
+            and request.url.path == "/api/v1/missions/destinations"
+        ) or (
+            request.method == "POST" and request.url.path in _MISSION_POST_PATHS
+        )
+        response: Response
+        if protected_request:
+            try:
+                user = await run_in_threadpool(
+                    verify_authorization, request.headers.get("authorization")
+                )
+            except HTTPException as exc:
+                response = _http_error_response(exc)
+            else:
+                request.state.authenticated_user = user
+                response = await call_next(request)
+        else:
+            response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-Frame-Options"] = "DENY"
@@ -165,31 +212,7 @@ def create_app(
     async def http_error(
         _request: Request, exc: StarletteHTTPException
     ) -> JSONResponse:
-        code = {
-            404: "not_found",
-            405: "method_not_allowed",
-            401: "authentication_required",
-            403: "forbidden",
-            503: "authentication_unavailable",
-            429: "rate_limited",
-        }.get(exc.status_code, "http_error")
-        default_messages = {
-            401: "A valid Clerk session token is required.",
-            403: "The authenticated session is not authorized for this application.",
-            503: "Authentication verification is temporarily unavailable.",
-            429: "The mission request limit has been reached.",
-        }
-        message = default_messages.get(exc.status_code, "The request failed.")
-        if isinstance(exc.detail, str) and exc.status_code not in default_messages:
-            message = exc.detail
-        elif isinstance(exc.detail, dict):
-            detail_code = exc.detail.get("code")
-            detail_message = exc.detail.get("message")
-            if isinstance(detail_code, str):
-                code = detail_code
-            if isinstance(detail_message, str):
-                message = detail_message
-        return _error_response(exc.status_code, code, message, headers=exc.headers)
+        return _http_error_response(exc)
 
     @application.exception_handler(Exception)
     async def unexpected_error(_request: Request, exc: Exception) -> JSONResponse:
@@ -214,9 +237,7 @@ def create_app(
             "frontend_api_url": settings.frontend_api_url,
         }
 
-    def require_authenticated_user(
-        authorization: str | None = Header(default=None),
-    ) -> AuthenticatedUser:
+    def verify_authorization(authorization: str | None) -> AuthenticatedUser:
         if authorization is None or not authorization.strip():
             raise HTTPException(
                 status_code=401,
@@ -265,6 +286,18 @@ def create_app(
                     ),
                 },
             ) from exc
+
+    def require_authenticated_user(request: Request) -> AuthenticatedUser:
+        user = getattr(request.state, "authenticated_user", None)
+        if not isinstance(user, AuthenticatedUser):
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "code": "authentication_required",
+                    "message": "A valid Clerk session token is required.",
+                },
+            )
+        return user
 
     def enforce_rate_limit(user: AuthenticatedUser, route_key: str, limit: int) -> None:
         retry_after = mission_rate_limiter.check(user.user_id, route_key, limit)

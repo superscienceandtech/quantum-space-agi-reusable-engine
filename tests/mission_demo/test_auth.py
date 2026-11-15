@@ -132,6 +132,19 @@ def test_loads_clerk_configuration_from_environment(
     assert settings.jwks_url == "https://clerk.example/.well-known/jwks.json"
 
 
+def test_rejects_non_loopback_http_frontend_api_url(auth_module: Any) -> None:
+    with pytest.raises(ValueError, match="HTTPS"):
+        make_settings(auth_module, frontend_api_url="http://clerk.example")
+
+
+def test_allows_loopback_http_frontend_api_url_for_local_verification(
+    auth_module: Any,
+) -> None:
+    settings = make_settings(auth_module, frontend_api_url="http://127.0.0.1:8080")
+
+    assert settings.frontend_api_url == "http://127.0.0.1:8080"
+
+
 @pytest.mark.parametrize(
     "changes",
     [

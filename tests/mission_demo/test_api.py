@@ -161,6 +161,28 @@ def test_mission_routes_require_authentication() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("headers", "content"),
+    [
+        ({"Content-Type": "application/json"}, b"{"),
+        ({"Content-Type": "text/plain"}, b"not-json"),
+    ],
+)
+def test_unauthenticated_mission_posts_are_rejected_before_body_parsing(
+    headers: dict[str, str], content: bytes
+) -> None:
+    client = SyncASGIClient(create_app())
+
+    response = client.post(
+        "/api/v1/missions/run",
+        headers=headers,
+        content=content,
+    )
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "authentication_required"
+
+
 def test_valid_session_can_access_each_mission_route(
     authenticated_client: SyncASGIClient,
 ) -> None:

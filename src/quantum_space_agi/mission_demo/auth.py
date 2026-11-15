@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ipaddress
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -66,12 +67,23 @@ class ClerkAuthSettings:
         if self.publishable_key is not None and not self.publishable_key.strip():
             raise ValueError("CLERK_PUBLISHABLE_KEY must not be empty")
         if self.frontend_api_url is not None:
+            frontend_api_url = _normalize_origin(
+                self.frontend_api_url, setting="CLERK_FRONTEND_API_URL"
+            )
+            parsed_frontend_api_url = urlsplit(frontend_api_url)
+            hostname = parsed_frontend_api_url.hostname or ""
+            try:
+                loopback_host = ipaddress.ip_address(hostname).is_loopback
+            except ValueError:
+                loopback_host = hostname == "localhost"
+            if parsed_frontend_api_url.scheme != "https" and not loopback_host:
+                raise ValueError(
+                    "CLERK_FRONTEND_API_URL must use HTTPS except for loopback"
+                )
             object.__setattr__(
                 self,
                 "frontend_api_url",
-                _normalize_origin(
-                    self.frontend_api_url, setting="CLERK_FRONTEND_API_URL"
-                ),
+                frontend_api_url,
             )
         if self.audience is not None and not self.audience.strip():
             raise ValueError("CLERK_AUDIENCE must not be empty when set")
