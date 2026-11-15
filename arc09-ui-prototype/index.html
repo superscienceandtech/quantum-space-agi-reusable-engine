@@ -155,7 +155,7 @@
                   <div class="form-field">
                     <label for="mission-destination">Educational orbit profile</label>
                     <select id="mission-destination" name="destination_profile_id" required>
-                      <option value="" selected disabled>Loading synthetic profiles…</option>
+                      <option value="" selected disabled>Checking sign-in configuration…</option>
                     </select>
                     <small>Altitude in metres above the simulator Earth reference radius; ECI +X start and prograde +Y velocity.</small>
                   </div>
@@ -168,6 +168,7 @@
                   </fieldset>
                 </div>
                 <button class="button button-primary" type="submit" disabled>Validate and run mission</button>
+                <p id="mission-demo-readiness" role="status" aria-live="polite">Checking sign-in and mission readiness…</p>
               </form>
               <p id="mission-demo-status" role="status" aria-live="polite">Loading synthetic destination profiles from the local mission API…</p>
             </section>

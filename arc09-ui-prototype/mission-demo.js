@@ -4,18 +4,22 @@
   if (!form) return;
 
   const status = document.getElementById('mission-demo-status');
+  const readiness = document.getElementById('mission-demo-readiness');
   const results = document.getElementById('mission-demo-results');
   const destination = form.elements.destination_profile_id;
   const runButton = form.querySelector('button[type="submit"]');
+  const payloadInputs = [...form.querySelectorAll('input[name="selected_payload_ids"]')];
+  const supportedPayloadIds = new Set(payloadInputs.map((input) => input.value));
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const destinationLoadFallback =
     'Could not load synthetic destination profiles. Check that the local mission service is running and try again.';
-  const formControls = [...form.querySelectorAll('input, select, button')];
   let authReady = false;
   let authConfigured = false;
   let authStateReceived = false;
   let signedIn = false;
   let destinationsLoaded = false;
+  let destinationProfiles = new Map();
+  let submitting = false;
   let result = null;
 
   class MissionAuthorizationError extends Error {
@@ -57,10 +61,78 @@
     publishMissionState('error', null, message);
   }
 
-  function setControlsDisabled(disabled) {
-    formControls.forEach((control) => {
-      control.disabled = disabled;
+  function setProfilePlaceholder(message) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = message;
+    option.disabled = true;
+    option.selected = true;
+    destination.replaceChildren(option);
+  }
+
+  function selectedPayloadIds() {
+    return payloadInputs
+      .filter((input) => input.checked)
+      .map((input) => input.value);
+  }
+
+  function hasValidMissionInputs() {
+    const payloadIds = selectedPayloadIds();
+    return destinationProfiles.has(destination.value) &&
+      payloadIds.length > 0 &&
+      payloadIds.every((payloadId) => supportedPayloadIds.has(payloadId));
+  }
+
+  function readinessMessage() {
+    if (submitting) return 'Mission run in progress.';
+    if (!authReady) return 'Waiting for sign-in status.';
+    if (!authConfigured) {
+      return 'Clerk sign-in is not configured. Mission operations are disabled.';
+    }
+    if (!signedIn) return 'Sign in to enable mission operations.';
+    if (!destinationsLoaded) {
+      return 'Synthetic destination profiles must load before a mission can run.';
+    }
+    if (!destinationProfiles.has(destination.value)) {
+      return 'Select a valid synthetic profile.';
+    }
+    const payloadIds = selectedPayloadIds();
+    if (!payloadIds.length || payloadIds.some((id) => !supportedPayloadIds.has(id))) {
+      return 'Select at least one supported payload.';
+    }
+    return 'Ready to validate and run this synthetic educational mission.';
+  }
+
+  function updateReadiness() {
+    const canConfigure = authReady && authConfigured && signedIn &&
+      destinationsLoaded && !submitting;
+    destination.disabled = !canConfigure;
+    payloadInputs.forEach((input) => {
+      input.disabled = !canConfigure;
     });
+    runButton.disabled = !canConfigure || !hasValidMissionInputs();
+    readiness.textContent = readinessMessage();
+  }
+
+  function isValidDestinationProfile(profile) {
+    return Boolean(
+      profile &&
+      typeof profile.profile_id === 'string' &&
+      profile.profile_id.trim() &&
+      typeof profile.display_name === 'string' &&
+      profile.display_name.trim() &&
+      Number.isFinite(profile.altitude_m) &&
+      profile.altitude_m > 0 &&
+      Number.isFinite(profile.simulation_duration_s) &&
+      profile.simulation_duration_s > 0 &&
+      Number.isFinite(profile.time_step_s) &&
+      profile.time_step_s > 0 &&
+      profile.time_step_s <= profile.simulation_duration_s &&
+      Array.isArray(profile.assumptions) &&
+      profile.assumptions.length > 0 &&
+      profile.assumptions.every((item) => typeof item === 'string' && item.trim()) &&
+      profile.classification === 'synthetic educational profile'
+    );
   }
 
   function clearMissionResults() {
@@ -73,7 +145,9 @@
   function showRequestError(error, fallback) {
     if (error instanceof MissionAuthorizationError) {
       destinationsLoaded = false;
-      setControlsDisabled(true);
+      destinationProfiles.clear();
+      setProfilePlaceholder('Sign in to load synthetic profiles');
+      updateReadiness();
       showError(error.message);
       return;
     }
@@ -122,8 +196,7 @@
   function missionRequest() {
     return {
       destination_profile_id: destination.value,
-      selected_payload_ids: [...form.querySelectorAll('input[name="selected_payload_ids"]:checked')]
-        .map((input) => input.value)
+      selected_payload_ids: selectedPayloadIds()
     };
   }
 
@@ -227,7 +300,10 @@
 
   async function loadDestinations() {
     if (!authReady || !authConfigured || !signedIn) return;
-    setControlsDisabled(true);
+    destinationsLoaded = false;
+    destinationProfiles.clear();
+    setProfilePlaceholder('Loading synthetic profiles…');
+    updateReadiness();
     result = null;
     publishMissionState('loading', result);
     setStatus('Loading synthetic destination profiles…');
@@ -237,6 +313,20 @@
       if (!payload || !Array.isArray(payload.destinations)) {
         throw new Error('The local service returned an invalid destination list.');
       }
+      if (!payload.destinations.length) {
+        setProfilePlaceholder('No synthetic profiles available');
+        setStatus('No synthetic educational profiles are available from the local service.');
+        publishMissionState('empty', null);
+        updateReadiness();
+        return;
+      }
+      const profileIds = new Set();
+      payload.destinations.forEach((profile) => {
+        if (!isValidDestinationProfile(profile) || profileIds.has(profile.profile_id)) {
+          throw new Error('The local service returned an invalid synthetic destination profile.');
+        }
+        profileIds.add(profile.profile_id);
+      });
       destination.replaceChildren();
       payload.destinations.forEach((profile) => {
         const option = document.createElement('option');
@@ -244,11 +334,11 @@
         option.textContent = `${profile.display_name} · ${(profile.altitude_m / 1000).toLocaleString()} km altitude`;
         destination.appendChild(option);
       });
-      if (!payload.destinations.length) {
-        throw new Error('The local service returned no synthetic destination profiles.');
-      }
+      destinationProfiles = new Map(
+        payload.destinations.map((profile) => [profile.profile_id, profile])
+      );
       destinationsLoaded = true;
-      setControlsDisabled(false);
+      updateReadiness();
       setStatus('Ready. Configure a synthetic mission, then validate and run it locally.');
       publishMissionState('empty', null);
     } catch (error) {
@@ -256,6 +346,10 @@
         showRequestError(error, destinationLoadFallback);
         return;
       }
+      destinationsLoaded = false;
+      destinationProfiles.clear();
+      setProfilePlaceholder('Synthetic profiles could not be loaded');
+      updateReadiness();
       const detail = error instanceof Error ? error.message.trim() : '';
       showError(detail
         ? `Could not load synthetic destination profiles: ${detail}. Check that the local mission service is running and try again.`
@@ -265,26 +359,16 @@
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!authReady || !authConfigured || !signedIn || !destinationsLoaded) {
-      setControlsDisabled(true);
-      setStatus(
-        authConfigured
-          ? 'Sign in to load synthetic destination profiles and enable mission operations.'
-          : 'Clerk sign-in is not configured. Mission operations are disabled.',
-        'error'
-      );
-      return;
-    }
+    if (submitting) return;
+    updateReadiness();
+    if (runButton.disabled) return;
     result = null;
     results.hidden = true;
     results.replaceChildren();
     publishMissionState('loading', result);
     const request = missionRequest();
-    if (!request.selected_payload_ids.length) {
-      showError('Select at least one payload before running the educational simulation.');
-      return;
-    }
-    runButton.disabled = true;
+    submitting = true;
+    updateReadiness();
     setStatus('Validating mission configuration…');
     try {
       const validationResponse = await authenticatedFetch(
@@ -309,9 +393,12 @@
     } catch (error) {
       showRequestError(error, 'The local mission run failed.');
     } finally {
-      runButton.disabled = !signedIn || !destinationsLoaded;
+      submitting = false;
+      updateReadiness();
     }
   });
+
+  form.addEventListener('change', updateReadiness);
 
   function applyAuthState(detail) {
     authStateReceived = true;
@@ -321,7 +408,13 @@
     signedIn = Boolean(detail && detail.signedIn);
     if (!authConfigured || !signedIn) {
       destinationsLoaded = false;
-      setControlsDisabled(true);
+      destinationProfiles.clear();
+      setProfilePlaceholder(
+        authConfigured
+          ? 'Sign in to load synthetic profiles'
+          : 'Clerk sign-in is not configured'
+      );
+      updateReadiness();
       clearMissionResults();
       const authStatus = document.getElementById('mission-demo-auth-status');
       const authFailed = authStatus && authStatus.dataset.tone === 'error';
@@ -336,7 +429,7 @@
     if (!wasSignedIn) loadDestinations();
   }
 
-  setControlsDisabled(true);
+  updateReadiness();
   window.addEventListener('nasaq-auth:state', (event) => {
     applyAuthState(event.detail);
   });

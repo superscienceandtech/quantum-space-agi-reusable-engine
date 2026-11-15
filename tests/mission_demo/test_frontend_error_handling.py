@@ -31,6 +31,9 @@ def render_mission_builder(
     *,
     auth_state: dict[str, bool] | None = None,
     submit_mission: bool = False,
+    selected_payloads: tuple[str, ...] = (),
+    invalid_profile_selection: bool = False,
+    duplicate_submission: bool = False,
 ) -> dict[str, object]:
     chrome = shutil.which("google-chrome")
     if not chrome:
@@ -61,6 +64,9 @@ def render_mission_builder(
   window.arc09CapturedRequests = [];
   window.arc09TokenRequestCount = 0;
   window.arc09SubmitMission = {str(submit_mission).lower()};
+  window.arc09SelectedPayloads = {json.dumps(list(selected_payloads))};
+  window.arc09InvalidProfileSelection = {str(invalid_profile_selection).lower()};
+  window.arc09DuplicateSubmission = {str(duplicate_submission).lower()};
   window.fetch = async (url, options = {{}}) => {{
     window.arc09CapturedRequests.push({{
       url,
@@ -105,27 +111,55 @@ def render_mission_builder(
         probe = """
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  const missionPage = document.getElementById('mission-builder');
+  document.querySelectorAll('section[data-page]').forEach(page => {
+    page.hidden = page !== missionPage;
+  });
+  let initialized = false;
   let submitted = false;
   const capture = () => {
     const status = document.getElementById('mission-demo-status');
-    if (status && status.textContent.startsWith('Ready.') &&
-        window.arc09SubmitMission && !submitted) {
-      submitted = true;
-      document.querySelector(
-        '#mission-demo-form input[value="imager"]'
-      ).checked = true;
-      document.getElementById('mission-demo-form').dispatchEvent(
-        new Event('submit', { bubbles: true, cancelable: true })
-      );
+    if (status && status.textContent.startsWith('Ready.') && !initialized) {
+      initialized = true;
+      const form = document.getElementById('mission-demo-form');
+      if (window.arc09InvalidProfileSelection) {
+        const destination = document.getElementById('mission-destination');
+        destination.value = 'unlisted-profile';
+        destination.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      Array.from(form.querySelectorAll(
+        'input[name="selected_payload_ids"]'
+      )).forEach(input => {
+        input.checked = window.arc09SelectedPayloads.includes(input.value);
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      if (window.arc09SubmitMission) {
+        submitted = true;
+        form.dispatchEvent(
+          new Event('submit', { bubbles: true, cancelable: true })
+        );
+        if (window.arc09DuplicateSubmission) {
+          form.dispatchEvent(
+            new Event('submit', { bubbles: true, cancelable: true })
+          );
+        }
+      }
       setTimeout(capture, 10);
       return;
     }
     if (!status || (status.dataset.tone !== 'error' &&
-        !['Ready.', 'Sign in above', 'Clerk sign-in is not configured.']
+        ![
+          'Ready.',
+          'No synthetic educational profiles',
+          'Sign in above',
+          'Clerk sign-in is not configured.',
+          'Simulation complete'
+        ]
           .some(prefix => status.textContent.startsWith(prefix)))) {
       setTimeout(capture, 10);
       return;
     }
+    const readiness = document.getElementById('mission-demo-readiness');
     const output = document.createElement('pre');
     output.id = 'mission-result';
     output.textContent = JSON.stringify({
@@ -135,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         live: status.getAttribute('aria-live')
       },
       destination_disabled: document.getElementById('mission-destination').disabled,
+      readiness: readiness && readiness.textContent,
       run_disabled: document.querySelector(
         '#mission-demo-form button[type="submit"]'
       ).disabled,
@@ -145,6 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
       requests: window.arc09CapturedRequests,
       token_request_count: window.arc09TokenRequestCount,
       results_hidden: document.getElementById('mission-demo-results').hidden,
+      results_text: document.getElementById('mission-demo-results').textContent,
+      responsive: {
+        viewport_width: document.documentElement.clientWidth,
+        document_width: document.documentElement.scrollWidth,
+        mission_builder_width: missionPage.getBoundingClientRect().width,
+        readiness_visible: Boolean(
+          readiness && readiness.getBoundingClientRect().height > 0
+        )
+      },
       option_labels: Array.from(
         document.getElementById('mission-destination').options,
         option => option.textContent
@@ -347,7 +391,7 @@ def test_destination_load_failures_show_actionable_alert(
     assert result["run_disabled"] is True
 
 
-def test_destination_load_success_restores_status_and_enables_controls() -> None:
+def test_destination_load_success_keeps_run_disabled_without_payload() -> None:
     result = render_mission_builder(
         {
             "kind": "json",
@@ -358,6 +402,10 @@ def test_destination_load_success_restores_status_and_enables_controls() -> None
                         "profile_id": "synthetic-leo-test",
                         "display_name": "Synthetic test orbit",
                         "altitude_m": 400000,
+                        "simulation_duration_s": 3600,
+                        "time_step_s": 120,
+                        "assumptions": ["Synthetic educational test profile."],
+                        "classification": "synthetic educational profile",
                     }
                 ]
             },
@@ -367,7 +415,8 @@ def test_destination_load_success_restores_status_and_enables_controls() -> None
     assert result["status"]["role"] == "status"
     assert result["status"]["live"] == "polite"
     assert result["destination_disabled"] is False
-    assert result["run_disabled"] is False
+    assert result["run_disabled"] is True
+    assert "Select at least one supported payload" in result["readiness"]
     assert result["requests"] == [
         {
             "url": "/api/v1/missions/destinations",
@@ -375,6 +424,217 @@ def test_destination_load_success_restores_status_and_enables_controls() -> None
         }
     ]
     assert any("Synthetic test orbit" in label for label in result["option_labels"])
+
+
+def test_selecting_a_payload_enables_a_valid_mission_run() -> None:
+    result = render_mission_builder(
+        {
+            "kind": "json",
+            "status": 200,
+            "payload": {
+                "destinations": [
+                    {
+                        "profile_id": "synthetic-leo-test",
+                        "display_name": "Synthetic test orbit",
+                        "altitude_m": 400000,
+                        "simulation_duration_s": 3600,
+                        "time_step_s": 120,
+                        "assumptions": ["Synthetic educational test profile."],
+                        "classification": "synthetic educational profile",
+                    }
+                ]
+            },
+        },
+        selected_payloads=("imager",),
+    )
+
+    assert result["run_disabled"] is False
+    assert "Ready to validate" in result["readiness"]
+
+
+def test_mission_readiness_fits_the_mobile_viewport() -> None:
+    result = render_mission_builder(
+        {
+            "kind": "json",
+            "status": 200,
+            "payload": {
+                "destinations": [
+                    {
+                        "profile_id": "synthetic-leo-test",
+                        "display_name": "Synthetic test orbit",
+                        "altitude_m": 400000,
+                        "simulation_duration_s": 3600,
+                        "time_step_s": 120,
+                        "assumptions": ["Synthetic educational test profile."],
+                        "classification": "synthetic educational profile",
+                    }
+                ]
+            },
+        },
+        selected_payloads=("imager",),
+    )
+
+    responsive = result["responsive"]
+    assert responsive["mission_builder_width"] > 0
+    assert responsive["readiness_visible"] is True
+    assert responsive["document_width"] <= responsive["viewport_width"]
+
+
+def test_empty_destination_list_has_a_distinct_empty_state() -> None:
+    result = render_mission_builder(
+        {"kind": "json", "status": 200, "payload": {"destinations": []}}
+    )
+
+    assert result["status"]["text"].startswith(
+        "No synthetic educational profiles are available"
+    )
+    assert result["status"]["role"] == "status"
+    assert result["destination_disabled"] is True
+    assert result["run_disabled"] is True
+
+
+def test_invalid_destination_records_are_rejected() -> None:
+    result = render_mission_builder(
+        {
+            "kind": "json",
+            "status": 200,
+            "payload": {
+                "destinations": [
+                    {
+                        "profile_id": "synthetic-leo-test",
+                        "display_name": "Unclassified test profile",
+                        "altitude_m": 400000,
+                        "simulation_duration_s": 3600,
+                        "time_step_s": 120,
+                        "assumptions": ["Test profile."],
+                        "classification": "real mission",
+                    }
+                ]
+            },
+        }
+    )
+
+    assert "invalid synthetic destination profile" in result["status"]["text"]
+    assert result["status"]["role"] == "alert"
+    assert result["destination_disabled"] is True
+    assert result["run_disabled"] is True
+
+
+def test_unlisted_selected_profile_keeps_run_disabled() -> None:
+    result = render_mission_builder(
+        {
+            "kind": "json",
+            "status": 200,
+            "payload": {
+                "destinations": [
+                    {
+                        "profile_id": "synthetic-leo-test",
+                        "display_name": "Synthetic test orbit",
+                        "altitude_m": 400000,
+                        "simulation_duration_s": 3600,
+                        "time_step_s": 120,
+                        "assumptions": ["Synthetic educational test profile."],
+                        "classification": "synthetic educational profile",
+                    }
+                ]
+            },
+        },
+        selected_payloads=("imager",),
+        invalid_profile_selection=True,
+    )
+
+    assert result["run_disabled"] is True
+    assert "Select a valid synthetic profile" in result["readiness"]
+
+
+def test_duplicate_submission_runs_a_mission_once() -> None:
+    result = render_mission_builder(
+        {
+            "responses": [
+                {
+                    "kind": "json",
+                    "status": 200,
+                    "payload": {
+                        "destinations": [
+                            {
+                                "profile_id": "synthetic-leo-test",
+                                "display_name": "Synthetic test orbit",
+                                "altitude_m": 400000,
+                                "simulation_duration_s": 3600,
+                                "time_step_s": 120,
+                                "assumptions": ["Synthetic educational test profile."],
+                                "classification": "synthetic educational profile",
+                            }
+                        ]
+                    },
+                },
+                {"kind": "json", "status": 200, "payload": {"valid": True}},
+                {
+                    "kind": "json",
+                    "status": 503,
+                    "payload": {"error": {"message": "Synthetic service unavailable"}},
+                },
+            ]
+        },
+        submit_mission=True,
+        selected_payloads=("imager",),
+        duplicate_submission=True,
+    )
+
+    assert sum(
+        request["url"] == "/api/v1/missions/validate"
+        for request in result["requests"]
+    ) == 1
+    assert sum(
+        request["url"] == "/api/v1/missions/run" for request in result["requests"]
+    ) == 1
+
+
+def test_successful_synthetic_run_displays_returned_result() -> None:
+    from quantum_space_agi.mission_demo.service import MissionDemoService
+
+    mission_request = {
+        "destination_profile_id": "synthetic-leo-400-km",
+        "selected_payload_ids": ["imager"],
+    }
+    result = MissionDemoService().run(mission_request)
+    browser_result = render_mission_builder(
+        {
+            "responses": [
+                {
+                    "kind": "json",
+                    "status": 200,
+                    "payload": {
+                        "destinations": [
+                            {
+                                "profile_id": "synthetic-leo-400-km",
+                                "display_name": "Synthetic test orbit",
+                                "altitude_m": 400000,
+                                "simulation_duration_s": 3600,
+                                "time_step_s": 120,
+                                "assumptions": ["Synthetic educational test profile."],
+                                "classification": "synthetic educational profile",
+                            }
+                        ]
+                    },
+                },
+                {
+                    "kind": "json",
+                    "status": 200,
+                    "payload": {"valid": True},
+                },
+                {"kind": "json", "status": 200, "payload": result},
+            ]
+        },
+        submit_mission=True,
+        selected_payloads=("imager",),
+    )
+
+    assert browser_result["status"]["text"].startswith("Simulation complete")
+    assert browser_result["results_hidden"] is False
+    assert "Mission run results · synthetic educational output" in browser_result[
+        "results_text"
+    ]
 
 
 @pytest.mark.parametrize(
@@ -426,6 +686,10 @@ def test_authenticated_mission_requests_send_tokens_and_handle_auth_errors(
                                 "profile_id": "synthetic-leo-test",
                                 "display_name": "Synthetic test orbit",
                                 "altitude_m": 400000,
+                                "simulation_duration_s": 3600,
+                                "time_step_s": 120,
+                                "assumptions": ["Synthetic educational test profile."],
+                                "classification": "synthetic educational profile",
                             }
                         ]
                     },
@@ -439,6 +703,7 @@ def test_authenticated_mission_requests_send_tokens_and_handle_auth_errors(
             ]
         },
         submit_mission=True,
+        selected_payloads=("imager",),
     )
 
     assert expected_message in result["status"]["text"]

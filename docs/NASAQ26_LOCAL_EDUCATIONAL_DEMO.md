@@ -46,6 +46,41 @@ checkout's repository root.
 
 Python 3.11 or later is declared in `pyproject.toml`. This environment's active interpreter should be checked before treating Python 3.11 runtime compatibility as verified.
 
+## Clerk configuration
+
+The dashboard fails closed when Clerk is not configured: mission operations stay
+disabled and synthetic profiles are not requested. The public auth configuration
+route reports `enabled: true` only when `CLERK_PUBLISHABLE_KEY`,
+`CLERK_FRONTEND_API_URL`, and `CLERK_ALLOWED_ORIGINS` are all set.
+
+For local use, configure a Clerk application and set its values in the shell
+before starting the server. Use the exact local dashboard origin for
+`CLERK_ALLOWED_ORIGINS`:
+
+```bash
+export CLERK_PUBLISHABLE_KEY="pk_test_<your-clerk-publishable-key>"
+export CLERK_FRONTEND_API_URL="https://<your-clerk-frontend-api-origin>"
+export CLERK_ALLOWED_ORIGINS="http://127.0.0.1:8765"
+# Optional; set only when the Clerk session token uses an audience.
+# export CLERK_AUDIENCE="<configured-audience>"
+.venv/bin/python -m quantum_space_agi.mission_demo.server
+```
+
+The example values are placeholders, not credentials. The app does not load a
+`.env` file automatically; set variables in the process environment or a
+secrets manager. `CLERK_SECRET_KEY` is not used or read by this integration.
+For staging, use the exact HTTPS service origin and configure live
+values in the provider's secure environment settings; see
+[`NASAQ26_BACKEND_STAGING_DEPLOYMENT_PLAN.md`](./NASAQ26_BACKEND_STAGING_DEPLOYMENT_PLAN.md).
+
+This dashboard is static HTML and vanilla JavaScript, not a React application;
+it uses ClerkJS rather than `ClerkProvider`. The browser fetches the public auth
+configuration, loads Clerk UI v1 and ClerkJS v6 from the configured Frontend
+API, and obtains a session token in memory for each mission API request. These
+are CDN-loaded versions, not installed npm dependencies. FastAPI verifies that
+token against Clerk's public JWKS before serving the profile, validation, or run
+routes.
+
 ## Versioned local API
 
 Dataset Validation is a separate capability and is not exposed or routed through
@@ -78,6 +113,14 @@ The dashboard validates the configuration before running. A successful run respo
 - `resource_evaluation`, produced by ARC-08 after ARC-05 completes.
 - `trajectory.times_s` and `trajectory.states`; each state row is `[x_m, y_m, z_m, vx_mps, vy_mps, vz_mps]` in ECI SI units.
 - `trajectory.state_order`, collision index/time/state, diagnostics, and model metadata. Diagnostic arrays and trajectory data are JSON arrays; the response DTO rejects non-finite numeric values.
+
+The Mission Builder reports sign-in, profile loading, empty-profile, and loading
+failure states separately. The Run button stays disabled until the authenticated
+profile response is valid, a listed profile is selected, and at least one
+supported payload is selected. On submission, the API validates the request
+before starting the simulation. The run route is not separately preflighted:
+its availability is confirmed by the actual run request, and failures are
+shown without fabricating a result.
 
 ## Dashboard result views
 
